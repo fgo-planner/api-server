@@ -1,15 +1,17 @@
 
-import express, { Request, Response, NextFunction } from 'express';
+import 'reflect-metadata';
+import mongo from 'connect-mongo';
+import dotenv from 'dotenv';
+import express from 'express';
+import session from 'express-session';
+import loader from './loaders';
+
+dotenv.config();
+
+const MongoStore = mongo(session);
 
 const app = express();
-const router = express.Router();
 
-app.set('port', process.env.PORT || 3000);
-
-const test = (req: Request, res: Response, next: NextFunction) => {
-    res.send('TESTING 123');
-};
-
-app.get('/test', test);
+loader(app);
 
 export default app;

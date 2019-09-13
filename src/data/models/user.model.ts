@@ -16,7 +16,7 @@ const userSchema = new Schema({
 }, { timestamps: true });
 
 userSchema.statics.updateActiveStatus = function(this: UserModel, id: string, status: boolean, callback: (err: any, doc: any) => void) {
-    this.updateOne({ _id: new ObjectID(id)  }, { active : status }, callback);
+    this.updateOne({ _id: new ObjectID(id) }, { active : status }, callback);
 };
 
-export const UserModel = mongoose.model<UserDocument, UserModel>('User', userSchema);
+export const UserModel = mongoose.model<UserDocument, UserModel>('User', userSchema, 'Users');

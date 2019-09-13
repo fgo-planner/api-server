@@ -18,7 +18,6 @@ export abstract class AbstractRoute<T> {
             return;
         }
         this._routes.forEach(r => this._registerRoute(r, router, ...handlers));
-        router.use(this._baseUrl, router);
     }
 
     // TODO Add support for middleware.
@@ -36,7 +35,7 @@ export abstract class AbstractRoute<T> {
             console.error('Handler must be a function');
             return;
         }
-        const path = route.path || '/';
+        const path = this._baseUrl + (route.path || '/');
         switch (route.method) {
         case 'get':
             router.get(path, ...handlers, route.handler.bind(this._controller));

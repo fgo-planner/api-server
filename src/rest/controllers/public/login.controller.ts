@@ -1,15 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
-import { Service } from 'typedi';
 import { AuthenticationService } from '../../../services/user/authentication.service';
 import { UserService } from '../../../services/user/user.service';
+import { RestController, PostMapping } from '../../../internal/decorators/rest-controller.decorator';
 
-@Service()
+@RestController('/login')
 export class LoginController {
 
     constructor(private _authService: AuthenticationService, private _userService: UserService) {
 
     }
 
+    @PostMapping()
     login(req: Request, res: Response, next: NextFunction) {
         this._authService.generateJwt(req.body.username, req.body.password).then(jwt => {
             if (!jwt) {
@@ -19,6 +20,7 @@ export class LoginController {
         });
     }
 
+    @PostMapping('/register')
     register(req: Request, res: Response, next: NextFunction) {
         this._userService.register(req.body.username, req.body.email, req.body.password).then(
             () => res.send('success'),

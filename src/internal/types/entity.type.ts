@@ -1,3 +1,3 @@
 export type Entity = {
-    _id: string;
+    _id?: string;
 }

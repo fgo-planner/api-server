@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { UserModel } from '../../data/models/user.model';
+import { UserModel } from '../../data/models/user/user.model';
 import bcrypt from 'bcryptjs';
 
 /** 

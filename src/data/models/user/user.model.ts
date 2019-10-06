@@ -1,5 +1,5 @@
 import mongoose, { Document, Model, NativeError, Schema } from 'mongoose';
-import { User } from 'user.type';
+import { User } from 'user/user.type';
 import { ObjectID } from 'bson';
 
 export type UserDocument = Document & User;

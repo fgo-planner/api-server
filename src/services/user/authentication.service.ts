@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
-import { UserModel } from '../../data/models/user.model';
+import { UserModel } from '../../data/models/user/user.model';
 import passport from 'passport';
 
 @Service()

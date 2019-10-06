@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { AuthenticationService } from '../../../services/user/authentication.service';
-import { UserService } from '../../../services/user/user.service';
-import { RestController, PostMapping } from '../../../internal/decorators/rest-controller.decorator';
+import { AuthenticationService } from '../../services/user/authentication.service';
+import { UserService } from '../../services/user/user.service';
+import { RestController, PostMapping } from '../../internal/decorators/rest-controller.decorator';
 
 @RestController('/login')
 export class LoginController {

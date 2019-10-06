@@ -4,9 +4,9 @@ import Container from 'typedi';
 import { RouteArrayName, RoutePrefixName } from '../internal/decorators/rest-controller.decorator';
 import { Class } from '../internal/types/class.type';
 import { Route } from '../internal/types/route.type';
-import { GameAccountController } from '../rest/controllers/game-account.controller';
-import { LoginController } from '../rest/controllers/public/login.controller';
-import { UserController } from '../rest/controllers/user.controller';
+import { GameAccountController } from '../controllers/game-account.controller';
+import { LoginController } from '../controllers/public/login.controller';
+import { UserController } from '../controllers/user.controller';
 import { AuthenticationService } from '../services/user/authentication.service';
 
 // TODO Make this configurable

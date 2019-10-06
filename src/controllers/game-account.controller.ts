@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { RestController, PostMapping, GetMapping } from '../../internal/decorators/rest-controller.decorator';
-import { GameAccountService } from '../../services/game/game-account.service';
+import { RestController, PostMapping, GetMapping } from '../internal/decorators/rest-controller.decorator';
+import { GameAccountService } from '../services/game/game-account.service';
 
 @RestController('/game-account')
 export class GameAccountController {

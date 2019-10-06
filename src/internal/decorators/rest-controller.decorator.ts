@@ -14,43 +14,51 @@ export const RestController = (prefix = '') => {
 };
 
 /**
- * Helper function for adding route metadata for a method in a controller.
- * @param target The controller class.
- * @param propertyKey The name of the decorated method.
- * @param method The request method type (get, post, put, delete).
+ * Decorator for mapping web requests onto methods in request-handling
+ * classes with flexible method signatures.
  */
-const DefineMethodMapping = (target: any, propertyKey: string, path: string, method: RequestMethod) => {
-    if (!Reflect.hasMetadata(RouteArrayName, target.constructor)) {
-        Reflect.defineMetadata(RouteArrayName, [], target.constructor);
-    }
-    const routes: Route[] = Reflect.getMetadata(RouteArrayName, target.constructor);
-    routes.push({
-        path,
-        method,
-        handlerName: propertyKey
-    });
+export const RequestMapping = (method: RequestMethod, path = '') => {
+    return (target: any, propertyKey: string) => {
+        if (!Reflect.hasMetadata(RouteArrayName, target.constructor)) {
+            Reflect.defineMetadata(RouteArrayName, [], target.constructor);
+        }
+        const routes: Route[] = Reflect.getMetadata(RouteArrayName, target.constructor);
+        routes.push({
+            path,
+            method,
+            handlerName: propertyKey
+        });
+    };
 };
 
+/**
+ * Decorator for mapping GET requests onto specific handler methods.
+ * Shortcut equivalent of `@RequestMapping('get', path)`.
+ */
 export const GetMapping = (path = '') => {
-    return (target: any, propertyKey: string) => {
-        DefineMethodMapping(target, propertyKey, path, 'get');
-    };
+    return RequestMapping('get', path);
 };
 
+/**
+ * Decorator for mapping GET requests onto specific handler methods.
+ * Shortcut equivalent of `@RequestMapping('post', path)`.
+ */
 export const PostMapping = (path = '') => {
-    return (target: any, propertyKey: string) => {
-        DefineMethodMapping(target, propertyKey, path, 'post');
-    };
+    return RequestMapping('post', path);
 };
 
+/**
+ * Decorator for mapping GET requests onto specific handler methods.
+ * Shortcut equivalent of `@RequestMapping('put', path)`.
+ */
 export const PutMapping = (path = '') => {
-    return (target: any, propertyKey: string) => {
-        DefineMethodMapping(target, propertyKey, path, 'put');
-    };
+    return RequestMapping('put', path);
 };
 
+/**
+ * Decorator for mapping GET requests onto specific handler methods.
+ * Shortcut equivalent of `@RequestMapping('delete', path)`.
+ */
 export const DeleteMapping = (path = '') => {
-    return (target: any, propertyKey: string) => {
-        DefineMethodMapping(target, propertyKey, path, 'delete');
-    };
+    return RequestMapping('delete', path);
 };

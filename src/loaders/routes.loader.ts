@@ -1,12 +1,13 @@
 import { Application, Router } from 'express';
 import { Dictionary, RequestHandler } from 'express-serve-static-core';
 import Container from 'typedi';
+import { GameAccountController } from '../controllers/game-account.controller';
+import { GameItemController } from '../controllers/game-item.controller';
+import { LoginController } from '../controllers/public/login.controller';
+import { UserController } from '../controllers/user.controller';
 import { RouteArrayName, RoutePrefixName } from '../internal/decorators/rest-controller.decorator';
 import { Class } from '../internal/types/class.type';
 import { Route } from '../internal/types/route.type';
-import { GameAccountController } from '../controllers/game-account.controller';
-import { LoginController } from '../controllers/public/login.controller';
-import { UserController } from '../controllers/user.controller';
 import { AuthenticationService } from '../services/user/authentication.service';
 
 // TODO Make this configurable
@@ -18,7 +19,8 @@ const PublicControllers: Class<any>[] = [
 
 const UserControllers: Class<any>[] = [
     UserController,
-    GameAccountController
+    GameAccountController,
+    GameItemController,
 ];
 
 const AdminControllers: Class<any>[] = [

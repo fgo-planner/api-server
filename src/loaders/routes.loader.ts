@@ -33,7 +33,7 @@ const router = Router();
  * @param prefix The path prefix as defined by the controller.
  * @param route The route info.
  */
-const registerRoute = (instance: any, prefix: string, route: Route, handlers: RequestHandler<Dictionary<string>>[]) => {
+const registerRoute = (instance: any, prefix: string, route: Route, ...handlers: RequestHandler<Dictionary<string>>[]) => {
     const controllerName = instance.constructor.name;
 
     // TODO Add user permission handler.
@@ -48,7 +48,7 @@ const registerRoute = (instance: any, prefix: string, route: Route, handlers: Re
     handlers.push(handler.bind(instance));
 
     // Construct path for the route mapping.
-    const path = (prefix || '') + (route.path || '');
+    const path = prefix + (route.path || '');
 
     // Register the route with the router.
     const method = route.method;
@@ -60,32 +60,32 @@ const registerRoute = (instance: any, prefix: string, route: Route, handlers: Re
  * Registers the endpoints of a controller with the router.
  * @param controller The controller class.
  */
-const registerController = (controller: Class<any>, handlers: RequestHandler<Dictionary<string>>[]) => {
+const registerController = (prefix: string, controller: Class<any>, ...handlers: RequestHandler<Dictionary<string>>[]) => {
     const instance = Container.get(controller);
-    const prefix = Reflect.getMetadata(RoutePrefixName, controller);
-    if (prefix === undefined) {
+    const controllerPrefix = Reflect.getMetadata(RoutePrefixName, controller);
+    if (controllerPrefix === undefined) {
         console.error(`Could not register controller: ${controller.name} is not a controller.`);
         return;
     }
     const routes: Route[] = Reflect.getMetadata(RouteArrayName, controller);
     for (const route of routes) {
-        registerRoute(instance, prefix, route, handlers);
+        registerRoute(instance, prefix + controllerPrefix, route, ...handlers);
     }
 };
 
 /**
  * Registers a list of controllers to the router.
  */
-const registerControllers = (controllers: Class<any>[], ...handlers: RequestHandler<Dictionary<string>>[]) => {
+const registerControllers = (prefix: string, controllers: Class<any>[], ...handlers: RequestHandler<Dictionary<string>>[]) => {
     for (const controller of controllers) {
-        registerController(controller, handlers);
+        registerController(prefix, controller, ...handlers);
     }
 };
 
 export default (app: Application) => {
     const authService = Container.get(AuthenticationService);
-    registerControllers(PublicControllers);
-    registerControllers(UserControllers, authService.authenticateToken);
-    registerControllers(AdminControllers, authService.authenticateToken);
-    app.use(ResourceApiPrefix, router);
+    registerControllers(ResourceApiPrefix, PublicControllers);
+    registerControllers(ResourceApiPrefix, UserControllers, authService.authenticateToken);
+    registerControllers(ResourceApiPrefix + '/admin', AdminControllers, authService.authenticateToken);
+    app.use(router);
 };

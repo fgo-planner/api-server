@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
-import { GetMapping, RestController, PostMapping, PutMapping } from '../internal/decorators/rest-controller.decorator';
+import { Inject } from 'typedi';
+import { GetMapping, PostMapping, PutMapping, RestController } from '../internal/decorators/rest-controller.decorator';
 import { GameItemService } from '../services/game/object/game-item.service';
 
 @RestController('/game-item')
 export class GameItemController {
 
-    constructor(private _gameItemService: GameItemService) {
-
-    }
+    @Inject()
+    private _gameItemService: GameItemService;
 
     // TODO Make this admin only
     @PutMapping()

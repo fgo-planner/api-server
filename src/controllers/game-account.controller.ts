@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
-import { RestController, PostMapping, GetMapping } from '../internal/decorators/rest-controller.decorator';
+import { Inject } from 'typedi';
+import { GetMapping, PostMapping, RestController } from '../internal/decorators/rest-controller.decorator';
 import { GameAccountService } from '../services/game/game-account.service';
 
 @RestController('/game-account')
 export class GameAccountController {
 
-    constructor(private _gameAccountService: GameAccountService) {
-
-    }
+    @Inject()
+    private _gameAccountService: GameAccountService;
 
     @PostMapping()
     addAccount(req: Request, res: Response, next: NextFunction) {

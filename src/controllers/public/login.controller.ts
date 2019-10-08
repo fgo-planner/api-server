@@ -1,14 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
+import { Inject } from 'typedi';
+import { PostMapping, RestController } from '../../internal/decorators/rest-controller.decorator';
 import { AuthenticationService } from '../../services/user/authentication.service';
 import { UserService } from '../../services/user/user.service';
-import { RestController, PostMapping } from '../../internal/decorators/rest-controller.decorator';
 
 @RestController('/login')
 export class LoginController {
 
-    constructor(private _authService: AuthenticationService, private _userService: UserService) {
+    @Inject()
+    private _authService: AuthenticationService;
 
-    }
+    @Inject()
+    private _userService: UserService;
 
     @PostMapping()
     login(req: Request, res: Response, next: NextFunction) {

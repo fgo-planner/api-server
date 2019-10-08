@@ -7,6 +7,7 @@ export class GameItemService {
 
     async createItem(item: GameItem) {
         // TODO Validation
+        delete item._id;
         return await GameItemModel.create(item);
     }
 

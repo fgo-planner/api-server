@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { GetMapping, RestController, PostMapping } from '../internal/decorators/rest-controller.decorator';
+import { GetMapping, RestController, PostMapping, PutMapping } from '../internal/decorators/rest-controller.decorator';
 import { GameItemService } from '../services/game/object/game-item.service';
 
 @RestController('/game-item')
@@ -10,20 +10,29 @@ export class GameItemController {
     }
 
     // TODO Make this admin only
-    @PostMapping()
-    addItem(req: Request, res: Response) {
+    @PutMapping()
+    createItem(req: Request, res: Response) {
         const item = req.body;
-        this._gameItemService.addItem(item).then(
-            item => res.send(item.toJSON()),
+        this._gameItemService.createItem(item).then(
+            created => res.send(created),
             err => res.status(400).send(err)
         );
     }
 
     @GetMapping()
-    getItems(req: Request, res: Response) {
-        this._gameItemService.getItems().then(
+    findItems(req: Request, res: Response) {
+        this._gameItemService.findItems().then(
             items => res.send(items),
             err => res.status(404).send(err)
+        );
+    }
+
+    @PostMapping()
+    updateitem(req: Request, res: Response) {
+        const item = req.body;
+        this._gameItemService.updateItem(item).then(
+            updated => res.send(updated),
+            err => res.status(400).send(err)
         );
     }
 

@@ -1,8 +1,9 @@
 // Contains exports for common schema definitions that are shared by multiple models.
 
+import { SchemaDefinition } from 'mongoose';
 import GameRegions from '../types/game/game-region.type';
 
-export const GameObjectSchema = {
+export const GameObjectSchema: SchemaDefinition = {
     name: {
         type: String,
         required: true,
@@ -11,10 +12,11 @@ export const GameObjectSchema = {
     nameJp: String,
     rarity: {
         type: Number,
-        min: 0,
-        max: 5,
         required: true,
-        default: 1
+        min: 1,
+        max: 5,
+        default: 1,
+        index: true
     },
     gameRegions: {
         type: [String],

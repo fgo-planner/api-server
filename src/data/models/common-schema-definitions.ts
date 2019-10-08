@@ -20,6 +20,8 @@ export const GameObjectSchema: SchemaDefinition = {
     },
     gameRegions: {
         type: [String],
-        enum: GameRegions()
+        enum: GameRegions(),
+        required: true,
+        default: ['JP']
     }
 };

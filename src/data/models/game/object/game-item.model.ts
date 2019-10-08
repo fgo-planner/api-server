@@ -14,7 +14,9 @@ const schemaDefinition: SchemaDefinition = {
     description: String,
     categories: {
         type: [String],
-        enum: GameItemCategories()
+        enum: GameItemCategories(),
+        required: true,
+        default: []
     }
 };
 

@@ -1,11 +1,27 @@
 import { RequestMethod } from '../types/request-method.type';
 import { Route } from '../types/route.type';
+import { RouteSecurityLevel } from '../types/route-security-level.enum';
 
 // Contains decorators for defining controllers and method mappings.
 // Based on https://nehalist.io/routing-with-typescript-decorators/
 
 export const RouteArrayName = 'routes';
 export const RoutePrefixName = 'prefix';
+
+/**
+ * Helper function for updating route metadata.
+ */
+const updateMetadata = (target: any, propertyKey: any, data: any) => {
+    if (!Reflect.hasMetadata(RouteArrayName, target.constructor)) {
+        Reflect.defineMetadata(RouteArrayName, {}, target.constructor);
+    }
+    const routes: {[key: string]: Route} = Reflect.getMetadata(RouteArrayName, target.constructor);
+    if (routes[propertyKey]) {
+        Object.assign(routes[propertyKey], data);
+    } else {
+        routes[propertyKey] = data;
+    }
+}
 
 export const RestController = (prefix = '') => {
     return (target: any) => {
@@ -19,11 +35,7 @@ export const RestController = (prefix = '') => {
  */
 export const RequestMapping = (method: RequestMethod, path = '') => {
     return (target: any, propertyKey: string) => {
-        if (!Reflect.hasMetadata(RouteArrayName, target.constructor)) {
-            Reflect.defineMetadata(RouteArrayName, [], target.constructor);
-        }
-        const routes: Route[] = Reflect.getMetadata(RouteArrayName, target.constructor);
-        routes.push({
+        updateMetadata(target, propertyKey, {
             path,
             method,
             handlerName: propertyKey
@@ -61,4 +73,21 @@ export const PutMapping = (path = '') => {
  */
 export const DeleteMapping = (path = '') => {
     return RequestMapping('delete', path);
+};
+
+/**
+ * Indicates that the route is secured.
+ * @param level (optional, default = 1) The level of security. A value of 0
+ *              indicates that any user may access the route. A value of 1
+ *              indicates that any authenticated user may access the route. A
+ *              value of 2 indicates that only authenticated admin users may
+ *              access the route.
+ */
+export const Secured = (level = RouteSecurityLevel.AUTHENTICATED) => {
+    return (target: any, propertyKey: string) => {
+        updateMetadata(target, propertyKey, {
+            accessLevel: level,
+            handlerName: propertyKey
+        });
+    };
 };

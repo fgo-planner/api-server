@@ -14,7 +14,8 @@ export default () => {
         const user = {
             _id: payload.id,
             username: payload.username,
-            email: payload.email
+            email: payload.email,
+            admin: payload.admin
         };
         return done(null, user);
     }));

@@ -13,6 +13,16 @@ export class LoginController {
     @Inject()
     private _userService: UserService;
 
+    @PostMapping('/admin')
+    adminLogin(req: Request, res: Response, next: NextFunction) {
+        this._authService.generateJwt(req.body.username, req.body.password, true).then(jwt => {
+            if (!jwt) {
+                return res.status(401).send('Invalid username or password.');
+            }
+            res.send(jwt);
+        });
+    }
+
     @PostMapping()
     login(req: Request, res: Response, next: NextFunction) {
         this._authService.generateJwt(req.body.username, req.body.password).then(jwt => {

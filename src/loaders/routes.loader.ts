@@ -9,25 +9,21 @@ import { RouteArrayName, RoutePrefixName } from '../internal/decorators/rest-con
 import { Class } from '../internal/types/class.type';
 import { Route } from '../internal/types/route.type';
 import { AuthenticationService } from '../services/user/authentication.service';
+import { RouteSecurityLevel } from '../internal/types/route-security-level.enum';
 
 // TODO Make this configurable
 const ResourceApiPrefix = '/rest';
 
-const PublicControllers: Class<any>[] = [
-    LoginController
-];
-
-const UserControllers: Class<any>[] = [
+const Controllers: Class<any>[] = [
+    LoginController,
     UserController,
     GameAccountController,
     GameItemController,
 ];
 
-const AdminControllers: Class<any>[] = [
-
-];
-
 const router = Router();
+
+
 
 /**
  * Registers a controller endpoint with the router.
@@ -38,7 +34,15 @@ const router = Router();
 const registerRoute = (instance: any, prefix: string, route: Route, ...handlers: RequestHandler<Dictionary<string>>[]) => {
     const controllerName = instance.constructor.name;
 
-    // TODO Add user permission handler.
+    // Add authentication middleware based on route access level.
+    const accessLevel = route.accessLevel || RouteSecurityLevel.NONE;
+    if (accessLevel >= RouteSecurityLevel.AUTHENTICATED) {
+        const authService = Container.get(AuthenticationService);
+        handlers.push(authService.authenticateToken);
+        if (accessLevel >= RouteSecurityLevel.ADMIN) {
+            handlers.push(authService.authenticateAdminUser);
+        }
+    }
 
     // Get handler from controller and append to list of handlers.
     const handlerName = route.handlerName;
@@ -69,8 +73,9 @@ const registerController = (prefix: string, controller: Class<any>, ...handlers:
         console.error(`Could not register controller: ${controller.name} is not a controller.`);
         return;
     }
-    const routes: Route[] = Reflect.getMetadata(RouteArrayName, controller);
-    for (const route of routes) {
+    const routes: {[key: string]: Route} = Reflect.getMetadata(RouteArrayName, controller);
+    for (const key of Object.keys(routes)) {
+        const route = routes[key];
         registerRoute(instance, prefix + controllerPrefix, route, ...handlers);
     }
 };
@@ -85,9 +90,6 @@ const registerControllers = (prefix: string, controllers: Class<any>[], ...handl
 };
 
 export default (app: Application) => {
-    const authService = Container.get(AuthenticationService);
-    registerControllers(ResourceApiPrefix, PublicControllers);
-    registerControllers(ResourceApiPrefix, UserControllers, authService.authenticateToken);
-    registerControllers(ResourceApiPrefix + '/admin', AdminControllers, authService.authenticateToken);
+    registerControllers(ResourceApiPrefix, Controllers);
     app.use(router);
 };

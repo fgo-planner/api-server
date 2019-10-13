@@ -10,8 +10,8 @@ export class UserService {
 
     private readonly _bcryptStrength = Number(process.env.BCRYPT_STRENGTH) || 4;
 
-    test(id: string) {
-        UserModel.updateActiveStatus(id, true, (err, doc) => {
+    test(id: string, status: boolean) {
+        UserModel.setAdminStatus(id, status, (err, doc) => {
             console.log(doc);
         });
     }

@@ -18,8 +18,6 @@ export class AuthenticationService {
      */
     async generateJwt(username: string, password: string, adminOnly = false) {
 
-        console.log(username, password);
-
         // Username and password must be provided.
         if (!username || !password) {
             return null;
@@ -73,7 +71,6 @@ export class AuthenticationService {
      * `@authenticateToken` must be called before this function.
      */
     authenticateAdminUser(req: Request, res: Response, next: NextFunction) {
-        console.log(req.user)
         if ((req.user as any).admin) {
             next();
         } else {

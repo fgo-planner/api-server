@@ -21,7 +21,7 @@ const updateMetadata = (target: any, propertyKey: any, data: any) => {
     } else {
         routes[propertyKey] = data;
     }
-}
+};
 
 export const RestController = (prefix = '') => {
     return (target: any) => {

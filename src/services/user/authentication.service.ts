@@ -50,7 +50,7 @@ export class AuthenticationService {
         };
 
         const token = jwt.sign(payload, process.env.JWT_SECRET, { algorithm: 'HS512' });
-        return `${this._BearerTokenPrefix} ${token}`;
+        return `${this._BearerTokenPrefix}${token}`;
     }
 
     /**

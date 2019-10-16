@@ -55,10 +55,10 @@ export class AuthenticationService {
 
     /**
      * Middleware function for extracting access token payload if it is present in
-     * the request. The extracted payload is stored in the `user` field of the
-     * request object and can be accessed from `req.user` in subsequent handlers.
+     * the request. The extracted payload is stored in the `token` field of the
+     * request object and can be accessed from `req.token` in subsequent handlers.
      * 
-     * If the access token is missing or invalid, then the `req.user` field will
+     * If the access token is missing or invalid, then the `req.token` field will
      * not be modified. This function will not send an error back to the client.
      */
     parseAccessToken(req: Request, res: Response, next: NextFunction) {
@@ -66,7 +66,7 @@ export class AuthenticationService {
         if (req.method !== 'OPTIONS') {
             const payload = this._parseAccessTokenFromRequest(req);
             if (payload) {
-                req.user = payload;
+                req.token = payload;
             }
         }
         next();
@@ -74,8 +74,8 @@ export class AuthenticationService {
     
     /**
      * Middleware function for authenticating a request based on the attached
-     * access token. The payload form the access token will be stored in the `user`
-     * field of the request object and can be accessed from `req.user` in
+     * access token. The payload form the access token will be stored in the
+     * `token` field of the request object and can be accessed from `req.token` in
      * subsequent handlers.
      * 
      * If the access token is missing or invalid, then an Unauthorized error will
@@ -90,7 +90,7 @@ export class AuthenticationService {
         
         const payload = this._parseAccessTokenFromRequest(req);
         if (payload) {
-            req.user = payload;
+            req.token = payload;
             next();
         } else {
             res.status(401).send('Unauthorized');
@@ -102,7 +102,7 @@ export class AuthenticationService {
      * `@authenticateAccessToken` must be called before this function.
      */
     authenticateAdminUser(req: Request, res: Response, next: NextFunction) {
-        if ((req.user as AccessTokenPayload).admin) {
+        if (req.token && req.token.admin) {
             next();
         } else {
             res.status(403).send('Forbidden');

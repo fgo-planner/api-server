@@ -11,7 +11,7 @@ export class GameAccountController {
 
     @PostMapping()
     addAccount(req: Request, res: Response, next: NextFunction) {
-        const userId = (req.user as any)._id;
+        const userId = (req.token as any)._id;
         this._gameAccountService.addAccount(userId, req.body).then(
             value => res.send(value),
             err => res.status(400).send(err)
@@ -20,7 +20,7 @@ export class GameAccountController {
 
     @GetMapping('/current-user')
     getAccountsForCurrentUser(req: Request, res: Response, next: NextFunction) {
-        const userId = (req.user as any)._id;
+        const userId = (req.token as any)._id;
         this._gameAccountService.findByUserId(userId).then(
             value => res.send(value),
             err => res.status(400).send(err)

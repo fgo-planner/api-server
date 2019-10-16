@@ -33,15 +33,22 @@ const router = Router();
  */
 const registerRoute = (instance: any, prefix: string, route: Route, ...handlers: RequestHandler<Dictionary<string>>[]) => {
     const controllerName = instance.constructor.name;
-
-    // Add authentication middleware based on route access level.
+    
+    /*
+     * Add authentication middleware from AuthenticationService based on route access level.
+     * Level 0 -> parseAccessToken
+     * Level 1 -> authenticateAccessToken
+     * Level 2 -> authenticateAccessToken and authenticateAdminUser
+     */
+    const authService = Container.get(AuthenticationService);
     const accessLevel = route.accessLevel || RouteSecurityLevel.NONE;
     if (accessLevel >= RouteSecurityLevel.AUTHENTICATED) {
-        const authService = Container.get(AuthenticationService);
-        handlers.push(authService.authenticateToken);
+        handlers.push(authService.authenticateAccessToken.bind(authService));
         if (accessLevel >= RouteSecurityLevel.ADMIN) {
-            handlers.push(authService.authenticateAdminUser);
+            handlers.push(authService.authenticateAdminUser.bind(authService));
         }
+    } else {
+        handlers.push(authService.parseAccessToken.bind(authService));
     }
 
     // Get handler from controller and append to list of handlers.

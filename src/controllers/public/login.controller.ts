@@ -15,7 +15,7 @@ export class LoginController {
 
     @PostMapping('/admin')
     adminLogin(req: Request, res: Response, next: NextFunction) {
-        this._authService.generateJwt(req.body.username, req.body.password, true).then(jwt => {
+        this._authService.generateAccessToken(req.body.username, req.body.password, true).then(jwt => {
             if (!jwt) {
                 return res.status(401).send('Invalid username or password.');
             }
@@ -25,7 +25,7 @@ export class LoginController {
 
     @PostMapping()
     login(req: Request, res: Response, next: NextFunction) {
-        this._authService.generateJwt(req.body.username, req.body.password).then(jwt => {
+        this._authService.generateAccessToken(req.body.username, req.body.password).then(jwt => {
             if (!jwt) {
                 return res.status(401).send('Invalid username or password.');
             }

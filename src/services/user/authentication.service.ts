@@ -3,20 +3,22 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
 import { UserModel } from '../../data/models/user/user.model';
-import passport from 'passport';
+import { AccessTokenPayload } from '../../internal';
 
 @Service()
 export class AuthenticationService {
 
+    private readonly _BearerTokenPrefix = 'Bearer ';
+
     /**
-     * Verifies provided user credentials, and genereates and returns a JSON
-     * web token if the credentials are valid. If the credentials were not
-     * valid, then null is returned.
+     * Verifies provided user credentials, and genereates and returns a JWT access
+     * token if the credentials are valid. If the credentials were not valid, then
+     * null is returned.
      * 
-     * @param adminOnly Only generate the JWT if the user is an admin.
-     *                  Otherwise, return null.
+     * @param adminOnly (optional, default = false) Only generate the access token
+     *                  if the user is an admin. Otherwise, return null.
      */
-    async generateJwt(username: string, password: string, adminOnly = false) {
+    async generateAccessToken(username: string, password: string, adminOnly = false) {
 
         // Username and password must be provided.
         if (!username || !password) {
@@ -42,39 +44,87 @@ export class AuthenticationService {
         }
 
         // Create JWT body payload.
-        const payload: any = {
+        const payload: AccessTokenPayload = {
             id: user._id,
-            username: user.username,
-            email: user.email,
             admin: user.admin
-            // TODO Add more parameters
         };
 
         const token = jwt.sign(payload, process.env.JWT_SECRET, { algorithm: 'HS512' });
-        return `Bearer ${token}`;
+        return `${this._BearerTokenPrefix} ${token}`;
+    }
+
+    /**
+     * Middleware function for extracting access token payload if it is present in
+     * the request. The extracted payload is stored in the `user` field of the
+     * request object and can be accessed from `req.user` in subsequent handlers.
+     * 
+     * If the access token is missing or invalid, then the `req.user` field will
+     * not be modified. This function will not send an error back to the client.
+     */
+    parseAccessToken(req: Request, res: Response, next: NextFunction) {
+        // OPTIONS requests are skipped.
+        if (req.method !== 'OPTIONS') {
+            const payload = this._parseAccessTokenFromRequest(req);
+            if (payload) {
+                req.user = payload;
+            }
+        }
+        next();
     }
     
     /**
-     * Middleware function for authenticating a request against the JWT.
+     * Middleware function for authenticating a request based on the attached
+     * access token. The payload form the access token will be stored in the `user`
+     * field of the request object and can be accessed from `req.user` in
+     * subsequent handlers.
+     * 
+     * If the access token is missing or invalid, then an Unauthorized error will
+     * be sent back to the client.
      */
-    authenticateToken(req: Request, res: Response, next: NextFunction) {
+    authenticateAccessToken(req: Request, res: Response, next: NextFunction) {
+        // Skip check on OPTIONS requests.
         if (req.method === 'OPTIONS') {
-            // Skip check on OPTIONS requests.
+            next();
+            return;
+        } 
+        
+        const payload = this._parseAccessTokenFromRequest(req);
+        if (payload) {
+            req.user = payload;
             next();
         } else {
-            passport.authenticate('jwt', { session: false })(req, res, next);
+            res.status(401).send('Unauthorized');
         }
     }
 
     /**
      * Middleware function for check if the requestor is an admin user. 
-     * `@authenticateToken` must be called before this function.
+     * `@authenticateAccessToken` must be called before this function.
      */
     authenticateAdminUser(req: Request, res: Response, next: NextFunction) {
-        if ((req.user as any).admin) {
+        if ((req.user as AccessTokenPayload).admin) {
             next();
         } else {
             res.status(403).send('Forbidden');
+        }
+    }
+
+    private _parseAccessTokenFromRequest(req: Request): AccessTokenPayload {
+        let bearer = req.headers.authorization;
+        if (!bearer) {
+            return null;
+        }
+        if (bearer.indexOf(this._BearerTokenPrefix) === 0) {
+            bearer = bearer.substring(this._BearerTokenPrefix.length);
+        }
+        return this._parseToken(bearer);
+    }
+
+    private _parseToken<T>(token: string): T {
+        try {
+            return jwt.verify(token, process.env.JWT_SECRET) as any;
+        } catch {
+            return null;
         }
     }
 

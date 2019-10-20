@@ -13,7 +13,7 @@ export class UserController {
     @GetMapping('/test/:status')
     @Secured(RouteSecurityLevel.ADMIN)
     test(req: Request, res: Response, next: NextFunction) {
-        this._userService.test(req.token._id, req.params['status'] === 'true');
+        this._userService.test(req.token.id, req.params['status'] === 'true');
         res.send(JSON.stringify(req.token));
     }
 

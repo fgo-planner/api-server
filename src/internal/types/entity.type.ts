@@ -1,3 +1,5 @@
+import { ObjectId } from 'bson';
+
 export type Entity = {
-    _id?: string;
+    _id?: ObjectId | string;
 }

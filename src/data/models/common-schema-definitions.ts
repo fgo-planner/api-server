@@ -2,6 +2,7 @@
 
 import { SchemaDefinition } from 'mongoose';
 import GameRegions from '../types/game/game-region.type';
+import { UrlStringUtils } from '../../utils/url-string.utils';
 
 export const GameObjectSchema: SchemaDefinition = {
     name: {
@@ -10,6 +11,15 @@ export const GameObjectSchema: SchemaDefinition = {
         index: true
     },
     nameJp: String,
+    urlString: {
+        type: String,
+        required: true,
+        unique: true,
+        validate: [
+            UrlStringUtils.isValid,
+            'Invalid URL string format.'
+        ]
+    },
     rarity: {
         type: Number,
         required: true,

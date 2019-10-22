@@ -1,7 +1,8 @@
+import { ObjectId } from 'bson';
 import { GameItem } from 'game/object/game-item.type';
 import { Service } from 'typedi';
 import { GameItemModel } from '../../../data/models/game/object/game-item.model';
-import { ObjectId } from 'bson';
+import { PageRequest } from '../../../internal';
 import { GameObjectService } from './game-object.service';
 
 @Service()
@@ -23,8 +24,18 @@ export class GameItemService extends GameObjectService<GameItem> {
         return await GameItemModel.find();
     }
 
-    async searchGameItems(search) {
-        return await GameItemModel.find({});
+    async searchGameItems(page: PageRequest) {
+        const count = await GameItemModel.countDocuments();
+        const data = await GameItemModel.find()
+            .skip(page.size * (page.page - 1))
+            .limit(page.size);
+            
+        return {
+            data,
+            count,
+            page: page.page,
+            limit: page.size
+        };
     }
 
     async updateGameItem(item: GameItem) {

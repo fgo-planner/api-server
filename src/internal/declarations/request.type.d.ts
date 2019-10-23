@@ -1,4 +1,4 @@
-import { AccessTokenPayload } from '../token-payload.type';
+import { AccessTokenPayload } from '../types/token-payload.type';
 
 /**
  * Extends the `Request` type provided by express.

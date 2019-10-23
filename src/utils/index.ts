@@ -1,2 +1,2 @@
-export * from './page-request.utils';
+export * from './pagination.utils';
 export * from './url-string.utils';

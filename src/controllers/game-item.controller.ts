@@ -1,11 +1,10 @@
 import { Request, Response } from 'express';
-import { Dictionary } from 'express-serve-static-core';
 import { GameItem } from 'game/object/game-item.type';
 import { Inject } from 'typedi';
 import { RouteSecurityLevel } from '../internal';
 import { GetMapping, PostMapping, PutMapping, RestController, Secured } from '../internal/';
 import { GameItemService } from '../services/game/object/game-item.service';
-import { PageRequestUtils } from '../utils';
+import { PaginationUtils } from '../utils';
 
 @RestController('/game-item')
 export class GameItemController {
@@ -34,10 +33,10 @@ export class GameItemController {
 
     @GetMapping('/search')
     searchGameItems(req: Request, res: Response) {
-        const pageRequest = PageRequestUtils.pageRequestFromParams(req.query);
-        console.log(pageRequest)
-        this._gameItemService.searchGameItems(pageRequest).then(
-            items => res.send(items),
+        const pagination = PaginationUtils.parse(req.query);
+        console.log(pagination)
+        this._gameItemService.searchGameItems(pagination).then(
+            data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
             err => res.status(404).send(err)
         );
     }
@@ -58,10 +57,6 @@ export class GameItemController {
             updated => res.send(updated),
             err => res.status(400).send(err)
         );
-    }
-
-    private _pageRequestFromParams(params: Dictionary<string>) {
-
     }
 
 }

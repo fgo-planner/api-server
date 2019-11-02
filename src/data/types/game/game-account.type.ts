@@ -1,5 +1,5 @@
-import { Entity } from '../../../internal/types/entity.type';
-import { GameRegion } from './game-region.type';
+import { Entity } from '../../../internal';
+import { GameRegion } from 'game/game-region.type';
 
 export type GameAccount = Entity & {
 

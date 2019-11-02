@@ -1,4 +1,4 @@
-import { Entity } from '../../../internal/types/entity.type';
+import { Entity } from '../../../internal';
 
 export type User = Entity & {
     username: string;

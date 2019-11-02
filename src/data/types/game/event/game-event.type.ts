@@ -1,5 +1,5 @@
 import { GameRegion } from 'game/game-region.type';
-import { Entity } from '../../../../internal/types/entity.type';
+import { Entity } from '../../../../internal';
 import { GameEventActivity } from './activity/game-event-activity.type';
 
 export type GameEvent = Entity & {

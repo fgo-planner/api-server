@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { Inject } from 'typedi';
-import { GetMapping, PostMapping, RestController } from '../internal/decorators/rest-controller.decorator';
+import { GetMapping, PostMapping, RestController, UserAccessLevel } from '../internal';
 import { GameAccountService } from '../services/game/game-account.service';
 
-@RestController('/game-account')
+@RestController('/game-account', UserAccessLevel.Authenticated)
 export class GameAccountController {
 
     @Inject()

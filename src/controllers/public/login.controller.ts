@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { Inject } from 'typedi';
-import { PostMapping, RestController } from '../../internal/decorators/rest-controller.decorator';
+import { PostMapping, RestController, UserAccessLevel } from '../../internal';
 import { AuthenticationService } from '../../services/user/authentication.service';
 import { UserService } from '../../services/user/user.service';
 
-@RestController('/login')
+@RestController('/login', UserAccessLevel.Public)
 export class LoginController {
 
     @Inject()

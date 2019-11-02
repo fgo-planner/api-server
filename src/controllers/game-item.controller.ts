@@ -1,19 +1,18 @@
 import { Request, Response } from 'express';
 import { GameItem } from 'game/object/game-item.type';
 import { Inject } from 'typedi';
-import { RouteSecurityLevel } from '../internal';
-import { GetMapping, PostMapping, PutMapping, RestController, Secured } from '../internal/';
+import { UserAccessLevel } from '../internal';
+import { GetMapping, PostMapping, PutMapping, RestController } from '../internal/';
 import { GameItemService } from '../services/game/object/game-item.service';
 import { PaginationUtils } from '../utils';
 
-@RestController('/game-item')
+@RestController('/game-item', UserAccessLevel.Public)
 export class GameItemController {
 
     @Inject()
     private _gameItemService: GameItemService;
 
-    @PutMapping()
-    @Secured(RouteSecurityLevel.ADMIN)
+    @PutMapping(UserAccessLevel.Admin)
     addGameItem(req: Request, res: Response) {
         const item: GameItem = req.body;
         this._gameItemService.createGameItem(item).then(
@@ -22,8 +21,7 @@ export class GameItemController {
         );
     }
 
-    @GetMapping()
-    @Secured(RouteSecurityLevel.ADMIN)
+    @GetMapping(UserAccessLevel.Admin)
     getGameItems(req: Request, res: Response) {
         this._gameItemService.getGameItems().then(
             items => res.send(items),
@@ -49,8 +47,7 @@ export class GameItemController {
         );
     }
 
-    @PostMapping()
-    @Secured(RouteSecurityLevel.ADMIN)
+    @PostMapping(UserAccessLevel.Admin)
     updateGameItem(req: Request, res: Response) {
         const item = req.body;
         this._gameItemService.updateGameItem(item).then(

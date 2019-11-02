@@ -1,4 +1,4 @@
-import { RequestMethod, UserAccessLevel } from '../enum';
+import { RequestMethod, UserAccessLevel } from 'internal';
 
 /**
  * Maps a route to a method in a controller.

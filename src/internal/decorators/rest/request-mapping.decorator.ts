@@ -1,5 +1,5 @@
 
-import { RequestMethod, RouteMetadata, UserAccessLevel } from '../../';
+import { RequestMethod, RouteMetadata, UserAccessLevel } from 'internal';
 
 export const RouteMetadataMapKey = 'routes';
 

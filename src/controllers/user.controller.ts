@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
+import { GetMapping, RestController } from 'internal';
+import { UserService } from 'services';
 import { Inject } from 'typedi';
-import { GetMapping, RestController } from '../internal';
-import { UserService } from '../services/user/user.service';
 
 @RestController('/user')
 export class UserController {

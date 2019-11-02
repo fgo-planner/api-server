@@ -1,4 +1,4 @@
-import { GameObject } from './game-object.type';
+import { GameObject } from 'data/types';
 
 export type GameServant = GameObject & {
     number: number;

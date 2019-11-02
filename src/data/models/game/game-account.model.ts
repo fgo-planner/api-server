@@ -1,6 +1,6 @@
-import mongoose, { Document, Schema } from 'mongoose';
-import { GameAccount } from '../../types/game/game-account.type';
 import { ObjectID } from 'bson';
+import { GameAccount } from 'data/types';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export type GameAccountDocument = Document & GameAccount;
 

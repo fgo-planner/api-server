@@ -1,6 +1,6 @@
-import { Service } from 'typedi';
-import { UserModel } from '../../data/models/user/user.model';
 import bcrypt from 'bcryptjs';
+import { UserModel } from 'data/models';
+import { Service } from 'typedi';
 
 /** 
  * Handles retriving and updating users (excluding adminstrative operations).

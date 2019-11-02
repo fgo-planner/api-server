@@ -1,4 +1,4 @@
-import { GameEventActivity } from '../game-event-activity.type';
+import { GameEventActivity } from 'data/types';
 
 export type GameEventRoulette = GameEventActivity & {
     type: 'roulette';

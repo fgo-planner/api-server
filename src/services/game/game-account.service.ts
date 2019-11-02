@@ -1,6 +1,6 @@
-import { GameAccount } from 'game/game-account.type';
+import { GameAccountModel } from 'data/models';
+import { GameAccount } from 'data/types';
 import { Service } from 'typedi';
-import { GameAccountModel } from '../../data/models/game/game-account.model';
 
 @Service()
 export class GameAccountService {

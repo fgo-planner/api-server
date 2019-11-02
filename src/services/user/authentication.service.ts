@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
+import { UserModel } from 'data/models';
 import { NextFunction, Request, Response } from 'express';
+import { AccessTokenPayload } from 'internal';
 import jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
-import { UserModel } from '../../data/models/user/user.model';
-import { AccessTokenPayload } from '../../internal';
 
 @Service()
 export class AuthenticationService {

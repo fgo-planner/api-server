@@ -1,5 +1,4 @@
-import { GameItemCategory } from './game-item-category.type';
-import { GameObject } from './game-object.type';
+import { GameItemCategory, GameObject } from 'data/types';
 
 export type GameItem = GameObject & {
     description?: string;

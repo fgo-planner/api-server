@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
+import { GetMapping, PostMapping, RestController, UserAccessLevel } from 'internal';
+import { GameAccountService } from 'services';
 import { Inject } from 'typedi';
-import { GetMapping, PostMapping, RestController, UserAccessLevel } from '../internal';
-import { GameAccountService } from '../services/game/game-account.service';
 
 @RestController('/game-account', UserAccessLevel.Authenticated)
 export class GameAccountController {

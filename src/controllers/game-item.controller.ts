@@ -1,9 +1,9 @@
+import { GameItem } from 'data/types';
 import { Request, Response } from 'express';
-import { GameItem } from 'game/object/game-item.type';
+import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
+import { GameItemService } from 'services';
 import { Inject } from 'typedi';
-import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from '../internal';
-import { GameItemService } from '../services/game/object/game-item.service';
-import { PaginationUtils } from '../utils';
+import { PaginationUtils } from 'utils';
 
 @RestController('/game-item', UserAccessLevel.Public)
 export class GameItemController {

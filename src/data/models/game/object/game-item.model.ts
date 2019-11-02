@@ -1,6 +1,5 @@
+import { GameItem, GameItemCategory } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import GameItemCategories from '../../../types/game/object/game-item-category.type';
-import { GameItem } from '../../../types/game/object/game-item.type';
 import { GameObjectSchema } from '../../common-schema-definitions';
 
 export type GameItemDocument = Document & GameItem;
@@ -14,7 +13,7 @@ const schemaDefinition: SchemaDefinition = {
     description: String,
     categories: {
         type: [String],
-        enum: GameItemCategories(),
+        enum: Object.keys(GameItemCategory),
         required: true,
         default: []
     }

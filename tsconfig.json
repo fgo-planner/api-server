@@ -12,9 +12,26 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
+      "controllers": [
+        "src/controllers"
+      ],
+      "data/types": [
+        "src/data/types"
+      ],
+      "data/models": [
+        "src/data/models"
+      ],
+      "internal": [
+        "src/internal"
+      ],
+      "services": [
+        "src/services"
+      ],
+      "utils": [
+        "src/utils"
+      ],
       "*": [
-        "node_modules/*",
-        "src/data/types/*"
+        "node_modules/*"
       ]
     }
   },

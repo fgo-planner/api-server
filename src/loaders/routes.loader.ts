@@ -1,12 +1,9 @@
+import { GameAccountController, GameItemController, LoginController, UserController } from 'controllers';
 import { Application, Router } from 'express';
 import { Dictionary, RequestHandler } from 'express-serve-static-core';
+import { Class, ControllerMetadata, ControllerMetadataKey, RouteMetadata, RouteMetadataMapKey, UserAccessLevel } from 'internal';
+import { AuthenticationService } from 'services';
 import Container from 'typedi';
-import { GameAccountController } from '../controllers/game-account.controller';
-import { GameItemController } from '../controllers/game-item.controller';
-import { LoginController } from '../controllers/public/login.controller';
-import { UserController } from '../controllers/user.controller';
-import { Class, ControllerMetadata, ControllerMetadataKey, RouteMetadata, RouteMetadataMapKey, UserAccessLevel } from '../internal';
-import { AuthenticationService } from '../services/user/authentication.service';
 
 // TODO Make this configurable
 const ResourceApiPrefix = '/rest';

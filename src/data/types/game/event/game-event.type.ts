@@ -1,6 +1,5 @@
-import { GameRegion } from 'game/game-region.type';
-import { Entity } from '../../../../internal';
-import { GameEventActivity } from './activity/game-event-activity.type';
+import { GameEventActivity, GameRegion } from 'data/types';
+import { Entity } from 'internal';
 
 export type GameEvent = Entity & {
     name: string;

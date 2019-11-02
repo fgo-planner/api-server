@@ -1,8 +1,8 @@
 import { ObjectId } from 'bson';
-import { GameItem } from 'game/object/game-item.type';
+import { GameItemModel } from 'data/models';
+import { GameItem } from 'data/types';
+import { Pagination } from 'internal';
 import { Service } from 'typedi';
-import { GameItemModel } from '../../../data/models/game/object/game-item.model';
-import { Pagination } from '../../../internal';
 import { GameObjectService } from './game-object.service';
 
 @Service()

@@ -1,8 +1,8 @@
 // Contains exports for common schema definitions that are shared by multiple models.
 
+import { GameRegion } from 'data/types';
 import { SchemaDefinition } from 'mongoose';
-import GameRegions from '../types/game/game-region.type';
-import { UrlStringUtils } from '../../utils/url-string.utils';
+import { UrlStringUtils } from 'utils';
 
 export const GameObjectSchema: SchemaDefinition = {
     name: {
@@ -30,7 +30,7 @@ export const GameObjectSchema: SchemaDefinition = {
     },
     gameRegions: {
         type: [String],
-        enum: GameRegions(),
+        enum: Object.keys(GameRegion),
         required: true,
         default: ['JP']
     }

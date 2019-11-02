@@ -1,4 +1,4 @@
-import { UserAccessLevel } from '../../';
+import { UserAccessLevel } from 'internal';
 
 export const ControllerMetadataKey = 'controller';
 

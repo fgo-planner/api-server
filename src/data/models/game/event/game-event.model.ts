@@ -1,6 +1,5 @@
+import { GameEvent, GameRegion } from 'data/types';
 import mongoose, { Document, Schema } from 'mongoose';
-import { GameEvent } from '../../../types/game/event/game-event.type';
-import GameRegions from '../../../types/game/game-region.type';
 
 export type GameEventDocument = Document & GameEvent;
 
@@ -8,7 +7,7 @@ const schema = new Schema({
     name: String,
     gameRegion: {
         type: String,
-        enum: GameRegions(),
+        enum: Object.keys(GameRegion),
         required: true
     },
     shortName: String,

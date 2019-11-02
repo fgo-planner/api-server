@@ -1,5 +1,5 @@
 import { ObjectId } from 'bson';
-import { GameObject } from 'game/object/game-object.type';
+import { GameObject } from 'data/types';
 import { Document, Model } from 'mongoose';
 
 /**

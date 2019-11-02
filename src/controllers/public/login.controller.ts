@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { Inject } from 'typedi';
 import { PostMapping, RestController, UserAccessLevel } from '../../internal';
 import { AuthenticationService } from '../../services/user/authentication.service';
@@ -14,7 +14,7 @@ export class LoginController {
     private _userService: UserService;
 
     @PostMapping('/admin')
-    adminLogin(req: Request, res: Response, next: NextFunction) {
+    adminLogin(req: Request, res: Response) {
         this._authService.generateAccessToken(req.body.username, req.body.password, true).then(jwt => {
             if (!jwt) {
                 return res.status(401).send('Invalid username or password.');
@@ -24,7 +24,7 @@ export class LoginController {
     }
 
     @PostMapping()
-    login(req: Request, res: Response, next: NextFunction) {
+    login(req: Request, res: Response) {
         this._authService.generateAccessToken(req.body.username, req.body.password).then(jwt => {
             if (!jwt) {
                 return res.status(401).send('Invalid username or password.');
@@ -34,14 +34,14 @@ export class LoginController {
     }
 
     @PostMapping('/register')
-    register(req: Request, res: Response, next: NextFunction) {
+    register(req: Request, res: Response) {
         this._userService.register(req.body.username, req.body.email, req.body.password).then(
             () => res.send('success'),
             err => res.status(400).send(err)
         );
     }
 
-    requestPasswordReset(req: Request, res: Response, next: NextFunction) {
+    requestPasswordReset(req: Request, res: Response) {
         // TODO Implement this
     }
 

@@ -8,17 +8,23 @@
         "sourceType": "module"
     },
     "rules": {
-        "semi": [
-            "error",
-            "always"
+        "indent": [
+            "warn",
+            4
+        ],
+        "max-len": [
+            "warn",
+            { 
+                "code": 140
+            }
         ],
         "quotes": [
-            "error",
+            "warn",
             "single"
         ],
-        "indent": [
-            "error",
-            4
+        "semi": [
+            "warn",
+            "always"
         ],
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/no-explicit-any": "off"

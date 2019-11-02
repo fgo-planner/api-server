@@ -68,6 +68,7 @@ export function RequestMapping(method: RequestMethod, accessLevel: UserAccessLev
  * @param accessLevel The minimum user access level required to access the 
  *                    method. This overrides the controller's value.
  */
+// eslint-disable-next-line max-len
 export function RequestMapping(method: RequestMethod, path: string, accessLevel: UserAccessLevel): (target: any, propertyKey: string) => void;
 
 /**

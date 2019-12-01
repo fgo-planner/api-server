@@ -1,6 +1,6 @@
 import { GameItem, GameItemCategory } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameObjectSchema } from '../../common-schema-definitions';
+import { GameObjectSchema, GameObjectSchemaTextIndex } from '../../common-schema-definitions';
 
 export type GameItemDocument = Document & GameItem;
 
@@ -20,5 +20,19 @@ const schemaDefinition: SchemaDefinition = {
 };
 
 const schema = new Schema(schemaDefinition, { timestamps: true });
+
+// Add text index
+schema.index({
+    ...GameObjectSchemaTextIndex,
+    description: 'text'
+}, {
+    name: 'textIndex',
+    weights: {
+        urlString: 5,
+        name: 5,
+        nameJp: 4,
+        description: 1
+    }
+});
 
 export const GameItemModel = mongoose.model<GameItemDocument>('GameItem', schema, 'GameItems');

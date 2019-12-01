@@ -1,5 +1,6 @@
 import { ObjectId } from 'bson';
 import { GameObject } from 'data/types';
+import { Pagination } from 'internal';
 import { Document, Model } from 'mongoose';
 
 /**
@@ -30,6 +31,18 @@ export abstract class GameObjectService<T extends GameObject> {
         return this._model.find().exec();
     }
 
+    protected async _search(query: any, page: Pagination): Promise<{data: (T & Document)[]; total: number}> {
+        const { conditions, projection, size, skip, sort } = this._generateQuery(query, page);
+        const count = await this._model.find(conditions)
+            .countDocuments();
+        const data = await this._model.find(conditions)
+            .select(projection)
+            .sort(sort)
+            .skip(skip)
+            .limit(size);
+        return { data, total: count };
+    }
+
     protected _update(object: T): Promise<T & Document> {
         if (!object._id || !ObjectId.isValid(object._id)) {
             throw 'Entity\'s ID is missing or invalid.';
@@ -51,5 +64,13 @@ export abstract class GameObjectService<T extends GameObject> {
         }
         return null;
     }
+
+    protected abstract _generateQuery(query: any, page: Pagination): {
+        conditions: any; 
+        projection: any; 
+        size: number; 
+        skip: number; 
+        sort: any;
+    };
 
 }

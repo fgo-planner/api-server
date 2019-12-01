@@ -35,3 +35,9 @@ export const GameObjectSchema: SchemaDefinition = {
         default: ['JP']
     }
 };
+
+export const GameObjectSchemaTextIndex = {
+    name: 'text',
+    nameJp: 'text',
+    urlString: 'text'
+};

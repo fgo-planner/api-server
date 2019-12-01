@@ -31,8 +31,7 @@ export class GameItemController {
     @GetMapping('/search')
     searchGameItems(req: Request, res: Response) {
         const pagination = PaginationUtils.parse(req.query);
-        console.log(pagination)
-        this._gameItemService.searchGameItems(pagination).then(
+        this._gameItemService.searchGameItems(req.query, pagination).then(
             data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
             err => res.status(404).send(err)
         );

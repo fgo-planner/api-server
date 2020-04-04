@@ -6,5 +6,5 @@ export type GameObject = Entity & {
     nameJp?: string;
     urlString: string;
     rarity: number;
-    gameRegions: GameRegion[];
+    gameRegions: { [key in GameRegion]?: boolean };
 }

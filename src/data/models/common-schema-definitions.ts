@@ -1,8 +1,32 @@
 // Contains exports for common schema definitions that are shared by multiple models.
 
-import { GameRegion } from 'data/types';
 import { SchemaDefinition } from 'mongoose';
 import { UrlStringUtils } from 'utils';
+import { GameRegion } from 'data/types';
+
+export const GameRegionsSchema: SchemaDefinition = {
+    [GameRegion.NA]: {
+        type: Boolean,
+        required: false
+    },
+    [GameRegion.JP]: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
+    [GameRegion.CN]: {
+        type: Boolean,
+        required: false
+    },
+    [GameRegion.KR]: {
+        type: Boolean,
+        required: false
+    },
+    [GameRegion.TW]: {
+        type: Boolean,
+        required: false
+    }
+};
 
 export const GameObjectSchema: SchemaDefinition = {
     name: {
@@ -29,10 +53,11 @@ export const GameObjectSchema: SchemaDefinition = {
         index: true
     },
     gameRegions: {
-        type: [String],
-        enum: Object.keys(GameRegion),
+        type: GameRegionsSchema,
         required: true,
-        default: ['JP']
+        default: {
+            [GameRegion.JP]: true
+        }
     }
 };
 

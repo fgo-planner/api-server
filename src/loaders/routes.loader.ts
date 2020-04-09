@@ -1,4 +1,4 @@
-import { GameAccountController, GameItemController, LoginController, UserController } from 'controllers';
+import { GameAccountController, GameItemController, GameServantController, LoginController, UserController } from 'controllers';
 import { Application, Router } from 'express';
 import { Dictionary, RequestHandler } from 'express-serve-static-core';
 import { Class, ControllerMetadata, ControllerMetadataKey, RouteMetadata, RouteMetadataMapKey, UserAccessLevel } from 'internal';
@@ -13,6 +13,7 @@ const Controllers: Class<any>[] = [
     UserController,
     GameAccountController,
     GameItemController,
+    GameServantController
 ];
 
 const router = Router();

@@ -8,6 +8,7 @@ export * from './game/object/game-craft-essence.type';
 export * from './game/object/game-item-category.enum';
 export * from './game/object/game-item.type';
 export * from './game/object/game-object.type';
+export * from './game/object/game-servant-attribute.enum';
 export * from './game/object/game-servant-class.enum';
 export * from './game/object/game-servant.type';
 export * from './game/game-account.type';

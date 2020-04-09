@@ -1,6 +1,8 @@
-import { GameObject } from 'data/types';
+import { GameObject, GameServantAttribute, GameServantClass } from 'data/types';
 
 export type GameServant = GameObject & {
-    number: number;
+    gameId: number;
     cost: number;
+    class: GameServantClass;
+    attribute: GameServantAttribute;
 }

@@ -2,6 +2,7 @@ import { ObjectId } from 'bson';
 import { GameObject } from 'data/types';
 import { Pagination } from 'internal';
 import { Document, Model } from 'mongoose';
+import { ObjectIdUtils } from 'utils';
 
 /**
  * Abstract service that provides basic CRUD operations and utility functions
@@ -20,7 +21,7 @@ export abstract class GameObjectService<T extends GameObject> {
     }
 
     protected _findById(id: ObjectId | string): Promise<T & Document> {
-        id = this._convertToObjectId(id);
+        id = ObjectIdUtils.convertToObjectId(id);
         if (!id) {
             throw 'ObjectId is missing or invalid.';
         }
@@ -44,25 +45,15 @@ export abstract class GameObjectService<T extends GameObject> {
     }
 
     protected _update(object: T): Promise<T & Document> {
-        if (!object._id || !ObjectId.isValid(object._id)) {
-            throw 'Entity\'s ID is missing or invalid.';
+        const id = ObjectIdUtils.convertToObjectId(object._id);
+        if (!id) {
+            throw 'ObjectId is missing or invalid.';
         }
         return this._model.findOneAndUpdate(
-            { '_id': new ObjectId(object._id) },
+            { _id: id as any }, 
             { $set: object },
             { runValidators: true, new: true }
         ).exec();
-    }
-
-    // TODO Move this to a util class.
-    protected _convertToObjectId(id: ObjectId | string) {
-        if (typeof id !== 'string') {
-            return id;
-        }
-        if (ObjectId.isValid(id)) {
-            return new ObjectId(id);
-        }
-        return null;
     }
 
     protected abstract _generateQuery(query: any, page: Pagination): {

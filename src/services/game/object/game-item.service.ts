@@ -29,14 +29,7 @@ export class GameItemService extends GameObjectService<GameItem> {
     }
 
     async updateGameItem(item: GameItem) {
-        if (!item._id) {
-            throw 'Item ID is missing';
-        }
-        return await GameItemModel.findOneAndUpdate(
-            { '_id': item._id },
-            { $set: item },
-            { runValidators: true, new: true }
-        );
+        return await this._update(item);
     }
 
     protected _generateQuery(query: any, page: Pagination): {conditions: any; projection: any; size: number; skip: number; sort: any} {

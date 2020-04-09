@@ -56,12 +56,37 @@ export abstract class GameObjectService<T extends GameObject> {
         ).exec();
     }
 
-    protected abstract _generateQuery(query: any, page: Pagination): {
-        conditions: any; 
-        projection: any; 
-        size: number; 
-        skip: number; 
-        sort: any;
-    };
+    protected _generateQuery(query: {[key: string]: string}, page: Pagination) {
+        const conditions: any = {};
+        const projection: any = {};
+        const sort: any = {};
+        if (page.sort) {
+            // TODO Only allow sorting by specific fields.
+            sort[page.sort] = page.direction === 'ASC' ? 1 : -1;
+        }
+        if (query.search) {
+            conditions.$text = {
+                $search: query.search
+            };
+            projection.score = sort.score = { 
+                $meta: 'textScore'
+            };
+        }
+        if (query.rarity != null) {
+            conditions.rarity = query.rarity;
+        }
+        if (query.regions != null) {
+            query.regions.split(',').forEach(region => {
+                conditions[`gameRegions.${region}`] = true;
+            });
+        }
+        return {
+            conditions,
+            projection,
+            skip: page.size * (page.page - 1),
+            size: page.size,
+            sort
+        };
+    }
 
 }

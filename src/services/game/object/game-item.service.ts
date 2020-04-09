@@ -32,42 +32,15 @@ export class GameItemService extends GameObjectService<GameItem> {
         return await this._update(item);
     }
 
-    protected _generateQuery(query: any, page: Pagination): {conditions: any; projection: any; size: number; skip: number; sort: any} {
-        const conditions: any = {};
-        const projection: any = {};
-        const sort: any = {};
-        if (page.sort) {
-            // TODO Only allow sorting by specific fields.
-            sort[page.sort] = page.direction === 'ASC' ? 1 : -1;
-        }
-        if (query.search) {
-            conditions.$text = {
-                $search: query.search
-            };
-            projection.score = sort.score = { 
-                $meta: 'textScore'
-            };
-        }
-        if (query.rarity != null) {
-            conditions.rarity = query.rarity;
-        }
-        if (query.regions != null) {
-            conditions.gameRegions = {
-                $all: query.regions.split(',')
-            };
-        }
+    protected _generateQuery(query: {[key: string]: string}, page: Pagination) {
+        const _query = super._generateQuery(query, page);
+        const conditions = _query.conditions;
         if (query.categories != null) {
             conditions.categories = {
                 $in: query.categories.split(',')
             };
         }
-        return {
-            conditions,
-            projection,
-            skip: page.size * (page.page - 1),
-            size: page.size,
-            sort
-        };
+        return _query;
     }
 
 }

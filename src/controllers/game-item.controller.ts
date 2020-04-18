@@ -14,41 +14,41 @@ export class GameItemController {
     @PutMapping(UserAccessLevel.Admin)
     addGameItem(req: Request, res: Response) {
         const item: GameItem = req.body;
-        this._gameItemService.createGameItem(item).then(
+        this._gameItemService.createItem(item).then(
             created => res.send(created),
             err => res.status(400).send(err)
         );
     }
 
     @GetMapping(UserAccessLevel.Admin)
-    getGameItems(req: Request, res: Response) {
-        this._gameItemService.getGameItems().then(
+    getItems(req: Request, res: Response) {
+        this._gameItemService.getItems().then(
             items => res.send(items),
             err => res.status(404).send(err)
         );
     }
 
     @GetMapping('/search')
-    searchGameItems(req: Request, res: Response) {
+    searchItems(req: Request, res: Response) {
         const pagination = PaginationUtils.parse(req.query);
-        this._gameItemService.searchGameItems(req.query, pagination).then(
+        this._gameItemService.searchItems(req.query, pagination).then(
             data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
             err => res.status(404).send(err)
         );
     }
 
     @GetMapping('/:id')
-    getGameItem(req: Request, res: Response) {
-        this._gameItemService.findGameItemById(req.params.id).then(
+    getItem(req: Request, res: Response) {
+        this._gameItemService.findItemById(req.params.id).then(
             item => res.send(item),
             err => res.status(404).send(err)
         );
     }
 
     @PostMapping(UserAccessLevel.Admin)
-    updateGameItem(req: Request, res: Response) {
+    updateItem(req: Request, res: Response) {
         const item = req.body;
-        this._gameItemService.updateGameItem(item).then(
+        this._gameItemService.updateItem(item).then(
             updated => res.send(updated),
             err => res.status(400).send(err)
         );

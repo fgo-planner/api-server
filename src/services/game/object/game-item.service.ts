@@ -12,23 +12,23 @@ export class GameItemService extends GameObjectService<GameItem> {
         super(GameItemModel);
     }
 
-    async createGameItem(item: GameItem) {
+    async createItem(item: GameItem) {
         return await this._create(item);
     }
 
-    async findGameItemById(id: ObjectId | string) {
+    async findItemById(id: ObjectId | string) {
         return await this._findById(id);
     }
     
-    async getGameItems() {
+    async getItems() {
         return await GameItemModel.find();
     }
 
-    async searchGameItems(query: any, page: Pagination) {
+    async searchItems(query: any, page: Pagination) {
         return this._search(query, page);
     }
 
-    async updateGameItem(item: GameItem) {
+    async updateItem(item: GameItem) {
         return await this._update(item);
     }
 

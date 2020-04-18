@@ -12,23 +12,23 @@ export class GameCraftEssenceService extends GameObjectService<GameCraftEssence>
         super(GameCraftEssenceModel);
     }
 
-    async createGameCraftEssence(craftEssence: GameCraftEssence) {
+    async createCraftEssence(craftEssence: GameCraftEssence) {
         return await this._create(craftEssence);
     }
 
-    async findGameCraftEssenceById(id: ObjectId | string) {
+    async findCraftEssenceById(id: ObjectId | string) {
         return await this._findById(id);
     }
     
-    async getGameCraftEssences() {
+    async getCraftEssences() {
         return await GameCraftEssenceModel.find();
     }
 
-    async searchGameCraftEssences(query: any, page: Pagination) {
+    async searchCraftEssences(query: any, page: Pagination) {
         return this._search(query, page);
     }
 
-    async updateGameCraftEssence(craftEssence: GameCraftEssence) {
+    async updateCraftEssence(craftEssence: GameCraftEssence) {
         return await this._update(craftEssence);
     }
 

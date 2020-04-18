@@ -12,23 +12,23 @@ export class GameServantService extends GameObjectService<GameServant> {
         super(GameServantModel);
     }
 
-    async createGameServant(servant: GameServant) {
+    async createServant(servant: GameServant) {
         return await this._create(servant);
     }
 
-    async findGameServantById(id: ObjectId | string) {
+    async findServantById(id: ObjectId | string) {
         return await this._findById(id);
     }
     
-    async getGameServants() {
+    async getServants() {
         return await GameServantModel.find();
     }
 
-    async searchGameServants(query: any, page: Pagination) {
+    async searchServants(query: any, page: Pagination) {
         return this._search(query, page);
     }
 
-    async updateGameServant(servant: GameServant) {
+    async updateServant(servant: GameServant) {
         return await this._update(servant);
     }
 

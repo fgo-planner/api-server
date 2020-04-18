@@ -14,41 +14,41 @@ export class GameServantController {
     @PutMapping(UserAccessLevel.Admin)
     addGameServant(req: Request, res: Response) {
         const servant: GameServant = req.body;
-        this._gameServantService.createGameServant(servant).then(
+        this._gameServantService.createServant(servant).then(
             created => res.send(created),
             err => res.status(400).send(err)
         );
     }
 
     @GetMapping(UserAccessLevel.Admin)
-    getGameServants(req: Request, res: Response) {
-        this._gameServantService.getGameServants().then(
+    getServants(req: Request, res: Response) {
+        this._gameServantService.getServants().then(
             servants => res.send(servants),
             err => res.status(404).send(err)
         );
     }
 
     @GetMapping('/search')
-    searchGameServants(req: Request, res: Response) {
+    searchServants(req: Request, res: Response) {
         const pagination = PaginationUtils.parse(req.query);
-        this._gameServantService.searchGameServants(req.query, pagination).then(
+        this._gameServantService.searchServants(req.query, pagination).then(
             data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
             err => res.status(404).send(err)
         );
     }
 
     @GetMapping('/:id')
-    getGameServant(req: Request, res: Response) {
-        this._gameServantService.findGameServantById(req.params.id).then(
+    getServant(req: Request, res: Response) {
+        this._gameServantService.findServantById(req.params.id).then(
             servant => res.send(servant),
             err => res.status(404).send(err)
         );
     }
 
     @PostMapping(UserAccessLevel.Admin)
-    updateGameServant(req: Request, res: Response) {
+    updateServant(req: Request, res: Response) {
         const servant = req.body;
-        this._gameServantService.updateGameServant(servant).then(
+        this._gameServantService.updateServant(servant).then(
             updated => res.send(updated),
             err => res.status(400).send(err)
         );

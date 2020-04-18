@@ -14,8 +14,10 @@
         ],
         "max-len": [
             "warn",
-            { 
-                "code": 140
+            {
+                "code": 140,
+                "ignorePattern": "^import\\s.+\\sfrom\\s.+;$",
+                "ignoreUrls": true
             }
         ],
         "quotes": [

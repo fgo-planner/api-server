@@ -2,7 +2,7 @@ import express, { Application, NextFunction, Request, Response } from 'express';
 
 export default (app: Application) => {
     app.set('port', process.env.PORT || 3000);
-    app.use(express.json());
+    app.use(express.json(), express.text());
 
     // CORS
     app.use((req: Request, res: Response, next: NextFunction) => {

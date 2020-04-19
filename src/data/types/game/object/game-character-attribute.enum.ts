@@ -1,4 +1,4 @@
-export enum GameServantAttribute {
+export enum GameCharacterAttribute {
     Man = 'Man',
     Sky = 'Sky',
     Earth = 'Earth',

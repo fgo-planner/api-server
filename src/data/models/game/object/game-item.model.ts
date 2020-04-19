@@ -1,11 +1,11 @@
 import { GameItem, GameItemCategory } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameObjectSchema, GameObjectSchemaTextIndex } from '../../common-schema-definitions';
+import { GameObjectSchemaTextIndex, GamePlayerObjectSchema } from '../../common-schema-definitions';
 
 export type GameItemDocument = Document & GameItem;
 
 const schemaDefinition: SchemaDefinition = {
-    ...GameObjectSchema,
+    ...GamePlayerObjectSchema,
     description: String,
     categories: {
         type: [String],

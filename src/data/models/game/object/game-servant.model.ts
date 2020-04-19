@@ -1,11 +1,12 @@
-import { GameServant, GameServantAttribute, GameServantClass } from 'data/types';
+import { GameServant } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameObjectSchema, GameObjectSchemaTextIndex } from '../../common-schema-definitions';
+import { GameCharacterSchema, GameObjectSchema, GameObjectSchemaTextIndex, GamePlayerObjectSchema } from '../../common-schema-definitions';
 
 export type GameServantDocument = Document & GameServant;
 
 const schemaDefinition: SchemaDefinition = {
-    ...GameObjectSchema,
+    ...GamePlayerObjectSchema,
+    ...GameCharacterSchema,
     rarity: {
         ...GameObjectSchema.rarity,
         min: 0 // Rarity for servants ranges from 0 thru 5.
@@ -16,18 +17,6 @@ const schemaDefinition: SchemaDefinition = {
         min: 0,
         max: 16,
         default: 0,
-    },
-    class: {
-        type: String,
-        enum: Object.keys(GameServantClass),
-        required: true,
-        default: GameServantClass.Shielder
-    },
-    attribute: {
-        type: String,
-        enum: Object.keys(GameServantAttribute),
-        required: true,
-        default: GameServantAttribute.Earth
     }
 };
 

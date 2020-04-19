@@ -6,11 +6,11 @@ import { ObjectIdUtils } from 'utils';
 
 /**
  * Abstract service that provides basic CRUD operations and utility functions
- * for querying `GameObject` repositories.
+ * for querying database collections of `GameObject` typed models.
  */
 export abstract class GameObjectService<T extends GameObject> {
 
-    constructor(private _model: Model<T & Document, {}>) {
+    constructor(protected _model: Model<T & Document, {}>) {
 
     }
 
@@ -26,14 +26,6 @@ export abstract class GameObjectService<T extends GameObject> {
             throw 'ObjectId is missing or invalid.';
         }
         return this._model.findById(id).exec();
-    }
-
-    async findByUrlString(urlString: string): Promise<T & Document> {
-        return this._model.findOne({ urlString } as any).exec();
-    }
-
-    async existsByUrlString(urlString: string) {
-        return await this._model.exists({ urlString } as any);
     }
 
     async findAll(): Promise<(T & Document)[]> {
@@ -82,11 +74,6 @@ export abstract class GameObjectService<T extends GameObject> {
         }
         if (query.rarity != null) {
             conditions.rarity = query.rarity;
-        }
-        if (query.regions != null) {
-            query.regions.split(',').forEach(region => {
-                conditions[`gameRegions.${region}`] = true;
-            });
         }
         return {
             conditions,

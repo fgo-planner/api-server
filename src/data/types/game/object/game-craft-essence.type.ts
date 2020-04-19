@@ -1,6 +1,9 @@
-import { GameObject } from 'data/types';
+import { GamePlayerObject } from 'data/types';
 
-export type GameCraftEssence = GameObject & {
+/**
+ * A craft essence.
+ */
+export type GameCraftEssence = GamePlayerObject & {
     cost: number;
     // effects: string[];
 }

@@ -1,8 +1,8 @@
 // Contains exports for common schema definitions that are shared by multiple models.
 
+import { GameCharacterAttribute, GameCharacterClass, GameRegion } from 'data/types';
 import { SchemaDefinition } from 'mongoose';
 import { UrlStringUtils } from 'utils';
-import { GameRegion } from 'data/types';
 
 export const GameRegionsSchema: SchemaDefinition = {
     [GameRegion.NA]: {
@@ -35,6 +35,18 @@ export const GameObjectSchema: SchemaDefinition = {
         index: true
     },
     nameJp: String,
+    rarity: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5,
+        default: 1,
+        index: true
+    }
+};
+
+export const GamePlayerObjectSchema: SchemaDefinition = {
+    ...GameObjectSchema,
     urlString: {
         type: String,
         required: true,
@@ -43,14 +55,6 @@ export const GameObjectSchema: SchemaDefinition = {
             UrlStringUtils.isValid,
             'Invalid URL string format.'
         ]
-    },
-    rarity: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 5,
-        default: 1,
-        index: true
     },
     gameId: {
         type: Number,
@@ -63,6 +67,22 @@ export const GameObjectSchema: SchemaDefinition = {
         default: {
             [GameRegion.JP]: true
         }
+    }
+};
+
+export const GameCharacterSchema: SchemaDefinition = {
+    ...GameObjectSchema,
+    class: {
+        type: String,
+        enum: Object.keys(GameCharacterClass),
+        required: true,
+        default: GameCharacterClass.Shielder
+    },
+    attribute: {
+        type: String,
+        enum: Object.keys(GameCharacterAttribute),
+        required: true,
+        default: GameCharacterAttribute.Earth
     }
 };
 

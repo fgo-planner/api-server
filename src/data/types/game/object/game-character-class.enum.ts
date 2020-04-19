@@ -1,4 +1,4 @@
-export enum GameServantClass {
+export enum GameCharacterClass {
     AlterEgo = 'AlterEgo',
     Archer = 'Archer',
     Assassin = 'Assassin',

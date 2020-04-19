@@ -1,6 +1,10 @@
-import { GameItemCategory, GameObject } from 'data/types';
+import { GameItemCategory, GamePlayerObject } from 'data/types';
 
-export type GameItem = GameObject & {
+/**
+ * An in-game item owned by a player, including skill and ascention materials,
+ * event items and currencies, and consumables.
+ */
+export type GameItem = GamePlayerObject & {
     description?: string;
     categories: GameItemCategory[];
 }

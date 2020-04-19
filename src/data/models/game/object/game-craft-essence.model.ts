@@ -1,11 +1,11 @@
 import { GameCraftEssence } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameObjectSchema, GameObjectSchemaTextIndex } from '../../common-schema-definitions';
+import { GameObjectSchemaTextIndex, GamePlayerObjectSchema } from '../../common-schema-definitions';
 
 export type GameCraftEssenceDocument = Document & GameCraftEssence;
 
 const schemaDefinition: SchemaDefinition = {
-    ...GameObjectSchema,
+    ...GamePlayerObjectSchema,
     cost: {
         type: Number,
         required: true,

@@ -1,6 +1,6 @@
 import { GameServant } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameCharacterSchema, GameObjectSchema, GameObjectSchemaTextIndex, GamePlayerObjectSchema } from '../../common-schema-definitions';
+import { GameCharacterSchema, GameObjectSchema, GameObjectSchemaTextIndex, GamePlayerObjectSchema } from './game-object-schema-definitions';
 
 export type GameServantDocument = Document & GameServant;
 

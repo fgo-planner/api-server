@@ -1,4 +1,4 @@
-// Contains exports for common schema definitions that are shared by multiple models.
+// Contains common schema definitions that are used by `GameObject` models.
 
 import { GameCharacterAttribute, GameCharacterClass, GameRegion } from 'data/types';
 import { SchemaDefinition } from 'mongoose';

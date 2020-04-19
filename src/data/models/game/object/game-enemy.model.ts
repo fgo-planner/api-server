@@ -1,6 +1,6 @@
 import { GameEnemy } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameCharacterSchema, GameObjectSchemaTextIndex } from '../../common-schema-definitions';
+import { GameCharacterSchema, GameObjectSchemaTextIndex } from './game-object-schema-definitions';
 
 export type GameEnemyDocument = Document & GameEnemy;
 

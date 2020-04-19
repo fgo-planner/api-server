@@ -1,6 +1,6 @@
 import { GameCraftEssence } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameObjectSchemaTextIndex, GamePlayerObjectSchema } from '../../common-schema-definitions';
+import { GameObjectSchemaTextIndex, GamePlayerObjectSchema } from './game-object-schema-definitions';
 
 export type GameCraftEssenceDocument = Document & GameCraftEssence;
 

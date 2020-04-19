@@ -14,7 +14,7 @@ export class GameServantController {
     @PutMapping(UserAccessLevel.Admin)
     addGameServant(req: Request, res: Response) {
         const servant: GameServant = req.body;
-        this._gameServantService.createServant(servant).then(
+        this._gameServantService.create(servant).then(
             created => res.send(created),
             err => res.status(400).send(err)
         );
@@ -22,7 +22,7 @@ export class GameServantController {
 
     @GetMapping(UserAccessLevel.Admin)
     getServants(req: Request, res: Response) {
-        this._gameServantService.getServants().then(
+        this._gameServantService.findAll().then(
             servants => res.send(servants),
             err => res.status(404).send(err)
         );
@@ -31,7 +31,7 @@ export class GameServantController {
     @GetMapping('/search')
     searchServants(req: Request, res: Response) {
         const pagination = PaginationUtils.parse(req.query);
-        this._gameServantService.searchServants(req.query, pagination).then(
+        this._gameServantService.search(req.query, pagination).then(
             data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
             err => res.status(404).send(err)
         );
@@ -39,7 +39,7 @@ export class GameServantController {
 
     @GetMapping('/:id')
     getServant(req: Request, res: Response) {
-        this._gameServantService.findServantById(req.params.id).then(
+        this._gameServantService.findById(req.params.id).then(
             servant => res.send(servant),
             err => res.status(404).send(err)
         );
@@ -48,7 +48,7 @@ export class GameServantController {
     @PostMapping(UserAccessLevel.Admin)
     updateServant(req: Request, res: Response) {
         const servant = req.body;
-        this._gameServantService.updateServant(servant).then(
+        this._gameServantService.update(servant).then(
             updated => res.send(updated),
             err => res.status(400).send(err)
         );

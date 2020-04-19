@@ -14,13 +14,13 @@ export abstract class GameObjectService<T extends GameObject> {
 
     }
 
-    protected _create(object: T): Promise<T & Document> {
+    async create(object: T): Promise<T & Document> {
         // TODO Validation
         delete object._id;
         return this._model.create(object);
     }
 
-    protected _findById(id: ObjectId | string): Promise<T & Document> {
+    async findById(id: ObjectId | string): Promise<T & Document> {
         id = ObjectIdUtils.convertToObjectId(id);
         if (!id) {
             throw 'ObjectId is missing or invalid.';
@@ -28,11 +28,19 @@ export abstract class GameObjectService<T extends GameObject> {
         return this._model.findById(id).exec();
     }
 
-    protected _find(): Promise<(T & Document)[]> {
+    async findByUrlString(urlString: string): Promise<T & Document> {
+        return this._model.findOne({ urlString } as any).exec();
+    }
+
+    async existsByUrlString(urlString: string) {
+        return await this._model.exists({ urlString } as any);
+    }
+
+    async findAll(): Promise<(T & Document)[]> {
         return this._model.find().exec();
     }
 
-    protected async _search(query: any, page: Pagination): Promise<{data: (T & Document)[]; total: number}> {
+    async search(query: any, page: Pagination): Promise<{data: (T & Document)[]; total: number}> {
         const { conditions, projection, size, skip, sort } = this._generateQuery(query, page);
         const count = await this._model.find(conditions)
             .countDocuments();
@@ -44,7 +52,7 @@ export abstract class GameObjectService<T extends GameObject> {
         return { data, total: count };
     }
 
-    protected _update(object: T): Promise<T & Document> {
+    async update(object: T): Promise<T & Document> {
         const id = ObjectIdUtils.convertToObjectId(object._id);
         if (!id) {
             throw 'ObjectId is missing or invalid.';

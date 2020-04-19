@@ -14,7 +14,7 @@ export class GameCraftEssenceController {
     @PutMapping(UserAccessLevel.Admin)
     addGameCraftEssence(req: Request, res: Response) {
         const craftEssence: GameCraftEssence = req.body;
-        this._gameCraftEssenceService.createCraftEssence(craftEssence).then(
+        this._gameCraftEssenceService.create(craftEssence).then(
             created => res.send(created),
             err => res.status(400).send(err)
         );
@@ -22,7 +22,7 @@ export class GameCraftEssenceController {
 
     @GetMapping(UserAccessLevel.Admin)
     getCraftEssences(req: Request, res: Response) {
-        this._gameCraftEssenceService.getCraftEssences().then(
+        this._gameCraftEssenceService.findAll().then(
             craftEssences => res.send(craftEssences),
             err => res.status(404).send(err)
         );
@@ -31,7 +31,7 @@ export class GameCraftEssenceController {
     @GetMapping('/search')
     searchCraftEssences(req: Request, res: Response) {
         const pagination = PaginationUtils.parse(req.query);
-        this._gameCraftEssenceService.searchCraftEssences(req.query, pagination).then(
+        this._gameCraftEssenceService.search(req.query, pagination).then(
             data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
             err => res.status(404).send(err)
         );
@@ -39,7 +39,7 @@ export class GameCraftEssenceController {
 
     @GetMapping('/:id')
     getCraftEssence(req: Request, res: Response) {
-        this._gameCraftEssenceService.findCraftEssenceById(req.params.id).then(
+        this._gameCraftEssenceService.findById(req.params.id).then(
             craftEssence => res.send(craftEssence),
             err => res.status(404).send(err)
         );
@@ -48,7 +48,7 @@ export class GameCraftEssenceController {
     @PostMapping(UserAccessLevel.Admin)
     updateCraftEssence(req: Request, res: Response) {
         const craftEssence = req.body;
-        this._gameCraftEssenceService.updateCraftEssence(craftEssence).then(
+        this._gameCraftEssenceService.update(craftEssence).then(
             updated => res.send(updated),
             err => res.status(400).send(err)
         );

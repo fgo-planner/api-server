@@ -14,6 +14,7 @@ export class GameItemImportExportService extends GameObjectImportExportService<G
         'nameJp',
         'urlString',
         'rarity',
+        'gameId',
         'gameRegions',
         'description',
         'categories'
@@ -32,6 +33,7 @@ export class GameItemImportExportService extends GameObjectImportExportService<G
             const value = this._getValueFromCsvLine(columnIndexMap, property, line);
             switch (property) {
             case 'rarity':
+            case 'gameId':
                 result[property] = this._parseNumberFromCsv(value);
                 break;
             case 'gameRegions':

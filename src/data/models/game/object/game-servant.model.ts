@@ -10,11 +10,6 @@ const schemaDefinition: SchemaDefinition = {
         ...GameObjectSchema.rarity,
         min: 0 // Rarity for servants ranges from 0 thru 5.
     },
-    gameId: {
-        type: Number,
-        required: true,
-        unique: true
-    },
     cost: {
         type: Number,
         required: true,

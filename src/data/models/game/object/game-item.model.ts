@@ -6,10 +6,6 @@ export type GameItemDocument = Document & GameItem;
 
 const schemaDefinition: SchemaDefinition = {
     ...GameObjectSchema,
-    rarity: {
-        ...GameObjectSchema.rarity,
-        max: 3 // Rarity for items ranges from 1 thru 3.
-    },
     description: String,
     categories: {
         type: [String],

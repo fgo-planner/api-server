@@ -1,15 +1,8 @@
 export enum GameItemCategory {
-    Points = 'Points',
-    Consumable = 'Consumable',
-    Exchange = 'Exchange',
-    CommandCode = 'CommandCode',
-    BondUnlock = 'BondUnlock',
+    Master = 'Master',
+    Enhancement = 'Enhancement',
     Skill = 'Skill',
     Ascension = 'Ascension',
-    SpecialReward = 'SpecialReward',
-    ExperienceUp = 'ExperienceUp',
-    StatusUp = 'StatusUp',
-    MysticCode = 'MysticCode',
     EventItem = 'EventItem',
     QuestUnlockingKey = 'QuestUnlockingKey',
     EventBPRecoveryItem = 'EventBPRecoveryItem'

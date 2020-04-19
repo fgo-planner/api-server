@@ -71,7 +71,15 @@ export abstract class GameObjectImportExportService<T extends GameObject> {
      * Helper method for parsing a number from a CSV string value.
      */
     protected _parseNumberFromCsv(value: string) {
-        return Number(value) || null;
+        const number = Number(value);
+        return isNaN(number) ? null : number;
+    }
+
+    /**
+     * Helper method for parsing a boolean from a CSV string value.
+     */
+    protected _parseBooleanFromCsv(value: string) {
+        return value.toLowerCase() === 'true';
     }
 
     /**

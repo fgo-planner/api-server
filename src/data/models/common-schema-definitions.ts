@@ -52,6 +52,11 @@ export const GameObjectSchema: SchemaDefinition = {
         default: 1,
         index: true
     },
+    gameId: {
+        type: Number,
+        required: true,
+        unique: true
+    },
     gameRegions: {
         type: GameRegionsSchema,
         required: true,

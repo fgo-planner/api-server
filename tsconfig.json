@@ -27,6 +27,9 @@
       "services": [
         "src/services"
       ],
+      "strings": [
+        "src/strings"
+      ],
       "utils": [
         "src/utils"
       ],

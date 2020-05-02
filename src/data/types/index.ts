@@ -1,3 +1,8 @@
+export * from './game/account/game-account.type';
+export * from './game/account/game-account-item.type';
+export * from './game/account/game-account-servant.type';
+export * from './game/account/game-account-servant-noble-phantasm.type';
+export * from './game/account/game-account-servant-skill.type';
 export * from './game/event/activity/roulette/game-event-roulette-box.type';
 export * from './game/event/activity/roulette/game-event-roulette.type';
 export * from './game/event/activity/shop/game-event-shop-item.type';
@@ -13,6 +18,5 @@ export * from './game/object/game-item.type';
 export * from './game/object/game-object.type';
 export * from './game/object/game-player-object.type';
 export * from './game/object/game-servant.type';
-export * from './game/game-account.type';
 export * from './game/game-region.enum';
 export * from './user/user.type';

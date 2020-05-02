@@ -11,7 +11,7 @@ export class GameAccountController {
 
     @PostMapping()
     addAccount(req: Request, res: Response) {
-        const userId = (req.token as any)._id;
+        const userId = (req.token as any).id;
         this._gameAccountService.addAccount(userId, req.body).then(
             value => res.send(value),
             err => res.status(400).send(err)

@@ -10,6 +10,7 @@ export default (tsConfig: any, rootPath: string) => {
         if (path === '*') {
             continue;
         }
+        console.log(`${rootPath}/${path}`);
         moduleAlias.addAlias(path, `${rootPath}/${path}`);
     }
 };

@@ -1,7 +1,7 @@
 export class CsvUtils {
 
     /**
-     * Regex of splitting a CSV file into lines.
+     * Regex for splitting a CSV file into lines.
      */
     private static readonly _FileSplitRegex = new RegExp(/\r\n|\n/);
 

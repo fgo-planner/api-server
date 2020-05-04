@@ -6,6 +6,7 @@ describe('UrlStringUtils.isValid', () => {
         '',
         'UpperCase',
         'under_scores',
+        'apostrophe\'s',
         '$peci@l=characters^',
         'white spaces    ',
         '-leading-and-trailing-hyphens-'
@@ -42,6 +43,7 @@ describe('UrlStringUtils.generate', () => {
         '  ': '',
         'lowercase': 'lowercase',
         'UpperCase': 'uppercase',
+        'apostrophe\'s': 'apostrophes',
         'hyphens-aka-dashes' : 'hyphens-aka-dashes',
         '-leading-and-trailing-hyphens-' : 'leading-and-trailing-hyphens',
         'numb3rs': 'numb3rs',

@@ -16,7 +16,7 @@
             "warn",
             {
                 "code": 140,
-                "ignorePattern": "^import\\s.+\\sfrom\\s.+;$",
+                "ignorePattern": "^(import\\s.+\\sfrom\\s.+)|(export\\s.+);$",
                 "ignoreUrls": true
             }
         ],

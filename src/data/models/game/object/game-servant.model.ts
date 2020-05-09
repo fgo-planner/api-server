@@ -1,14 +1,18 @@
 import { GameServant } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameCharacterSchema, GameObjectSchema, GameObjectSchemaTextIndex, GamePlayerObjectSchema } from './game-object-schema-definitions';
+import { MongooseValidationStrings } from 'strings';
+import { GameCharacterSchemaDefinition, GameObjectSchemaDefinition, GameObjectSchemaTextIndex, GamePlayerObjectSchemaDefinition } from './game-object-schema-definitions';
 
 export type GameServantDocument = Document & GameServant;
 
-const schemaDefinition: SchemaDefinition = {
-    ...GamePlayerObjectSchema,
-    ...GameCharacterSchema,
+/**
+ * Mongoose schema definition for the `GameServant` model.
+ */
+const GameServantSchemaDefinition: SchemaDefinition = {
+    ...GamePlayerObjectSchemaDefinition,
+    ...GameCharacterSchemaDefinition,
     rarity: {
-        ...GameObjectSchema.rarity,
+        ...GameObjectSchemaDefinition.rarity,
         min: 0 // Rarity for servants ranges from 0 thru 5.
     },
     cost: {
@@ -16,14 +20,21 @@ const schemaDefinition: SchemaDefinition = {
         required: true,
         min: 0,
         max: 16,
-        default: 0,
+        validate: {
+            validator: Number.isInteger,
+            message: MongooseValidationStrings.NumberInteger
+        },
+        default: 0
     }
 };
 
-const schema = new Schema(schemaDefinition, { timestamps: true });
+/**
+ * Mongoose schema for the `GameServant` model.
+ */
+const GameServantSchema = new Schema(GameServantSchemaDefinition, { timestamps: true });
 
 // Add text index
-schema.index(
+GameServantSchema.index(
     GameObjectSchemaTextIndex,
     {
         name: 'textIndex',
@@ -35,4 +46,4 @@ schema.index(
     }
 );
 
-export const GameServantModel = mongoose.model<GameServantDocument>('GameServant', schema, 'GameServants');
+export const GameServantModel = mongoose.model<GameServantDocument>('GameServant', GameServantSchema, 'GameServants');

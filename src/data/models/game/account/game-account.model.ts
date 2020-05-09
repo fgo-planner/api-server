@@ -56,7 +56,7 @@ const isFouValueValid = (value: number) => {
 };
 
 /**
- * Mongoose schema for the GameAccountServantSkill type.
+ * Mongoose schema for the `GameAccountServantSkill` type.
  */
 const GameAccountServantSkillSchema: Schema = new Schema({
     level: {

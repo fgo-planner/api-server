@@ -1,17 +1,23 @@
 import { GameEnemy } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameCharacterSchema, GameObjectSchemaTextIndex } from './game-object-schema-definitions';
+import { GameCharacterSchemaDefinition, GameObjectSchemaTextIndex } from './game-object-schema-definitions';
 
 export type GameEnemyDocument = Document & GameEnemy;
 
-const schemaDefinition: SchemaDefinition = {
-    ...GameCharacterSchema,
+/**
+ * Mongoose schema definition for the `GameEnemy` model.
+ */
+const GameEnemySchemaDefinition: SchemaDefinition = {
+    ...GameCharacterSchemaDefinition,
 };
 
-const schema = new Schema(schemaDefinition, { timestamps: true });
+/**
+ * Mongoose schema definition for the `GameEnemy` model.
+ */
+const GameEnemySchema = new Schema(GameEnemySchemaDefinition, { timestamps: true });
 
 // Add text index
-schema.index(
+GameEnemySchema.index(
     GameObjectSchemaTextIndex,
     {
         name: 'textIndex',
@@ -22,4 +28,4 @@ schema.index(
     }
 );
 
-export const GameEnemyModel = mongoose.model<GameEnemyDocument>('GameEnemy', schema, 'GameEnemies');
+export const GameEnemyModel = mongoose.model<GameEnemyDocument>('GameEnemy', GameEnemySchema, 'GameEnemies');

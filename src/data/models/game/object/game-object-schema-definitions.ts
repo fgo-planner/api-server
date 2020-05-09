@@ -1,10 +1,14 @@
 // Contains common schema definitions that are used by `GameObject` models.
 
 import { GameCharacterAttribute, GameCharacterClass, GameRegion } from 'data/types';
-import { SchemaDefinition } from 'mongoose';
+import { SchemaDefinition, Schema } from 'mongoose';
 import { UrlStringUtils } from 'utils';
+import { MongooseValidationStrings } from 'strings';
 
-export const GameRegionsSchema: SchemaDefinition = {
+/**
+ * Mongoose schema for the `GameRegion` enum.
+ */
+const GameRegionsSchema: Schema = new Schema({
     [GameRegion.NA]: {
         type: Boolean,
         required: false
@@ -26,9 +30,12 @@ export const GameRegionsSchema: SchemaDefinition = {
         type: Boolean,
         required: false
     }
-};
+}, { _id: false });
 
-export const GameObjectSchema: SchemaDefinition = {
+/**
+ * Mongoose schema definition for the `GameObject` base model.
+ */
+export const GameObjectSchemaDefinition: SchemaDefinition = {
     name: {
         type: String,
         required: true,
@@ -40,13 +47,20 @@ export const GameObjectSchema: SchemaDefinition = {
         required: true,
         min: 1,
         max: 5,
+        validate: {
+            validator: Number.isInteger,
+            message: MongooseValidationStrings.NumberInteger
+        },
         default: 1,
         index: true
     }
 };
 
-export const GamePlayerObjectSchema: SchemaDefinition = {
-    ...GameObjectSchema,
+/**
+ * Mongoose schema definition for the `GamePlayerObject` base model.
+ */
+export const GamePlayerObjectSchemaDefinition: SchemaDefinition = {
+    ...GameObjectSchemaDefinition,
     urlString: {
         type: String,
         required: true,
@@ -59,6 +73,11 @@ export const GamePlayerObjectSchema: SchemaDefinition = {
     gameId: {
         type: Number,
         required: true,
+        min: 0,
+        validate: {
+            validator: Number.isInteger,
+            message: MongooseValidationStrings.NumberInteger
+        },
         unique: true
     },
     gameRegions: {
@@ -70,8 +89,11 @@ export const GamePlayerObjectSchema: SchemaDefinition = {
     }
 };
 
-export const GameCharacterSchema: SchemaDefinition = {
-    ...GameObjectSchema,
+/**
+ * Mongoose schema definition for the `GameCharacter` base model.
+ */
+export const GameCharacterSchemaDefinition: SchemaDefinition = {
+    ...GameObjectSchemaDefinition,
     class: {
         type: String,
         enum: Object.keys(GameCharacterClass),
@@ -86,6 +108,9 @@ export const GameCharacterSchema: SchemaDefinition = {
     }
 };
 
+/**
+ * Mongoose text index definition for the `GameObject` base model.
+ */
 export const GameObjectSchemaTextIndex = {
     name: 'text',
     nameJp: 'text',

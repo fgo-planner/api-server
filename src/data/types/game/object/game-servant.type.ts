@@ -39,7 +39,7 @@ export type GameServant = GamePlayerObject & GameCharacter & {
         
     };
 
-    acensions: {
+    ascensions: {
         
         ascension1: GameServantAscension;
     

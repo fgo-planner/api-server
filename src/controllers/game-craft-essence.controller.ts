@@ -12,7 +12,7 @@ export class GameCraftEssenceController {
     private _gameCraftEssenceService: GameCraftEssenceService;
 
     @PutMapping(UserAccessLevel.Admin)
-    addGameCraftEssence(req: Request, res: Response) {
+    createCraftEssence(req: Request, res: Response) {
         const craftEssence: GameCraftEssence = req.body;
         this._gameCraftEssenceService.create(craftEssence).then(
             created => res.send(created),

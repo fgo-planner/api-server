@@ -12,7 +12,7 @@ export class GameServantController {
     private _gameServantService: GameServantService;
 
     @PutMapping(UserAccessLevel.Admin)
-    addGameServant(req: Request, res: Response) {
+    createServant(req: Request, res: Response) {
         const servant: GameServant = req.body;
         this._gameServantService.create(servant).then(
             created => res.send(created),

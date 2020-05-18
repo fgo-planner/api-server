@@ -12,7 +12,7 @@ export class GameItemController {
     private _gameItemService: GameItemService;
 
     @PutMapping(UserAccessLevel.Admin)
-    addGameItem(req: Request, res: Response) {
+    createItem(req: Request, res: Response) {
         const item: GameItem = req.body;
         this._gameItemService.create(item).then(
             created => res.send(created),

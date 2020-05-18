@@ -1,7 +1,7 @@
 {
   "name": "fgo-tracker-server",
   "version": "0.0.1",
-  "description": "Backend server for the FGO event progress tracker project.",
+  "description": "Backend server for the FGO account resource tracker project.",
   "scripts": {
     "start": "npm run serve",
     "build": "npm run build-ts && npm run lint",

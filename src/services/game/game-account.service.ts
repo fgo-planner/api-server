@@ -6,9 +6,16 @@ import { Service } from 'typedi';
 export class GameAccountService {
 
     async addAccount(userId: string, account: GameAccount) {
-        delete account._id;
         account.userId = userId;
-        return GameAccountModel.create(account);
+        const _account = new GameAccountModel(account);
+        const errors = _account.validateSync();
+        if (errors) {
+            throw errors;
+        }
+        return _account;
+
+        // delete account._id;
+        // return GameAccountModel.create(account);
     }
 
     async findByUserId(userId: string) {

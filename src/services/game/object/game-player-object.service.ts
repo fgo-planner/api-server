@@ -1,6 +1,7 @@
+import { GamePlayerObjectModel } from 'data/models';
 import { GamePlayerObject } from 'data/types';
 import { Pagination } from 'internal';
-import { Document, Model } from 'mongoose';
+import { Document } from 'mongoose';
 import { GameObjectService } from './game-object.service';
 
 /**
@@ -9,22 +10,30 @@ import { GameObjectService } from './game-object.service';
  */
 export abstract class GamePlayerObjectService<T extends GamePlayerObject> extends GameObjectService<T> {
 
-    constructor(protected _model: Model<T & Document, {}>) {
+    constructor(protected _model: GamePlayerObjectModel<T & Document>) {
         super(_model);
     }
     
-    async findByUrlString(urlString: string): Promise<T & Document> {
-        return this._model.findOne({ urlString } as any).exec();
+    async findAllGameIds() {
+        return this._model.findAllGameIds().exec();
+    }
+
+    async findAllUrlStrings() {
+        return this._model.findAllUrlStrings().exec();
+    }
+
+    async findByUrlString(urlString: string) {
+        return this._model.findByUrlString(urlString).exec();
     }
 
     async existsByUrlString(urlString: string) {
-        return await this._model.exists({ urlString } as any);
+        return this._model.existsByUrlString(urlString);
     }
 
     // TODO Add queries by gameId.
 
-    protected _generateQuery(query: {[key: string]: string}, page: Pagination) {
-        const _query = super._generateQuery(query, page);
+    protected _generateSearchQuery(query: {[key: string]: string}, page: Pagination) {
+        const _query = super._generateSearchQuery(query, page);
         const conditions = _query.conditions;
         if (query.regions != null) {
             query.regions.split(',').forEach(region => {

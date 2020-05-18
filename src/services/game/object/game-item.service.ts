@@ -11,8 +11,8 @@ export class GameItemService extends GamePlayerObjectService<GameItem> {
         super(GameItemModel);
     }
 
-    protected _generateQuery(query: {[key: string]: string}, page: Pagination) {
-        const _query = super._generateQuery(query, page);
+    protected _generateSearchQuery(query: {[key: string]: string}, page: Pagination) {
+        const _query = super._generateSearchQuery(query, page);
         const conditions = _query.conditions;
         if (query.categories != null) {
             conditions.categories = {

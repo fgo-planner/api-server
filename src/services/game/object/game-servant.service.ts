@@ -11,8 +11,8 @@ export class GameServantService extends GamePlayerObjectService<GameServant> {
         super(GameServantModel);
     }
 
-    protected _generateQuery(query: {[key: string]: string}, page: Pagination) {
-        const _query = super._generateQuery(query, page);
+    protected _generateSearchQuery(query: {[key: string]: string}, page: Pagination) {
+        const _query = super._generateSearchQuery(query, page);
         const conditions = _query.conditions;
         // TODO Add addition conditions
         return _query;

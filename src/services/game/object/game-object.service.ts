@@ -1,7 +1,8 @@
 import { ObjectId } from 'bson';
+import { GameObjectModel } from 'data/models';
 import { GameObject } from 'data/types';
 import { Pagination } from 'internal';
-import { Document, Model } from 'mongoose';
+import { Document } from 'mongoose';
 import { ObjectIdUtils } from 'utils';
 
 /**
@@ -10,7 +11,7 @@ import { ObjectIdUtils } from 'utils';
  */
 export abstract class GameObjectService<T extends GameObject> {
 
-    constructor(protected _model: Model<T & Document, {}>) {
+    constructor(protected _model: GameObjectModel<T & Document>) {
 
     }
 
@@ -33,7 +34,7 @@ export abstract class GameObjectService<T extends GameObject> {
     }
 
     async search(query: any, page: Pagination): Promise<{data: (T & Document)[]; total: number}> {
-        const { conditions, projection, size, skip, sort } = this._generateQuery(query, page);
+        const { conditions, projection, size, skip, sort } = this._generateSearchQuery(query, page);
         const count = await this._model.find(conditions)
             .countDocuments();
         const data = await this._model.find(conditions)
@@ -56,7 +57,7 @@ export abstract class GameObjectService<T extends GameObject> {
         ).exec();
     }
 
-    protected _generateQuery(query: {[key: string]: string}, page: Pagination) {
+    protected _generateSearchQuery(query: {[key: string]: string}, page: Pagination) {
         const conditions: any = {};
         const projection: any = {};
         const sort: any = {};

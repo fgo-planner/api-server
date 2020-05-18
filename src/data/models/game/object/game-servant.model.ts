@@ -1,10 +1,17 @@
 import { GameServant } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
-import { GameCharacterSchemaDefinition, GameObjectSchemaDefinition, GameObjectSchemaTextIndex, GamePlayerObjectSchemaDefinition } from './game-object-schema-definitions';
 import { NumberUtils } from 'utils';
+import { GameCharacterModel, GameCharacterSchemaDefinition } from './game-character.model';
+import { GameObjectSchemaDefinition, GameObjectSchemaTextIndex } from './game-object.model';
+import { GamePlayerObjectModel, GamePlayerObjectSchemaDefinition, Statics as GamePlayerObjectModelStatics } from './game-player-object.model';
 
 export type GameServantDocument = Document & GameServant;
+
+/**
+ * Mongoose document model definition for the `GameItem` type.
+ */
+type GameServantModel = GamePlayerObjectModel<GameServantDocument> & GameCharacterModel<GameServantDocument>;
 
 /**
  * Mongoose schema for the `GameServantUpgrade.materials` property.
@@ -200,6 +207,9 @@ const GameServantSchemaDefinition: SchemaDefinition = {
  */
 const GameServantSchema = new Schema(GameServantSchemaDefinition, { timestamps: true });
 
+// Add static functions for `GamePlayerObjectModel`.
+Object.assign(GameServantSchema.statics, GamePlayerObjectModelStatics);
+
 // Add text index
 GameServantSchema.index(
     GameObjectSchemaTextIndex,
@@ -213,4 +223,4 @@ GameServantSchema.index(
     }
 );
 
-export const GameServantModel = mongoose.model<GameServantDocument>('GameServant', GameServantSchema, 'GameServants');
+export const GameServantModel = mongoose.model<GameServantDocument, GameServantModel>('GameServant', GameServantSchema, 'GameServants');

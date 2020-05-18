@@ -8,9 +8,9 @@ import { NumberUtils } from 'utils';
 export type GameAccountDocument = Document & GameAccount;
 
 /**
- * Mongoose document model for the `GameAccount` type.
+ * Mongoose document model definition for the `GameAccount` type.
  */
-export interface GameAccountModel extends Model<GameAccountDocument> {
+type GameAccountModel = Model<GameAccountDocument> & {
 
     /**
      * Checks if the given game account ID string is in a valid format. Game
@@ -19,7 +19,7 @@ export interface GameAccountModel extends Model<GameAccountDocument> {
      */
     isAccountIdFormatValid: (id: string) => boolean;
 
-}
+};
 
 /**
  * Regex for checking if a game account ID string is in a valid format. Game
@@ -282,6 +282,7 @@ const GameAccountSchemaDefinition: SchemaDefinition = {
  */
 const GameAccountSchema = new Schema(GameAccountSchemaDefinition, { timestamps: true });
 
+// TODO This should exists in a utility class instead of as a statics funciton.
 GameAccountSchema.statics.isAccountIdFormatValid = isAccountIdFormatValid;
 
 export const GameAccountModel = mongoose.model<GameAccountDocument, GameAccountModel>('GameAccount', GameAccountSchema, 'GameAccounts');

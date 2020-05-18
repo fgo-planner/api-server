@@ -1,8 +1,14 @@
 import { GameItem, GameItemCategory } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameObjectSchemaTextIndex, GamePlayerObjectSchemaDefinition } from './game-object-schema-definitions';
+import { GameObjectSchemaTextIndex } from './game-object.model';
+import { GamePlayerObjectModel, GamePlayerObjectSchemaDefinition, Statics as GamePlayerObjectModelStatics } from './game-player-object.model';
 
 export type GameItemDocument = Document & GameItem;
+
+/**
+ * Mongoose document model definition for the `GameItem` type.
+ */
+type GameItemModel = GamePlayerObjectModel<GameItemDocument>;
 
 /**
  * Mongoose schema definition for the `GameItem` model.
@@ -23,6 +29,9 @@ const GameItemSchemaDefinition: SchemaDefinition = {
  */
 const GameItemSchema = new Schema(GameItemSchemaDefinition, { timestamps: true });
 
+// Add static functions for `GamePlayerObjectModel`.
+Object.assign(GameItemSchema.statics, GamePlayerObjectModelStatics);
+
 // Add text index
 GameItemSchema.index({
     ...GameObjectSchemaTextIndex,
@@ -37,4 +46,4 @@ GameItemSchema.index({
     }
 });
 
-export const GameItemModel = mongoose.model<GameItemDocument>('GameItem', GameItemSchema, 'GameItems');
+export const GameItemModel = mongoose.model<GameItemDocument, GameItemModel>('GameItem', GameItemSchema, 'GameItems');

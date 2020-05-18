@@ -1,8 +1,14 @@
 import { GameEnemy } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { GameCharacterSchemaDefinition, GameObjectSchemaTextIndex } from './game-object-schema-definitions';
+import { GameCharacterSchemaDefinition, GameCharacterModel } from './game-character.model';
+import { GameObjectSchemaTextIndex } from './game-object.model';
 
 export type GameEnemyDocument = Document & GameEnemy;
+
+/**
+ * Mongoose document model definition for the `GameEnemy` type.
+ */
+type GameEnemyModel = GameCharacterModel<GameEnemyDocument>;
 
 /**
  * Mongoose schema definition for the `GameEnemy` model.
@@ -28,4 +34,4 @@ GameEnemySchema.index(
     }
 );
 
-export const GameEnemyModel = mongoose.model<GameEnemyDocument>('GameEnemy', GameEnemySchema, 'GameEnemies');
+export const GameEnemyModel = mongoose.model<GameEnemyDocument, GameEnemyModel>('GameEnemy', GameEnemySchema, 'GameEnemies');

@@ -3,12 +3,12 @@ import mongoose, { Document, Model, NativeError, Schema, SchemaDefinition } from
 
 export type UserDocument = Document & User;
 
-export interface UserModel extends Model<UserDocument> {
+type UserModel = Model<UserDocument> & {
     setActiveStatus: (id: string, status: boolean, callback: (err: NativeError, doc: UserDocument) => void) => void;
     setAdminStatus: (id: string, isAdmin: boolean, callback: (err: NativeError, doc: UserDocument) => void) => void;
-}
+};
 
-const schemaDefinition: SchemaDefinition = {
+const UserSchemaDefinition: SchemaDefinition = {
     username: { type: String, unique: true },
     hash: String,
     email: { type: String, unique: true },
@@ -16,13 +16,22 @@ const schemaDefinition: SchemaDefinition = {
     active: Boolean
 };
 
-const userSchema = new Schema(schemaDefinition, { timestamps: true });
+const UserSchema = new Schema(UserSchemaDefinition, { timestamps: true });
 
-userSchema.statics.setActiveStatus = function(this: UserModel, id: string, status: boolean, callback: (err: any, doc: any) => void) {
-    this.updateOne({ _id: id }, { active : status }, callback);
+UserSchema.statics.setActiveStatus = function (
+    this: UserModel,
+    id: string,
+    status: boolean,
+    callback: (err: NativeError, doc: UserDocument) => void
+) {
+    this.updateOne({ _id: id }, { active: status }, callback);
 };
 
-userSchema.statics.setAdminStatus = function(this: UserModel, id: string, isAdmin: boolean, callback: (err: any, doc: any) => void) {
+UserSchema.statics.setAdminStatus = function (this: UserModel,
+    id: string,
+    isAdmin: boolean,
+    callback: (err: NativeError, doc: UserDocument) => void
+) {
     const update: any = {};
     if (isAdmin) {
         update.$set = { admin: true };
@@ -32,4 +41,4 @@ userSchema.statics.setAdminStatus = function(this: UserModel, id: string, isAdmi
     this.updateOne({ _id: id }, update, callback);
 };
 
-export const UserModel = mongoose.model<UserDocument, UserModel>('User', userSchema, 'Users');
+export const UserModel = mongoose.model<UserDocument, UserModel>('User', UserSchema, 'Users');

@@ -1,9 +1,15 @@
 import { GameCraftEssence } from 'data/types';
 import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
-import { GameObjectSchemaTextIndex, GamePlayerObjectSchemaDefinition } from './game-object-schema-definitions';
+import { GameObjectSchemaTextIndex } from './game-object.model';
+import { GamePlayerObjectModel, GamePlayerObjectSchemaDefinition, Statics as GamePlayerObjectModelStatics } from './game-player-object.model';
 
 export type GameCraftEssenceDocument = Document & GameCraftEssence;
+
+/**
+ * Mongoose document model definition for the `GameCraftEssence` type.
+ */
+type GameCraftEssenceModel = GamePlayerObjectModel<GameCraftEssenceDocument>;
 
 /**
  * Mongoose schema definition for the `GameCraftEssence` model.
@@ -28,6 +34,9 @@ const GameCraftEssenceSchemaDefinition: SchemaDefinition = {
  */
 const GameCraftEssenceSchema = new Schema(GameCraftEssenceSchemaDefinition, { timestamps: true });
 
+// Add static functions for `GamePlayerObjectModel`.
+Object.assign(GameCraftEssenceSchema.statics, GamePlayerObjectModelStatics);
+
 // Add text index
 GameCraftEssenceSchema.index(
     GameObjectSchemaTextIndex,
@@ -41,4 +50,4 @@ GameCraftEssenceSchema.index(
     }
 );
 
-export const GameCraftEssenceModel = mongoose.model<GameCraftEssenceDocument>('GameCraftEssence', GameCraftEssenceSchema, 'GameCraftEssences');
+export const GameCraftEssenceModel = mongoose.model<GameCraftEssenceDocument, GameCraftEssenceModel>('GameCraftEssence', GameCraftEssenceSchema, 'GameCraftEssences');

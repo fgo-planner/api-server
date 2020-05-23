@@ -1,8 +1,8 @@
-import { UrlStringUtils } from '../../src/utils/url-string.utils';
+import { UrlUtils } from '../../src/utils/url.utils';
 
-describe('UrlStringUtils.isValid', () => {
+describe('UrlUtils.isSegmentValid', () => {
 
-    const InvalidUrlStrings = [
+    const InvalidUrlPathSegments = [
         '',
         'UpperCase',
         'under_scores',
@@ -12,7 +12,7 @@ describe('UrlStringUtils.isValid', () => {
         '-leading-and-trailing-hyphens-'
     ];
 
-    const ValidUrlStrings = [
+    const ValidUrlPathSegments = [
         'lowercase',
         'hyphens-aka-dashes',
         'numb3rs',
@@ -20,23 +20,23 @@ describe('UrlStringUtils.isValid', () => {
         'hyphens-and-numbers2'
     ];
 
-    for (const urlString of InvalidUrlStrings) {
-        it(`should return false for '${urlString}.'`, () => {
-            const result = UrlStringUtils.isValid(urlString);
+    for (const urlPath of InvalidUrlPathSegments) {
+        it(`should return false for '${urlPath}.'`, () => {
+            const result = UrlUtils.isSegmentValid(urlPath);
             expect(result).toBe(false);
         });
     }
 
-    for (const urlString of ValidUrlStrings) {
-        it(`should return true for '${urlString}'.`, () => {
-            const result = UrlStringUtils.isValid(urlString);
+    for (const urlPath of ValidUrlPathSegments) {
+        it(`should return true for '${urlPath}'.`, () => {
+            const result = UrlUtils.isSegmentValid(urlPath);
             expect(result).toBe(true);
         });
     }
 
 });
 
-describe('UrlStringUtils.generate', () => {
+describe('UrlUtils.generateSegment', () => {
 
     const TestCases: {[key: string]: string} = {
         '': '',
@@ -57,7 +57,7 @@ describe('UrlStringUtils.generate', () => {
     for (const input of Object.keys(TestCases)) {
         const expected = TestCases[input];
         it(`should return '${expected}' for '${input}'.`, () => {
-            const result = UrlStringUtils.generate(input);
+            const result = UrlUtils.generateSegment(input);
             expect(result).toBe(expected);
         });
     }

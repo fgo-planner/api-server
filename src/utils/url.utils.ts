@@ -1,45 +1,45 @@
-export class UrlStringUtils {
+export class UrlUtils {
 
     static readonly Regex = /^[a-z0-9\-]+$/;
 
-    private static readonly _ValidationRegex = new RegExp(UrlStringUtils.Regex);
+    private static readonly _SegmentValidationRegex = new RegExp(UrlUtils.Regex);
 
     /**
-     * Regex of chacacters to be removed when generating a URL string.
+     * Regex of chacacters to be removed when generating a URL path segment.
      * Currently only includes apostrophes.
      */
     private static readonly _SpecialCharacterRemovalRegex = new RegExp(/[\']/g);
 
     /**
-     * Regex of chacacters to be replaced by hyphens when generating a URL string.
+     * Regex of chacacters to be replaced by hyphens when generating a URL path segment.
      */
     private static readonly _SpecialCharacterReplacementRegex = new RegExp(/[_\W+]+/g);
 
     /**
-     * Checks of the format of the given URL string is valid.
+     * Checks if a URL path segment is valid.
      */
-    static isValid(urlString: string) {
-        if (!UrlStringUtils._ValidationRegex.test(urlString)) {
+    static isSegmentValid(urlPath: string) {
+        if (!UrlUtils._SegmentValidationRegex.test(urlPath)) {
             return false;
         }
         // Regex does not catch leading and trailing hyphens.
-        if (urlString.startsWith('-') || urlString.endsWith('-')) {
+        if (urlPath.startsWith('-') || urlPath.endsWith('-')) {
             return false;
         }
         return true;
     }
 
     /**
-     * Generates a URL string from a given string.
+     * Generates a URL path segment from a given string.
      */
-    static generate(str: string) {
+    static generateSegment(str: string) {
         let result = str.trim()
 
             // Remove specific special characters first.
-            .replace(UrlStringUtils._SpecialCharacterRemovalRegex, '')
+            .replace(UrlUtils._SpecialCharacterRemovalRegex, '')
 
             // Replace rest of special characters with hyphens.
-            .replace(UrlStringUtils._SpecialCharacterReplacementRegex, '-')
+            .replace(UrlUtils._SpecialCharacterReplacementRegex, '-')
 
             .toLowerCase();
 

@@ -5,7 +5,7 @@ import { GameObject, GameRegion } from 'data/types';
  * servants, craft essences, and materials.
  */
 export type GamePlayerObject = GameObject & {
-    urlString: string;
     gameId: number;
+    urlPath: string;
     gameRegions: { [key in GameRegion]?: boolean };
 }

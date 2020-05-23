@@ -43,7 +43,7 @@ GameCraftEssenceSchema.index(
     {
         name: 'textIndex',
         weights: {
-            urlString: 5,
+            urlPath: 5,
             name: 5,
             nameJp: 3,
         }

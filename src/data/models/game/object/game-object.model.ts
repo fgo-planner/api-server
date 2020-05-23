@@ -43,5 +43,5 @@ export const GameObjectSchemaDefinition: SchemaDefinition = {
 export const GameObjectSchemaTextIndex = {
     name: 'text',
     nameJp: 'text',
-    urlString: 'text'
+    urlPath: 'text'
 };

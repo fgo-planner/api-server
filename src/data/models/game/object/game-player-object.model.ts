@@ -8,7 +8,7 @@
 import { GamePlayerObject, GameRegion } from 'data/types';
 import { Document, DocumentQuery, NativeError, Query, Schema, SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
-import { UrlStringUtils } from 'utils';
+import { UrlUtils } from 'utils';
 import { GameObjectModel, GameObjectSchemaDefinition } from './game-object.model';
 
 /**
@@ -23,21 +23,21 @@ export type GamePlayerObjectModel<T extends GamePlayerObject & Document> = GameO
     findAllGameIds: (callback?: (err: NativeError, res: number[]) => void) => Query<number[]>;
 
     /**
-     * Creates a Query for retrieving all the unique urlString values in the
+     * Creates a Query for retrieving all the unique urlPath values in the
      * colleciton.
      */
-    findAllUrlStrings: (callback?: (err: NativeError, res: string[]) => void) => Query<string[]>;
+    findAllUrlPaths: (callback?: (err: NativeError, res: string[]) => void) => Query<string[]>;
 
     /**
-     * Creates a Query to find a single document by its urlString field.
+     * Creates a Query to find a single document by its urlPath field.
      */
-    findByUrlString: (urlString: string, callback?: (err: NativeError, res: T) => void) => DocumentQuery<T, T>;
+    findByUrlPath: (urlPath: string, callback?: (err: NativeError, res: T) => void) => DocumentQuery<T, T>;
 
     /**
      * Returns true if at least one document exists in the collection has the
-     * urlString, and false otherwise.
+     * urlPath, and false otherwise.
      */
-    existsByUrlString: (urlString: string, callback?: (err: NativeError, res: boolean) => void) => Promise<boolean>;
+    existsByUrlPath: (urlPath: string, callback?: (err: NativeError, res: boolean) => void) => Promise<boolean>;
 
 };
 
@@ -76,15 +76,6 @@ const GameRegionsSchema: Schema = new Schema({
  */
 export const GamePlayerObjectSchemaDefinition: SchemaDefinition = {
     ...GameObjectSchemaDefinition,
-    urlString: {
-        type: String,
-        required: true,
-        unique: true,
-        validate: [
-            UrlStringUtils.isValid,
-            'Invalid URL string format.'
-        ]
-    },
     gameId: {
         type: Number,
         required: true,
@@ -94,6 +85,15 @@ export const GamePlayerObjectSchemaDefinition: SchemaDefinition = {
             message: MongooseValidationStrings.NumberInteger
         },
         unique: true
+    },
+    urlPath: {
+        type: String,
+        required: true,
+        unique: true,
+        validate: [
+            UrlUtils.isSegmentValid,
+            MongooseValidationStrings.GenericInvalidFormat
+        ]
     },
     gameRegions: {
         type: GameRegionsSchema,
@@ -116,34 +116,34 @@ const findAllGameIds = function<T extends GamePlayerObject & Document> (
     return this.distinct('gameId', callback) as Query<number[]>;
 };
 
-const findAllUrlStrings = function<T extends GamePlayerObject & Document> (
+const findAllUrlPaths = function<T extends GamePlayerObject & Document> (
     this: GamePlayerObjectModel<T>,
     callback?: (err: NativeError, res: string[]) => void
 ) {
-    return this.distinct('urlString', callback) as Query<string[]>;
+    return this.distinct('urlPath', callback) as Query<string[]>;
 };
 
-const findByUrlString = function<T extends GamePlayerObject & Document> (
+const findByUrlPath = function<T extends GamePlayerObject & Document> (
     this: GamePlayerObjectModel<T>,
-    urlString: string,
+    urlPath: string,
     callback?: (err: NativeError, res: T) => void
 ) {
-    return this.findOne({ urlString } as any, callback);
+    return this.findOne({ urlPath } as any, callback);
 };
 
-const existsByUrlString = function<T extends GamePlayerObject & Document> (
+const existsByUrlPath = function<T extends GamePlayerObject & Document> (
     this: GamePlayerObjectModel<T>,
-    urlString: string,
+    urlPath: string,
     callback?: (err: NativeError, res: boolean) => void
 ) {
-    return this.exists({ urlString } as any, callback);
+    return this.exists({ urlPath } as any, callback);
 };
 
 export const Statics = {
     findAllGameIds,
-    findAllUrlStrings,
-    findByUrlString,
-    existsByUrlString
+    findAllUrlPaths,
+    findByUrlPath,
+    existsByUrlPath
 };
 
 //#endregion

@@ -12,7 +12,7 @@ export class GameItemImportExportService extends GameObjectImportExportService<G
     private readonly _Properties: ReadonlyArray<string> = [
         'name',
         'nameJp',
-        'urlString',
+        'urlPath',
         'rarity',
         'gameId',
         'gameRegions',
@@ -58,7 +58,7 @@ export class GameItemImportExportService extends GameObjectImportExportService<G
     }
 
     protected async _validateAndWriteObject(object: GameItem) {
-        // if (await this._gameItemService.existsByUrlString(object.urlString)) {
+        // if (await this._gameItemService.existsByUrlPath(object.urlPath)) {
         //     return;
         // }
         try {

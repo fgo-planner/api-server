@@ -18,16 +18,16 @@ export abstract class GamePlayerObjectService<T extends GamePlayerObject> extend
         return this._model.findAllGameIds().exec();
     }
 
-    async findAllUrlStrings() {
-        return this._model.findAllUrlStrings().exec();
+    async findAllUrlPaths() {
+        return this._model.findAllUrlPaths().exec();
     }
 
-    async findByUrlString(urlString: string) {
-        return this._model.findByUrlString(urlString).exec();
+    async findByUrlPath(urlPath: string) {
+        return this._model.findByUrlPath(urlPath).exec();
     }
 
-    async existsByUrlString(urlString: string) {
-        return this._model.existsByUrlString(urlString);
+    async existsByUrlPath(urlPath: string) {
+        return this._model.existsByUrlPath(urlPath);
     }
 
     // TODO Add queries by gameId.

@@ -1,6 +1,6 @@
 import { CsvUtils } from '../../src/utils/csv.utils';
 
-describe('UrlUtils.splitFile', () => {
+describe('CsvUtils.splitFile', () => {
 
     it('should return empty array for null input', () => {
         const expected = [] as string[];
@@ -12,7 +12,7 @@ describe('UrlUtils.splitFile', () => {
 
 });
 
-describe('UrlUtils.splitLine', () => {
+describe('CsvUtils.splitLine', () => {
 
     it('should return empty array for null input', () => {
         const expected = [] as string[];

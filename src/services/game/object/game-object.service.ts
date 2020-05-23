@@ -26,7 +26,11 @@ export abstract class GameObjectService<T extends GameObject> {
         if (!id) {
             throw 'ObjectId is missing or invalid.';
         }
-        return this._model.findById(id).exec();
+        const object = await this._model.findById(id).exec();
+        if (!object) {
+            throw 'Not Found';
+        }
+        return object;
     }
 
     async findAll(): Promise<(T & Document)[]> {
@@ -50,11 +54,15 @@ export abstract class GameObjectService<T extends GameObject> {
         if (!id) {
             throw 'ObjectId is missing or invalid.';
         }
-        return this._model.findOneAndUpdate(
-            { _id: id as any }, 
+        const updated = await this._model.findOneAndUpdate(
+            { _id: id as any },
             { $set: object },
             { runValidators: true, new: true }
         ).exec();
+        if (!updated) {
+            throw `ObjectId ${id.toHexString()} does not exist in the collection.`;
+        }
+        return updated;
     }
 
     protected _generateSearchQuery(query: {[key: string]: string}, page: Pagination) {

@@ -22,7 +22,9 @@ export const GameObjectSchemaDefinition: SchemaDefinition = {
         required: true,
         index: true
     },
-    nameJp: String,
+    nameJp: {
+        type: String,
+    },
     rarity: {
         type: Number,
         required: true,
@@ -34,6 +36,10 @@ export const GameObjectSchemaDefinition: SchemaDefinition = {
         },
         default: 1,
         index: true
+    },
+    imageUrl: {
+        type: String,
+        // TODO Add URL path validation
     }
 };
 

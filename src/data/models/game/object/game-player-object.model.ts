@@ -95,6 +95,10 @@ export const GamePlayerObjectSchemaDefinition: SchemaDefinition = {
             MongooseValidationStrings.GenericInvalidFormat
         ]
     },
+    thumbnailUrl: {
+        type: String,
+        // TODO Add URL path validation
+    },
     gameRegions: {
         type: GameRegionsSchema,
         required: true,

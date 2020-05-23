@@ -8,4 +8,5 @@ export type GameObject = Entity & {
     name: string;
     nameJp?: string;
     rarity: number;
+    imageUrl?: string;
 }

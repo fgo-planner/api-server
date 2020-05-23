@@ -15,7 +15,9 @@ type GameItemModel = GamePlayerObjectModel<GameItemDocument>;
  */
 const GameItemSchemaDefinition: SchemaDefinition = {
     ...GamePlayerObjectSchemaDefinition,
-    description: String,
+    description: {
+        type: String
+    },
     categories: {
         type: [String],
         enum: Object.keys(GameItemCategory),

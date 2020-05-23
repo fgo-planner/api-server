@@ -8,4 +8,5 @@ export type GamePlayerObject = GameObject & {
     gameId: number;
     urlPath: string;
     gameRegions: { [key in GameRegion]?: boolean };
+    thumbnailUrl?: string;
 }

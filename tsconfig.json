@@ -18,6 +18,9 @@
       "data/types": [
         "src/data/types"
       ],
+      "data/schemas": [
+        "src/data/schemas"
+      ],
       "data/models": [
         "src/data/models"
       ],

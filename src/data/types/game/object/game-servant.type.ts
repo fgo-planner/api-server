@@ -1,24 +1,61 @@
-import { GameCharacter, GamePlayerObject, GameServantAscension, GameServantSkill } from 'data/types';
+import { GameCharacter } from './game-character.type';
+import { GameObjectSkillLevelable } from './game-object-skill-levelable.type';
+import { GameObjectSkillUnlockable } from './game-object-skill-unlockable.type';
+import { GameObjectSkill } from './game-object-skill.type';
+import { GameServantAscension } from './game-servant-ascension.type';
+import { GameServantDeck } from './game-servant-deck.enum';
+import { GameServantNoblePhantasm } from './game-servant-noble-phantasm.type';
 import { GameServantUpgrade } from './game-servant-upgrade.type';
+import { GameSpiritOriginCollection } from './game-spirit-origin-collection.type';
 
-/**
- * A servant with an ID number (and thus viewable in My Room -> Spirit Origin
- * List), including any non-summonable, servants. Does not include non-playable
- * servants that don't have an ID number; such servants should be classified as
- * a GameEnemy instead.
- */
-export type GameServant = GamePlayerObject & GameCharacter & {
+export type GameServant = GameSpiritOriginCollection & GameCharacter & {
 
     cost: number;
 
-    skills: {
+    cards: {
 
-        skill1: GameServantSkill;
+        deck: GameServantDeck;
 
-        skill2: GameServantSkill;
+        hits: {
 
-        skill3: GameServantSkill;
-        
+            buster: number[];
+
+            arts: number[];
+
+            quick: number[];
+
+            extra: number[];
+
+        };
+
+    };
+
+    activeSkills: {
+
+        skill1: {
+
+            base: GameObjectSkillLevelable;
+
+            upgrade?: GameObjectSkillLevelable & GameObjectSkillUnlockable;
+
+        };
+
+        skill2: {
+
+            base: GameObjectSkillLevelable & GameObjectSkillUnlockable;
+
+            upgrade?: GameObjectSkillLevelable & GameObjectSkillUnlockable;
+
+        };
+
+        skill3: {
+
+            base: GameObjectSkillLevelable & GameObjectSkillUnlockable;
+
+            upgrade?: GameObjectSkillLevelable & GameObjectSkillUnlockable;
+
+        };
+
         upgrade1: GameServantUpgrade;
 
         upgrade2: GameServantUpgrade;
@@ -36,20 +73,55 @@ export type GameServant = GamePlayerObject & GameCharacter & {
         upgrade8: GameServantUpgrade;
 
         upgrade9: GameServantUpgrade;
-        
+
     };
 
+    noblePhantasm: {
+
+        base: GameServantNoblePhantasm;
+
+        upgrade?: GameServantNoblePhantasm & GameObjectSkillUnlockable;
+
+    };
+
+    passiveSkills: GameObjectSkill[];
+
     ascensions: {
-        
+
         ascension1: GameServantAscension;
-    
+
         ascension2: GameServantAscension;
-    
+
         ascension3: GameServantAscension;
-        
+
         ascension4: GameServantAscension;
 
     };
 
+    bond: {
+
+        max: number;
+
+        points: number[];
+
+    };
+
+    stats: {
+
+        power: number;
+
+        defense: number;
+
+        agility: number;
+
+        magic: number;
+
+        luck: number;
+
+        noblePhantasm: number;
+
+    };
+
+    costumes: any[];
 
 }

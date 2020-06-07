@@ -1,6 +1,7 @@
+import { ObjectId } from 'bson';
 import { Entity } from 'internal';
 
-export type User = Entity & {
+export type User = Entity<ObjectId> & {
     username: string;
     hash?: string;
     email?: string;

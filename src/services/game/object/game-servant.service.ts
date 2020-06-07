@@ -2,10 +2,10 @@ import { GameServantModel } from 'data/models';
 import { GameServant } from 'data/types';
 import { Pagination } from 'internal';
 import { Service } from 'typedi';
-import { GamePlayerObjectService } from './game-player-object.service';
+import { GameObjectService } from './game-object.service';
 
 @Service()
-export class GameServantService extends GamePlayerObjectService<GameServant> {
+export class GameServantService extends GameObjectService<GameServant> {
 
     constructor() {
         super(GameServantModel);

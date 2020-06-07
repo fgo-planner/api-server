@@ -1,16 +1,22 @@
 /**
- * Material and QP cost for performing servant upgrades.
+ * Material and QP cost for performing a servant upgrade.
  */
 export type GameServantUpgrade = {
 
     /**
      * The cost of the upgrade in QP.
      */
-    cost: number;
+    qp: number;
 
     /**
      * Materials required for the upgrade.
      */
-    materials: { gameId: number; quantity: number }[];
+    materials: { 
+
+        itemId: number; 
+
+        quantity: number;
+        
+    }[];
 
 }

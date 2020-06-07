@@ -1,7 +1,8 @@
+import { ObjectId } from 'bson';
 import { GameEventActivity, GameRegion } from 'data/types';
 import { Entity } from 'internal';
 
-export type GameEvent = Entity & {
+export type GameEvent = Entity<ObjectId> & {
     name: string;
     gameRegion: GameRegion;
     shortName?: string;

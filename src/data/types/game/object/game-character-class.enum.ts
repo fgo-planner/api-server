@@ -1,14 +1,22 @@
+/**
+ * Enumerations of servant and NPC classes.
+ */
 export enum GameCharacterClass {
-    AlterEgo = 'AlterEgo',
-    Archer = 'Archer',
-    Assassin = 'Assassin',
-    Avenger = 'Avenger',
-    Berserker = 'Berserker',
-    Caster = 'Caster',
-    Lancer = 'Lancer',
-    MoonCancer = 'MoonCancer',
-    Rider = 'Rider',
-    Ruler = 'Ruler',
     Saber = 'Saber',
-    Shielder = 'Shielder'
+    Archer = 'Archer',
+    Lancer = 'Lancer',
+    Rider = 'Rider',
+    Caster = 'Caster',
+    Assassin = 'Assassin',
+    Berserker = 'Berserker',
+    Shielder = 'Shielder',
+    Ruler = 'Ruler',
+    AlterEgo = 'AlterEgo',
+    Avenger = 'Avenger',
+    MoonCancer = 'MoonCancer',
+    BeastI = 'BeastI',
+    BeastII = 'BeastII',
+    BeastIIIR = 'BeastIIIR',
+    BeastIIIL = 'BeastIIIL',
+    BeastFalse= 'BeastFalse'
 }

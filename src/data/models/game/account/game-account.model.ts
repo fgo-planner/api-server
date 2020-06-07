@@ -58,7 +58,7 @@ const isFouValueValid = (value: number) => {
 /**
  * Mongoose schema for the `GameAccountServantSkill` type.
  */
-const GameAccountServantSkillSchema: Schema = new Schema({
+const GameAccountServantSkillSchema = new Schema({
     level: {
         type: Number,
         required: true,
@@ -85,7 +85,7 @@ const GameAccountServantSkillSchema: Schema = new Schema({
 /**
  * Mongoose schema for the `GameAccountServantNoblePhantasm` type.
  */
-const GameAccountServantNoblePhantasmSchema: Schema = new Schema({
+const GameAccountServantNoblePhantasmSchema = new Schema({
     level: {
         type: Number,
         required: true,
@@ -107,7 +107,7 @@ const GameAccountServantNoblePhantasmSchema: Schema = new Schema({
 /**
  * Mongoose schema for the `GameAccountServant` type.
  */
-const GameAccountServantSchema: Schema = new Schema({
+const GameAccountServantSchema = new Schema({
     gameId: {
         type: Number,
         required: true,
@@ -207,7 +207,7 @@ const GameAccountServantSchema: Schema = new Schema({
 /**
  * Mongoose schema for the `GameAccountItem` type.
  */
-const GameAccountItemSchema: Schema = new Schema({
+const GameAccountItemSchema = new Schema({
     gameId: {
         type: Number,
         required: true,

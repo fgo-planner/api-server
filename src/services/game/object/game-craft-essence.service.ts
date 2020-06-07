@@ -2,10 +2,10 @@ import { GameCraftEssenceModel } from 'data/models';
 import { GameCraftEssence } from 'data/types';
 import { Pagination } from 'internal';
 import { Service } from 'typedi';
-import { GamePlayerObjectService } from './game-player-object.service';
+import { GameObjectService } from './game-object.service';
 
 @Service()
-export class GameCraftEssenceService extends GamePlayerObjectService<GameCraftEssence> {
+export class GameCraftEssenceService extends GameObjectService<GameCraftEssence> {
 
     constructor() {
         super(GameCraftEssenceModel);

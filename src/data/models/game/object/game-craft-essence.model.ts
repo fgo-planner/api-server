@@ -1,32 +1,29 @@
+import { GameCraftEssenceSchemaDefinition } from 'data/schemas';
 import { GameCraftEssence } from 'data/types';
-import mongoose, { Document, Schema, SchemaDefinition } from 'mongoose';
-import { MongooseValidationStrings } from 'strings';
-import { GameObjectSchemaTextIndex } from './game-object.model';
-import { GamePlayerObjectModel, GamePlayerObjectSchemaDefinition, Statics as GamePlayerObjectModelStatics } from './game-player-object.model';
+import mongoose, { Document, Schema } from 'mongoose';
+import { GameSpiritOriginCollectionModel, Statics as GameSpiritOriginCollectionStatics, SortProperties as GameSpiritOriginCollectionSortProperties } from './game-spirit-origin-collection.model';
 
 export type GameCraftEssenceDocument = Document & GameCraftEssence;
 
 /**
  * Mongoose document model definition for the `GameCraftEssence` type.
  */
-type GameCraftEssenceModel = GamePlayerObjectModel<GameCraftEssenceDocument>;
+type GameCraftEssenceModel = GameSpiritOriginCollectionModel<GameCraftEssenceDocument>;
 
 /**
- * Mongoose schema definition for the `GameCraftEssence` model.
+ * Properties that can be used as sort keys.
  */
-const GameCraftEssenceSchemaDefinition: SchemaDefinition = {
-    ...GamePlayerObjectSchemaDefinition,
-    cost: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 12,
-        validate: {
-            validator: Number.isInteger,
-            message: MongooseValidationStrings.NumberInteger
-        },
-        default: 1
-    },
+const SortProperties = [
+    ...GameSpiritOriginCollectionSortProperties,
+    'cost'
+];
+
+/**
+ * Properties and functions that can be assigned as statics on the schema.
+ */
+const Statics = {
+    ...GameSpiritOriginCollectionStatics,
+    SortProperties
 };
 
 /**
@@ -34,10 +31,17 @@ const GameCraftEssenceSchemaDefinition: SchemaDefinition = {
  */
 const GameCraftEssenceSchema = new Schema(GameCraftEssenceSchemaDefinition, { timestamps: true });
 
-// Add static functions for `GamePlayerObjectModel`.
-Object.assign(GameCraftEssenceSchema.statics, GamePlayerObjectModelStatics);
+// Add the static properties to the schema.
+Object.assign(GameCraftEssenceSchema.statics, Statics);
+
+GameCraftEssenceSchema.set('toJSON', {
+    // virtuals: true,
+    versionKey: false,
+});
 
 // Add text index
+// TODO Redo this
+/*
 GameCraftEssenceSchema.index(
     GameObjectSchemaTextIndex,
     {
@@ -49,5 +53,6 @@ GameCraftEssenceSchema.index(
         }
     }
 );
+*/
 
 export const GameCraftEssenceModel = mongoose.model<GameCraftEssenceDocument, GameCraftEssenceModel>('GameCraftEssence', GameCraftEssenceSchema, 'GameCraftEssences');

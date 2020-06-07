@@ -1,9 +1,7 @@
-import { ObjectId } from 'bson';
 import { GameObjectModel } from 'data/models';
 import { GameObject } from 'data/types';
 import { Pagination } from 'internal';
 import { Document } from 'mongoose';
-import { ObjectIdUtils } from 'utils';
 
 /**
  * Abstract service that provides basic CRUD operations and utility functions
@@ -17,13 +15,13 @@ export abstract class GameObjectService<T extends GameObject> {
 
     async create(object: T): Promise<T & Document> {
         // TODO Validation
-        delete object._id;
+        console.log(this._model.SortProperties)
         return this._model.create(object);
     }
 
-    async findById(id: ObjectId | string): Promise<T & Document> {
-        id = ObjectIdUtils.convertToObjectId(id);
-        if (!id) {
+    async findById(id: number | string): Promise<T & Document> {
+        id = Number(id);
+        if (!id && id !== 0) {
             throw 'ObjectId is missing or invalid.';
         }
         const object = await this._model.findById(id).exec();
@@ -50,17 +48,17 @@ export abstract class GameObjectService<T extends GameObject> {
     }
 
     async update(object: T): Promise<T & Document> {
-        const id = ObjectIdUtils.convertToObjectId(object._id);
-        if (!id) {
-            throw 'ObjectId is missing or invalid.';
+        const id = Number(object._id);
+        if (!id && id !== 0) {
+            throw 'ID is missing or invalid.';
         }
         const updated = await this._model.findOneAndUpdate(
-            { _id: id as any },
+            { _id: id } as any,
             { $set: object },
             { runValidators: true, new: true }
         ).exec();
         if (!updated) {
-            throw `ObjectId ${id.toHexString()} does not exist in the collection.`;
+            throw `ID ${id} does not exist.`;
         }
         return updated;
     }

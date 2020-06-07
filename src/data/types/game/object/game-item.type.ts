@@ -1,10 +1,20 @@
-import { GameItemCategory, GamePlayerObject } from 'data/types';
+import { GameItemType } from './game-item-type.enum';
+import { GameObjectRegional } from './game-object-regional.type';
 
 /**
- * An in-game item owned by a player, including skill and ascention materials,
- * event items and currencies, and consumables.
+ * An inventory item.
+ * 
+ * Examples:
+ * - Servant upgrade materials
+ * - Event items and currencies
+ * - Other consumable items
  */
-export type GameItem = GamePlayerObject & {
+export type GameItem = GameObjectRegional & {
+
+    rarity: number;
+
     description?: string;
-    categories: GameItemCategory[];
+
+    categories: GameItemType[];
+
 }

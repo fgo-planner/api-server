@@ -1,4 +1,7 @@
-export enum GameItemCategory {
+/**
+ * Enumeration of inventory item types.
+ */
+export enum GameItemType {
     Master = 'Master',
     Enhancement = 'Enhancement',
     Skill = 'Skill',

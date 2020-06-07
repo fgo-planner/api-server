@@ -1,4 +1,4 @@
-import { GameItem, GameItemCategory } from 'data/types';
+import { GameItem, GameItemType } from 'data/types';
 import { Inject, Service } from 'typedi';
 import { GameItemService } from './game-item.service';
 import { GameObjectImportExportService } from './game-object-import-export.service';
@@ -54,7 +54,7 @@ export class GameItemImportExportService extends GameObjectImportExportService<G
             return [];
         }
         const categories = value.split(',');
-        return categories.filter(c => c in GameItemCategory);
+        return categories.filter(c => c in GameItemType);
     }
 
     protected async _validateAndWriteObject(object: GameItem) {

@@ -1,7 +1,8 @@
+import { ObjectId } from 'bson';
 import { GameAccountItem, GameAccountServant, GameRegion } from 'data/types';
 import { Entity } from 'internal';
 
-export type GameAccount = Entity & {
+export type GameAccount = Entity<ObjectId> & {
 
     userId: string;
 

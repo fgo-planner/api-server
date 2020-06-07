@@ -14,9 +14,11 @@ export enum GameCharacterClass {
     AlterEgo = 'AlterEgo',
     Avenger = 'Avenger',
     MoonCancer = 'MoonCancer',
+    Foreigner = 'Foreigner',
     BeastI = 'BeastI',
     BeastII = 'BeastII',
     BeastIIIR = 'BeastIIIR',
     BeastIIIL = 'BeastIIIL',
-    BeastFalse= 'BeastFalse'
+    BeastFalse = 'BeastFalse',
+    Unknown = 'Unknown'
 }

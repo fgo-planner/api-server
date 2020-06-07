@@ -16,25 +16,29 @@ const GameServantCardsHitsSchema = new Schema({
     buster: {
         type: [Number],
         required: true,
-        // TODO Validate that all values are integers and that there is at least one element.
+        // TODO Validate that all values are integers and that there is at least one
+        // element and that all the elements add up to 100.
         default: [100]
     },
     arts: {
         type: [Number],
         required: true,
-        // TODO Validate that all values are integers and that there is at least one element.
+        // TODO Validate that all values are integers and that there is at least one
+        // element and that all the elements add up to 100.
         default: [100]
     },
     quick: {
         type: [Number],
         required: true,
-        // TODO Validate that all values are integers and that there is at least one element.
+        // TODO Validate that all values are integers and that there is at least one
+        // element and that all the elements add up to 100.
         default: [100]
     },
     extra: {
         type: [Number],
         required: true,
-        // TODO Validate that all values are integers and that there is at least one element.
+        // TODO Validate that all values are integers and that there is at least one
+        // element and that all the elements add up to 100.
         default: [100]
     }
 }, { _id: false, storeSubdocValidationError: false });

@@ -27,7 +27,12 @@ export type GameSkillEffect = Entity<number> & {
     /**
      * The ID of the icon displayed for the effect.
      */
-    icon?: number;
+    iconId?: number;
+
+    /**
+     * Alternative ID of the icon displayed for the effect.
+     */
+    iconId2?: number;
 
     /**
      * The IDs of the `GameSkillBuff` items that applied by this skill effect.

@@ -15,3 +15,6 @@ export * from './game/object/game-servant-noble-phantasm.schema';
 export * from './game/object/game-servant-upgrade.schema';
 export * from './game/object/game-spirit-origin-collection.schema';
 export * from './game/object/game-spirit-origin.schema';
+export * from './game/skill/game-skill-buff.schema';
+export * from './game/skill/game-skill-effect.schema';
+export * from './game/skill/game-skill.schema';

@@ -18,7 +18,12 @@ export type GameSkillBuff = Entity<number> & {
     /**
      * The ID of the icon displayed for the buff.
      */
-    icon: number;
+    iconId?: number;
+
+    /**
+     * Alternative ID of the icon displayed for the buff.
+     */
+    iconId2?: number;
 
     // TODO Add other properties from Atlas Academy API data.
 

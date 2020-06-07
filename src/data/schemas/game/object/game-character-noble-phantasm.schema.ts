@@ -28,7 +28,8 @@ export const GameCharacterNoblePhantasmSchemaDefinition: SchemaDefinition = {
     hits: {
         type: [Number],
         required: true,
-        // TODO Validate that all values are integers and that there is at least one element.
+        // TODO Validate that all values are integers and that there is at least one
+        // element and that all the elements add up to 100.
         default: [100]
     }
 };

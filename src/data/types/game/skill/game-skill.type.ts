@@ -1,4 +1,4 @@
-import { Entity, Range } from 'internal';
+import { Entity } from 'internal';
 import { GameSkillRank } from './game-skill-rank.enum';
 import { GameSkillType } from './game-skill-type.enum';
 
@@ -19,17 +19,16 @@ export type GameSkill = Entity<number> & {
     nameJp?: string;
 
     /**
-     * The skill's rank. The value data type depends on the skill type:
-     * 
-     * - `undefined` for skill types that are not ranked.
-     * 
-     * - A `GameSkillRank` constant for ranked skill types. If the skill itself is
-     * not ranked, then the value should be set to `GameSkillRank.None`.
-     * 
-     * - A `Range<GameSkillRank>` object for skills that ranged rank. Currently,
-     * this only applies to some noble phantasms.
+     * The skill's rank. For skills that have a ranged rank (noble phantasms), this
+     * is the lower bound of the range.
      */
-    rank?: GameSkillRank | Range<GameSkillRank>;
+    rank?: GameSkillRank;
+
+    /**
+     * The upper bound of a rank range. This should only be populated if the skill
+     * has a ranged rank. Otherwise, the `rank` field should be used instead.
+     */
+    rankUpper?: GameSkillRank;
 
     // TODO Add formatted name (name + rank). This will be a calculated transient value.
 
@@ -37,7 +36,15 @@ export type GameSkill = Entity<number> & {
 
     descriptionJp?: string;
 
-    icon?: number;
+    /**
+     * The ID of the icon displayed for the skill.
+     */
+    iconId?: number;
+
+    /**
+     * Alternative ID of the icon displayed for the skill.
+     */
+    iconId2?: number;
 
     /**
      * The IDs of the `GameSkillEffect` items that apply to this skill. Each item

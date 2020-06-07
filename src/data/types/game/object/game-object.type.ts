@@ -1,4 +1,5 @@
 import { Entity } from 'internal';
+import { ExternalLink } from '../../external/external-link.type';
 
 /**
  * Base type that represents an in-game object.
@@ -25,13 +26,7 @@ export type GameObject = Entity<number> & {
 
         tags: string[];
 
-        links: {
-
-            label: string;
-
-            url: string;
-
-        }[];
+        links: ExternalLink[];
 
     };
 

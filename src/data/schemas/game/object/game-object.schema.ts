@@ -1,20 +1,6 @@
-import { SchemaDefinition, Schema } from 'mongoose';
+import { Schema, SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
-
-/**
- * Mongoose schema for the `GameObject.metadata.links` objects.
- */
-const GameObjectMetadataLinkSchema = new Schema({
-    label: {
-        type: String,
-        required: true
-    },
-    url: {
-        type: String,
-        required: true,
-        // TODO Add validation
-    }
-}, { _id: false, storeSubdocValidationError: false });
+import { ExternalLinkSchema } from '../../external/external-link.schema';
 
 /**
  * Mongoose schema definition for the `GameObject.metadata` property.
@@ -34,7 +20,7 @@ export const GameObjectMetadataSchemaDefinition: SchemaDefinition = {
         index: true
     },
     links: {
-        type: [GameObjectMetadataLinkSchema],
+        type: [ExternalLinkSchema],
         required: true,
         default: []
     }

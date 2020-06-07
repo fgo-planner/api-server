@@ -1,3 +1,6 @@
+export * from './external/person/character-voice.model';
+export * from './external/person/illustrator.model';
+export * from './external/person/person.model';
 export * from './game/account/game-account.model';
 export * from './game/event/game-event.model';
 export { GameCharacterModel } from './game/object/game-character.model';

@@ -1,3 +1,7 @@
+export * from './external/person/character-voice.type';
+export * from './external/person/illustrator.type';
+export * from './external/person/person.type';
+export * from './external/external-link.type';
 export * from './game/account/game-account.type';
 export * from './game/account/game-account-item.type';
 export * from './game/account/game-account-servant.type';

@@ -10,7 +10,7 @@ export type GameSkillEffectDocument = GameSkillEffect & Document;
 type GameSkillEffectModel = Model<GameSkillEffectDocument>;
 
 /**
- * Mongoose schema for the `GameSkillEffect` model.
+ * Mongoose schema for the `GameSkillEffect` type.
  */
 const GameSkillEffectSchema = new Schema(GameSkillEffectSchemaDefinition, { timestamps: true });
 

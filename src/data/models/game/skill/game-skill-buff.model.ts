@@ -10,7 +10,7 @@ export type GameSkillBuffDocument = GameSkillBuff & Document;
 type GameSkillBuffModel = Model<GameSkillBuffDocument>;
 
 /**
- * Mongoose schema for the `GameSkillBuff` model.
+ * Mongoose schema for the `GameSkillBuff` type.
  */
 const GameSkillBuffSchema = new Schema(GameSkillBuffSchemaDefinition, { timestamps: true });
 

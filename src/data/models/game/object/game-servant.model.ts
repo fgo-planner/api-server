@@ -37,7 +37,7 @@ const Statics = {
 };
 
 /**
- * Mongoose schema for the `GameServant` model.
+ * Mongoose schema for the `GameServant` type.
  */
 const GameServantSchema = new Schema(GameServantSchemaDefinition, { timestamps: true });
 

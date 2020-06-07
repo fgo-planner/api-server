@@ -52,7 +52,7 @@ const Statics = {
 };
 
 /**
- * Mongoose schema for the `GameItem` model.
+ * Mongoose schema for the `GameItem` type.
  */
 const GameItemSchema = new Schema(GameItemSchemaDefinition, { timestamps: true });
 

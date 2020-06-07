@@ -27,7 +27,7 @@ const Statics = {
 };
 
 /**
- * Mongoose schema for the `GameCraftEssence` model.
+ * Mongoose schema for the `GameCraftEssence` type.
  */
 const GameCraftEssenceSchema = new Schema(GameCraftEssenceSchemaDefinition, { timestamps: true });
 

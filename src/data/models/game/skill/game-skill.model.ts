@@ -26,7 +26,7 @@ const Statics = {
 };
 
 /**
- * Mongoose schema for the `GameSkill` model.
+ * Mongoose schema for the `GameSkill` type.
  */
 const GameSKillSchema = new Schema(GameSkillSchemaDefinition, { timestamps: true });
 

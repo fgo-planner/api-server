@@ -278,7 +278,7 @@ const GameAccountSchemaDefinition: SchemaDefinition = {
 };
 
 /**
- * Mongoose schema for the `GameAccount` model.
+ * Mongoose schema for the `GameAccount` type.
  */
 const GameAccountSchema = new Schema(GameAccountSchemaDefinition, { timestamps: true });
 

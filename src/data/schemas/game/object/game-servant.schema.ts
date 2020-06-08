@@ -360,9 +360,8 @@ export const GameServantSchemaDefinition: SchemaDefinition = {
         default: {}
     },
     activeSkills: {
-        type: GameCharacterActiveSkillsSchema,
-        required: true,
-        default: {}
+        type: GameCharacterActiveSkillsSchema
+        // TODO Validate that this is present if the servant is marked as playable.
     },
     noblePhantasm: {
         type: GameServantNoblePhantasmPropSchema,

@@ -1,8 +1,16 @@
 import express, { Application, NextFunction, Request, Response } from 'express';
+import multer from 'multer';
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 export default (app: Application) => {
     app.set('port', process.env.PORT || 3000);
-    app.use(express.json(), express.text());
+    app.use(
+        express.json(),
+        express.text(),
+        upload.single('file')
+    );
 
     // CORS
     app.use((req: Request, res: Response, next: NextFunction) => {

@@ -331,6 +331,17 @@ export const GameServantSchemaDefinition: SchemaDefinition = {
         ...GameSpiritOriginCollectionSchemaDefinition.rarity,
         min: 0 // Rarity for servants ranges from 0 thru 5.
     },
+    summonable: {
+        type: Boolean, 
+        required: true,
+        default: false
+    },
+    playable: {
+        type: Boolean, 
+        required: true,
+        default: true
+        // TODO Index this?
+    },
     cost: {
         type: Number,
         required: true,

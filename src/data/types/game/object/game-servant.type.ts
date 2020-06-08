@@ -9,6 +9,10 @@ import { GameSpiritOriginCollection } from './game-spirit-origin-collection.type
 
 export type GameServant = GameSpiritOriginCollection & GameCharacter & {
 
+    summonable: boolean;
+
+    playable: boolean;
+
     cost: number;
 
     cards: {
@@ -29,7 +33,7 @@ export type GameServant = GameSpiritOriginCollection & GameCharacter & {
 
     };
 
-    activeSkills: {
+    activeSkills?: {
 
         skill1: {
 

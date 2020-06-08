@@ -2,11 +2,10 @@ import { GameServantDeck } from 'data/types';
 import { Schema, SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
 import { GameCharacterSchemaDefinition } from './game-character.schema';
-import { GameObjectSkillLevelableSchema, GameObjectSkillLevelableSchemaDefinition } from './game-object-skill-levelable.schema';
 import { GameServantUpgradeSchema } from './game-servant-upgrade.schema';
 import { GameSpiritOriginCollectionSchemaDefinition } from './game-spirit-origin-collection.schema';
 import { GameObjectSkillUnlockableSchemaDefinition } from './game-object-skill-unlockable.schema';
-import { GameObjectSkillSchema } from './game-object-skill.schema';
+import { GameObjectSkillSchema, GameObjectSkillSchemaDefinition } from './game-object-skill.schema';
 import { GameServantNoblePhantasmSchema, GameServantNoblePhantasmSchemaDefinition } from './game-servant-noble-phantasm.schema';
 
 /**
@@ -61,11 +60,11 @@ const GameServantCardsSchema = new Schema({
 }, { _id: false, storeSubdocValidationError: false });
 
 /**
- * Mongoose schema for the intersection of the `GameObjectSkillLevelable` and
+ * Mongoose schema for the intersection of the `GameObjectSkill` and
  * `GameObjectSkillUnlockable` types.
  */
-const GameObjectSkillLevelableAndUnlockableSchema = new Schema({
-    ...GameObjectSkillLevelableSchemaDefinition,
+const GameServantSkillUnlockableSchema = new Schema({
+    ...GameObjectSkillSchemaDefinition,
     ...GameObjectSkillUnlockableSchemaDefinition
 }, { _id: false, storeSubdocValidationError: false });
 
@@ -76,12 +75,12 @@ const GameObjectSkillLevelableAndUnlockableSchema = new Schema({
  */
 const GameCharacterActiveSkill1Schema = new Schema({
     base: {
-        type: GameObjectSkillLevelableSchema,
+        type: GameObjectSkillSchema,
         required: true,
         default: {} // TODO Populate this.
     },
     upgrade: {
-        type: GameObjectSkillLevelableAndUnlockableSchema
+        type: GameServantSkillUnlockableSchema
     }
 }, { _id: false, storeSubdocValidationError: false });
 
@@ -92,12 +91,12 @@ const GameCharacterActiveSkill1Schema = new Schema({
  */
 const GameCharacterActiveSkill2And3Schema = new Schema({
     base: {
-        type: GameObjectSkillLevelableAndUnlockableSchema,
+        type: GameServantSkillUnlockableSchema,
         required: true,
         default: {} // TODO Populate this.
     },
     upgrade: {
-        type: GameObjectSkillLevelableAndUnlockableSchema
+        type: GameServantSkillUnlockableSchema
     }
 }, { _id: false, storeSubdocValidationError: false });
 

@@ -37,6 +37,11 @@ export type GameSkill = Entity<number> & {
     descriptionJp?: string;
 
     /**
+     * Base cooldown in number of turns, if applicable.
+     */
+    cooldown?: number;
+
+    /**
      * The ID of the icon displayed for the skill.
      */
     iconId?: number;

@@ -1,5 +1,4 @@
 import { GameCharacter } from './game-character.type';
-import { GameObjectSkillLevelable } from './game-object-skill-levelable.type';
 import { GameObjectSkillUnlockable } from './game-object-skill-unlockable.type';
 import { GameObjectSkill } from './game-object-skill.type';
 import { GameServantAscension } from './game-servant-ascension.type';
@@ -34,25 +33,25 @@ export type GameServant = GameSpiritOriginCollection & GameCharacter & {
 
         skill1: {
 
-            base: GameObjectSkillLevelable;
+            base: GameObjectSkill;
 
-            upgrade?: GameObjectSkillLevelable & GameObjectSkillUnlockable;
+            upgrade?: GameObjectSkill & GameObjectSkillUnlockable;
 
         };
 
         skill2: {
 
-            base: GameObjectSkillLevelable & GameObjectSkillUnlockable;
+            base: GameObjectSkill & GameObjectSkillUnlockable;
 
-            upgrade?: GameObjectSkillLevelable & GameObjectSkillUnlockable;
+            upgrade?: GameObjectSkill & GameObjectSkillUnlockable;
 
         };
 
         skill3: {
 
-            base: GameObjectSkillLevelable & GameObjectSkillUnlockable;
+            base: GameObjectSkill & GameObjectSkillUnlockable;
 
-            upgrade?: GameObjectSkillLevelable & GameObjectSkillUnlockable;
+            upgrade?: GameObjectSkill & GameObjectSkillUnlockable;
 
         };
 

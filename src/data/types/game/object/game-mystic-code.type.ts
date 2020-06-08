@@ -1,5 +1,5 @@
 import { GameObjectRegional } from './game-object-regional.type';
-import { GameObjectSkillLevelable } from './game-object-skill-levelable.type';
+import { GameObjectSkill } from './game-object-skill.type';
 
 /**
  * A mystic code.
@@ -10,11 +10,11 @@ export type GameMysticCode = GameObjectRegional & {
 
     descriptionJp?: string;
 
-    skill1: GameObjectSkillLevelable;
+    skill1: GameObjectSkill;
 
-    skill2: GameObjectSkillLevelable;
+    skill2: GameObjectSkill;
 
-    skill3: GameObjectSkillLevelable;
+    skill3: GameObjectSkill;
 
     exp: number[];
 

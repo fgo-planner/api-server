@@ -31,7 +31,6 @@ export * from './game/object/game-npc.type';
 export * from './game/object/game-object-regional.type';
 export * from './game/object/game-object-skill-effect-values.type';
 export * from './game/object/game-object-skill-effect.type';
-export * from './game/object/game-object-skill-levelable.type';
 export * from './game/object/game-object-skill-unlockable.type';
 export * from './game/object/game-object-skill.type';
 export * from './game/object/game-object.type';

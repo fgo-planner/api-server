@@ -45,6 +45,16 @@ export const GameSkillSchemaDefinition: SchemaDefinition = {
     descriptionJp: {
         type: String
     },
+    baseCooldown: {
+        type: Number,
+        required: true,
+        min: 3,
+        validate: {
+            validator: Number.isInteger,
+            message: MongooseValidationStrings.NumberInteger
+        },
+        default: 3
+    },
     iconId: {
         type: Number,
         min: 0,

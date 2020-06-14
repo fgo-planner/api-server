@@ -364,9 +364,8 @@ export const GameServantSchemaDefinition: SchemaDefinition = {
         // TODO Validate that this is present if the servant is marked as playable.
     },
     noblePhantasm: {
-        type: GameServantNoblePhantasmPropSchema,
-        required: true,
-        default: {}
+        type: GameServantNoblePhantasmPropSchema
+        // TODO Validate that this is present if the servant is marked as playable.
     },
     passiveSkills: {
         type: [GameObjectSkillSchema],

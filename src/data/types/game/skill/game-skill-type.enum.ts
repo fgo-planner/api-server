@@ -5,9 +5,7 @@
 export enum GameSkillType {
     ServantActive = 'ServantActive',
     ServantPassive = 'ServantPassive',
-    ServantNoblePhantasm = 'ServantNoblePhantasm',
     NpcSkill = 'NpcSkill',
-    NpcNoblePhantasm = 'NpcNoblePhantasm',
     CraftEssence = 'CraftEssence',
     MysticCode = 'MysticCode',
     CommandCode = 'CommandCode'

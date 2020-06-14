@@ -7,7 +7,6 @@ import { GameObjectSkillEffect } from './game-object-skill-effect.type';
  * Examples:
  * - Servant skills (active and passive)
  * - Mystic code skills
- * - Noble phantasms
  * - Craft essence effects
  * - Command code effects
  */

@@ -30,15 +30,6 @@ export const GameSkillSchemaDefinition: SchemaDefinition = {
         type: String,
         // TODO Index this?
     },
-    rank: {
-        type: String,
-        enum: Object.keys(GameSkillRank)
-    },
-    rankUpper: {
-        type: String,
-        enum: Object.keys(GameSkillRank)
-        // TODO Add mongoose middleware validation to ensure that if this is populated, then `rank` is also populated.
-    },
     description: {
         type: String
     },

@@ -19,16 +19,9 @@ export type GameSkill = Entity<number> & {
     nameJp?: string;
 
     /**
-     * The skill's rank. For skills that have a ranged rank (noble phantasms), this
-     * is the lower bound of the range.
+     * The skill's rank.
      */
     rank?: GameSkillRank;
-
-    /**
-     * The upper bound of a rank range. This should only be populated if the skill
-     * has a ranged rank. Otherwise, the `rank` field should be used instead.
-     */
-    rankUpper?: GameSkillRank;
 
     // TODO Add formatted name (name + rank). This will be a calculated transient value.
 

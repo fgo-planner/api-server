@@ -1,4 +1,4 @@
-import { GameSkillRank, GameSkillType } from 'data/types';
+import { GameSkillType } from 'data/types';
 import { SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
 import { NumberUtils } from 'utils';

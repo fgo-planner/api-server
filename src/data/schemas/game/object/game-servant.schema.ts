@@ -1,12 +1,13 @@
 import { GameServantDeck, GameServantGrowthRate } from 'data/types';
 import { Schema, SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
+import { NumberUtils } from 'utils';
 import { GameCharacterSchemaDefinition } from './game-character.schema';
-import { GameServantUpgradeSchema } from './game-servant-upgrade.schema';
-import { GameSpiritOriginCollectionSchemaDefinition } from './game-spirit-origin-collection.schema';
 import { GameObjectSkillUnlockableSchemaDefinition } from './game-object-skill-unlockable.schema';
 import { GameObjectSkillSchema, GameObjectSkillSchemaDefinition } from './game-object-skill.schema';
 import { GameServantNoblePhantasmSchema, GameServantNoblePhantasmSchemaDefinition } from './game-servant-noble-phantasm.schema';
+import { GameServantUpgradeSchema } from './game-servant-upgrade.schema';
+import { GameSpiritOriginCollectionSchemaDefinition } from './game-spirit-origin-collection.schema';
 
 /**
  * Mongoose schema for the `GameServantUpgrade.cards.hits` property.
@@ -230,6 +231,13 @@ const GameServantAscensionsSchema = new Schema({
  * Mongoose schema for the `GameServant.bond` property.
  */
 const GameServantBondSchema = new Schema({
+    bondId: {
+        type: Number,
+        validate: {
+            validator: NumberUtils.isNullOrInteger,
+            message: MongooseValidationStrings.NumberInteger
+        }
+    },
     max: {
         type: Number,
         required: true,
@@ -382,8 +390,7 @@ export const GameServantSchemaDefinition: SchemaDefinition = {
     },
     ascensions: {
         type: GameServantAscensionsSchema,
-        required: true,
-        default: {}
+        // TODO Validate that this is present if the servant is marked as summonable.
     },
     bond: {
         type: GameServantBondSchema,

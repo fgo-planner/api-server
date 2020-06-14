@@ -94,7 +94,7 @@ export type GameServant = GameSpiritOriginCollection & GameCharacter & {
 
     passiveSkills: GameObjectSkill[];
 
-    ascensions: {
+    ascensions?: {
 
         ascension1: GameServantAscension;
 
@@ -107,6 +107,8 @@ export type GameServant = GameSpiritOriginCollection & GameCharacter & {
     };
 
     bond: {
+
+        bondId?: number;
 
         max: number;
 

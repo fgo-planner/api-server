@@ -1,25 +1,31 @@
 import { GameServant, GameNpc, GameCraftEssence, GameCommandCode, GameMysticCode, GameEnhancementCard, GameItem, GameSkill, GameSkillEffect, GameSkillBuff } from 'data/types';
 
-export type GameDataImportParseResult = {
+export class GameDataImportParseResult {
     
-    skillBuffs?: GameSkillBuff[];
+    readonly logs: any; // TODO Implement this
 
-    skillEffects?: GameSkillEffect[];
+    readonly skillBuffs: GameSkillBuff[] = [];
+
+    readonly skillEffects: GameSkillEffect[] = [];
     
-    skills?: GameSkill[];
+    readonly skills: GameSkill[] = [];
 
-    items?: GameItem[];
+    readonly items: GameItem[] = [];
 
-    servants?: GameServant[];
+    readonly servants: GameServant[] = [];
 
-    npc?: GameNpc[];
+    readonly npc: GameNpc[] = [];
 
-    craftEssences?: GameCraftEssence[];
+    readonly craftEssences: GameCraftEssence[] = [];
 
-    enhancementCards?: GameEnhancementCard[];
+    readonly enhancementCards: GameEnhancementCard[] = [];
 
-    commandCodes?: GameCommandCode[];
+    readonly commandCodes: GameCommandCode[] = [];
 
-    mysticCodes?: GameMysticCode[];
+    readonly mysticCodes: GameMysticCode[] = [];
+
+    constructor(public readonly parserName: string) {
+
+    }
 
 }

@@ -1,5 +1,5 @@
 /**
- * Item from the `mstCombineLimit` field.
+ * An item from the `mstCombineLimit` collection.
  */
 export type KazemaiGameDataMstCombineLimit = {
     itemIds: number[];
@@ -10,7 +10,7 @@ export type KazemaiGameDataMstCombineLimit = {
 };
 
 /**
- * Item from the `mstCombineSkill` field.
+ * An item from the `mstCombineSkill` collection.
  */
 export type KazemaiGameDataMstCombineSkill = {
     itemIds: number[];
@@ -21,7 +21,7 @@ export type KazemaiGameDataMstCombineSkill = {
 };
 
 /**
- * Item from the `mstCv` field.
+ * An item from the `mstCv` collection.
  */
 export type KazemaiGameDataMstCv = {
     id: number;
@@ -29,7 +29,19 @@ export type KazemaiGameDataMstCv = {
 };
 
 /**
- * Item from the `mstIllustrator` field.
+ * An item from the `mstFriendship` collection.
+ */
+export type KazemaiGameDataMstFriendship = {
+    itemIds: [];
+    itemNums: [];
+    id: number;
+    rank: number;
+    friendship: number;
+    qp: number;
+};
+
+/**
+ * An item from the `mstIllustrator` collection.
  */
 export type KazemaiGameDataMstIllustrator = {
     id: number;
@@ -37,7 +49,7 @@ export type KazemaiGameDataMstIllustrator = {
 };
 
 /**
- * Item from the `mstItem` field.
+ * An item from the `mstItem` collection.
  */
 export type KazemaiGameDataMstItem = {
     script: any;
@@ -52,7 +64,7 @@ export type KazemaiGameDataMstItem = {
 };
 
 /**
- * Item from the `mstSkill` field.
+ * An item from the `mstSkill` collection.
  */
 export type KazemaiGameDataMstSkill = {
     id: number;
@@ -63,7 +75,7 @@ export type KazemaiGameDataMstSkill = {
 };
 
 /**
- * Item from the `mstSkillDetail` field.
+ * An item from the `mstSkillDetail` collection.
  */
 export type KazemaiGameDataMstSkillDetail = {
     id: number;
@@ -71,7 +83,7 @@ export type KazemaiGameDataMstSkillDetail = {
 };
 
 /**
- * Item from the `mstSvt` field.
+ * An item from the `mstSvt` collection.
  */
 export type KazemaiGameDataMstSvt = {
     relateQuestIds: number[];
@@ -112,7 +124,7 @@ export type KazemaiGameDataMstSvt = {
 };
 
 /**
- * Item from the `mstSvtCard` field.
+ * An item from the `mstSvtCard` collection.
  */
 export type KazemaiGameDataMstSvtCard = {
     normalDamage: number[];
@@ -121,7 +133,7 @@ export type KazemaiGameDataMstSvtCard = {
 };
 
 /**
- * Item from the `mstSvtLimit` field.
+ * An item from the `mstSvtLimit` collection.
  */
 export type KazemaiGameDataMstSvtLimit = {
     svtId: number;
@@ -145,7 +157,7 @@ export type KazemaiGameDataMstSvtLimit = {
 };
 
 /**
- * Item from the `mstSvtSkill` field.
+ * An item from the `mstSvtSkill` collection.
  */
 export type KazemaiGameDataMstSvtSkill = {
     strengthStatus: number;
@@ -162,7 +174,7 @@ export type KazemaiGameDataMstSvtSkill = {
 };
 
 /**
- * Item from the `mstSvtTreasureDevice` field.
+ * An item from the `mstSvtTreasureDevice` collection.
  */
 export type KazemaiGameDataMstSvtTreasureDevice = {
     damage: number[];
@@ -180,7 +192,7 @@ export type KazemaiGameDataMstSvtTreasureDevice = {
 };
 
 /**
- * Item from the `mstTreasureDevice` field.
+ * An item from the `mstTreasureDevice` collection.
  */
 export type KazemaiGameDataMstTreasureDevice = {
     script: any;
@@ -194,7 +206,7 @@ export type KazemaiGameDataMstTreasureDevice = {
 };
 
 /**
- * Item from the `mstTreasureDeviceDetail` field.
+ * An item from the `mstTreasureDeviceDetail` collection.
  */
 export type KazemaiGameDataMstTreasureDeviceDetail = {
     id: number;
@@ -227,7 +239,7 @@ export type KazemaiGameData = {
     mstEventCampaignRelease: any[];
     mstEventEquipSkillRelease: any[];
     mstEventMission: any[];
-    mstFriendship: any[];
+    mstFriendship: KazemaiGameDataMstFriendship[];
     mstGift: any[];
     mstIllustrator: KazemaiGameDataMstIllustrator[];
     mstItem: KazemaiGameDataMstItem[];

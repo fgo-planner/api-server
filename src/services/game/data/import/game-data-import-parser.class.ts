@@ -9,11 +9,11 @@ export abstract class GameDataImportParser<IN> {
 
     protected readonly _result: GameDataImportParseResult;
 
-    constructor(protected readonly _data: IN) {
+    constructor(protected readonly _data: IN, parserName: string) {
         if (typeof _data !== 'object') {
             // TODO Throw exception
         }
-        this._result = this._instantiateResultContainer();
+        this._result = new GameDataImportParseResult(parserName);
     }
 
     parse(): GameDataImportParseResult {
@@ -26,20 +26,5 @@ export abstract class GameDataImportParser<IN> {
     }
 
     protected abstract _parse(): void;
-
-    private _instantiateResultContainer(): GameDataImportParseResult {
-        return {
-            skillBuffs: [],
-            skillEffects: [],
-            skills: [],
-            items: [],
-            servants: [],
-            npc: [],
-            craftEssences: [],
-            enhancementCards: [],
-            commandCodes: [],
-            mysticCodes: []
-        };
-    }
 
 }

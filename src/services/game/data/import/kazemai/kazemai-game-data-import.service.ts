@@ -9,7 +9,7 @@ export class KazemaiGameDataImportService {
     import(data: any, options = {}) {
         const parser = new KazemaiGameDataParser(data);
         const result = parser.parse();
-        return result.servants.slice(0, 10);
+        return result.servants;
     }
 
 }

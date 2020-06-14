@@ -3,6 +3,7 @@ import { GameObjectSkillUnlockable } from './game-object-skill-unlockable.type';
 import { GameObjectSkill } from './game-object-skill.type';
 import { GameServantAscension } from './game-servant-ascension.type';
 import { GameServantDeck } from './game-servant-deck.enum';
+import { GameServantGrowthRate } from './game-servant-growth-rate.enum';
 import { GameServantNoblePhantasm } from './game-servant-noble-phantasm.type';
 import { GameServantUpgrade } from './game-servant-upgrade.type';
 import { GameSpiritOriginCollection } from './game-spirit-origin-collection.type';
@@ -15,6 +16,8 @@ export type GameServant = GameSpiritOriginCollection & GameCharacter & {
     
     cost: number;
     
+    growthRate: GameServantGrowthRate;
+
     // TODO Add NP gain
     
     cards: {

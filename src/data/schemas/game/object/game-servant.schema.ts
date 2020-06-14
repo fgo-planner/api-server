@@ -1,4 +1,4 @@
-import { GameServantDeck } from 'data/types';
+import { GameServantDeck, GameServantGrowthRate } from 'data/types';
 import { Schema, SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
 import { GameCharacterSchemaDefinition } from './game-character.schema';
@@ -352,6 +352,13 @@ export const GameServantSchemaDefinition: SchemaDefinition = {
             message: MongooseValidationStrings.NumberInteger
         },
         default: 0,
+        index: true
+    },
+    growthRate: {
+        type: String,
+        enum: Object.keys(GameServantGrowthRate),
+        required: true,
+        default: GameServantGrowthRate.Linear,
         index: true
     },
     cards: {

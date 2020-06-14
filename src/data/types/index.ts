@@ -36,6 +36,7 @@ export * from './game/object/game-object-skill.type';
 export * from './game/object/game-object.type';
 export * from './game/object/game-servant-ascension.type';
 export * from './game/object/game-servant-deck.enum';
+export * from './game/object/game-servant-growth-rate.enum';
 export * from './game/object/game-servant-noble-phantasm-effect.type';
 export * from './game/object/game-servant-noble-phantasm.type';
 export * from './game/object/game-servant-upgrade.type';

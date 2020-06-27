@@ -1,7 +1,7 @@
 {
-  "name": "fgo-tracker-server",
+  "name": "fgo-servant-planner-server",
   "version": "0.0.1",
-  "description": "Backend server for the FGO account resource tracker project.",
+  "description": "Backend server for the FGO servant planner project.",
   "scripts": {
     "start": "npm run serve",
     "build": "npm run build-ts && npm run lint",
@@ -18,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alvinquach/fgo-tracker-server.git"
+    "url": "git+https://github.com/alvinquach/fgo-servant-planner-server.git"
   },
   "author": "Alvin Quach",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/alvinquach/fgo-tracker-server/issues"
+    "url": "https://github.com/alvinquach/fgo-ervant-planner-server/issues"
   },
-  "homepage": "https://github.com/alvinquach/fgo-tracker-server#readme",
+  "homepage": "https://github.com/alvinquach/fgo-ervant-planner-server#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "connect-mongo": "^3.2.0",

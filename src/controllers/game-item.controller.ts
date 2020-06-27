@@ -20,7 +20,7 @@ export class GameItemController {
         );
     }
 
-    @GetMapping(UserAccessLevel.Admin)
+    @GetMapping()
     getItems(req: Request, res: Response) {
         this._gameItemService.findAll().then(
             items => res.send(items),
@@ -28,10 +28,10 @@ export class GameItemController {
         );
     }
 
-    @GetMapping('/search')
-    searchItems(req: Request, res: Response) {
+    @GetMapping('/page', UserAccessLevel.Admin)
+    getItemsPage(req: Request, res: Response) {
         const pagination = PaginationUtils.parse(req.query);
-        this._gameItemService.search(req.query, pagination).then(
+        this._gameItemService.findPage(pagination).then(
             data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
             err => res.status(404).send(err)
         );
@@ -39,7 +39,8 @@ export class GameItemController {
 
     @GetMapping('/:id')
     getItem(req: Request, res: Response) {
-        this._gameItemService.findById(req.params.id).then(
+        const id = Number(req.params.id);
+        this._gameItemService.findById(id).then(
             item => res.send(item),
             err => res.status(404).send(err)
         );

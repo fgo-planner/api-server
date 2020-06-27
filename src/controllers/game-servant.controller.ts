@@ -29,9 +29,9 @@ export class GameServantController {
     }
 
     @GetMapping('/search')
-    searchServants(req: Request, res: Response) {
+    getServantsPage(req: Request, res: Response) {
         const pagination = PaginationUtils.parse(req.query);
-        this._gameServantService.search(req.query, pagination).then(
+        this._gameServantService.findPage(pagination).then(
             data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
             err => res.status(404).send(err)
         );
@@ -39,7 +39,8 @@ export class GameServantController {
 
     @GetMapping('/:id')
     getServant(req: Request, res: Response) {
-        this._gameServantService.findById(req.params.id).then(
+        const id = Number(req.params.id);
+        this._gameServantService.findById(id).then(
             servant => res.send(servant),
             err => res.status(404).send(err)
         );

@@ -1,5 +1,5 @@
 import { ObjectId } from 'bson';
-import { GameAccount, GameAccountServantSkill, GameRegion } from 'data/types';
+import { GameAccount, GameAccountServantSkill } from 'data/types';
 import mongoose, { Document, Model, Schema, SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
 import { NumberUtils } from 'utils';
@@ -247,13 +247,6 @@ const GameAccountSchemaDefinition: SchemaDefinition = {
         },
         index: true
         // TODO Make unique?
-    },
-    gameRegion: {
-        type: String,
-        enum: Object.keys(GameRegion),
-        required: true,
-        default: GameRegion.NA,
-        index: true
     },
     experience: {
         type: Number,

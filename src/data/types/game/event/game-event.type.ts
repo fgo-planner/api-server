@@ -1,6 +1,6 @@
 import { ObjectId } from 'bson';
 import { GameEventActivity } from 'data/types';
-import { Entity } from 'internal';
+import { Entity } from '../../entity.type';
 
 export type GameEvent = Entity<ObjectId> & {
     name: string;

@@ -24,6 +24,9 @@
       "data/models": [
         "src/data/models"
       ],
+      "dto": [
+        "src/dto"
+      ],
       "internal": [
         "src/internal"
       ],

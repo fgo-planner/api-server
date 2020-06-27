@@ -1,6 +1,6 @@
-import { Entity } from 'internal';
-import { GameItemType } from './game-item-type.enum';
+import { Entity } from '../../entity.type';
 import { GameItemBackground } from './game-item-background.enum';
+import { GameItemType } from './game-item-type.enum';
 
 /**
  * An inventory item.

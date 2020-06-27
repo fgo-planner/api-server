@@ -6,6 +6,6 @@
  */
 export type Entity<ID> = {
 
-    _id?: ID | string;
+    _id?: ID;
     
 }

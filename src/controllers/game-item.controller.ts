@@ -24,7 +24,7 @@ export class GameItemController {
     getItems(req: Request, res: Response) {
         this._gameItemService.findAll().then(
             items => res.send(items),
-            err => res.status(404).send(err)
+            err => res.status(400).send(err)
         );
     }
 
@@ -41,8 +41,13 @@ export class GameItemController {
     getItem(req: Request, res: Response) {
         const id = Number(req.params.id);
         this._gameItemService.findById(id).then(
-            item => res.send(item),
-            err => res.status(404).send(err)
+            item => {
+                if (item) {
+                    return res.send(item);
+                }
+                res.status(404).send(`Item ID ${id} could not be found.`);
+            },
+            err => res.status(400).send(err)
         );
     }
 
@@ -50,7 +55,12 @@ export class GameItemController {
     updateItem(req: Request, res: Response) {
         const item = req.body;
         this._gameItemService.update(item).then(
-            updated => res.send(updated),
+            updated => {
+                if (updated) {
+                    return res.send(updated);
+                }
+                res.status(404).send(`Item ID ${item._id} does not exist.`);
+            },
             err => res.status(400).send(err)
         );
     }

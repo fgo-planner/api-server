@@ -1,6 +1,6 @@
 import { ObjectId } from 'bson';
 import { GameAccountItem, GameAccountServant } from 'data/types';
-import { Entity } from 'internal';
+import { Entity } from '../../entity.type';
 
 export type GameAccount = Entity<ObjectId> & {
 

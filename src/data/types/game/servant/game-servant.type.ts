@@ -1,4 +1,4 @@
-import { Entity } from 'internal';
+import { Entity } from '../../entity.type';
 import { ExternalLink } from '../../external/external-link.type';
 import { GameServantAttribute } from './game-servant-attribute.enum';
 import { GameServantClass } from './game-servant-class.enum';
@@ -74,7 +74,7 @@ export type GameServant = Entity<number> & {
 
     };
 
-    ascensionMaterials: {
+    ascensionMaterials?: {
 
         1: GameServantEnhancement;
 

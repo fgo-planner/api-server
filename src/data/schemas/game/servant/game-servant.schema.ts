@@ -243,9 +243,7 @@ export const GameServantSchemaDefinition: SchemaDefinition = {
         default: {}
     },
     ascensionMaterials: {
-        type: GameServantAscensionMaterialsSchema,
-        required: true,
-        default: {}
+        type: GameServantAscensionMaterialsSchema
     },
     metadata: {
         type: GameServantMetadataSchema,

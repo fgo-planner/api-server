@@ -24,7 +24,7 @@ export class GameServantController {
     getServants(req: Request, res: Response) {
         this._gameServantService.findAll().then(
             servants => res.send(servants),
-            err => res.status(404).send(err)
+            err => res.status(400).send(err)
         );
     }
 
@@ -33,7 +33,7 @@ export class GameServantController {
         const pagination = PaginationUtils.parse(req.query);
         this._gameServantService.findPage(pagination).then(
             data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
-            err => res.status(404).send(err)
+            err => res.status(400).send(err)
         );
     }
 
@@ -41,8 +41,13 @@ export class GameServantController {
     getServant(req: Request, res: Response) {
         const id = Number(req.params.id);
         this._gameServantService.findById(id).then(
-            servant => res.send(servant),
-            err => res.status(404).send(err)
+            servant => {
+                if (servant) {
+                    return res.send(servant);
+                }
+                res.status(404).send(`Servant ID ${id} could not be found.`);
+            },
+            err => res.status(400).send(err)
         );
     }
 
@@ -50,7 +55,12 @@ export class GameServantController {
     updateServant(req: Request, res: Response) {
         const servant = req.body;
         this._gameServantService.update(servant).then(
-            updated => res.send(updated),
+            updated => {
+                if (updated) {
+                    return res.send(updated);
+                }
+                res.status(404).send(`Servant ID ${servant._id} does not exist.`);
+            },
             err => res.status(400).send(err)
         );
     }

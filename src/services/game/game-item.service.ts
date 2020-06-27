@@ -6,20 +6,23 @@ import { Service } from 'typedi';
 @Service()
 export class GameItemService {
 
-    async create(object: GameItem): Promise<GameItemDocument> {
+    async create(item: GameItem): Promise<GameItemDocument> {
         // TODO Validation
-        return GameItemModel.create(object);
+        return GameItemModel.create(item);
+    }
+
+    async existsById(id: number) {
+        if (!id && id !== 0) {
+            throw 'Servant ID is missing or invalid.';
+        }
+        return await GameItemModel.exists({ _id: id });
     }
 
     async findById(id: number): Promise<GameItemDocument> {
         if (!id && id !== 0) {
             throw 'Item ID is missing or invalid.';
         }
-        const object = await GameItemModel.findById(id).exec();
-        if (!object) {
-            throw `Item ID ${id} could not be found.`;
-        }
-        return object;
+        return await GameItemModel.findById(id).exec();
     }
 
     async findAll(): Promise<GameItemDocument[]> {
@@ -43,20 +46,16 @@ export class GameItemService {
         return GameItemModel.findByTypes(types).exec();
     }
 
-    async update(object: GameItem): Promise<GameItemDocument> {
-        const id = Number(object._id);
+    async update(item: GameItem): Promise<GameItemDocument> {
+        const id = Number(item._id);
         if (!id && id !== 0) {
             throw 'ID is missing or invalid.';
         }
-        const updated = await GameItemModel.findOneAndUpdate(
+        return await GameItemModel.findOneAndUpdate(
             { _id: id } as any,
-            { $set: object },
+            { $set: item },
             { runValidators: true, new: true }
         ).exec();
-        if (!updated) {
-            throw `Item ID ${id} does not exist.`;
-        }
-        return updated;
     }
 
 }

@@ -21,3 +21,4 @@ export * from './game/servant/game-servant-enhancement.type';
 export * from './game/servant/game-servant-gender.enum';
 export * from './game/servant/game-servant.type';
 export * from './user/user.type';
+export * from './entity.type';

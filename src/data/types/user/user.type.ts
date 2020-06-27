@@ -1,5 +1,5 @@
 import { ObjectId } from 'bson';
-import { Entity } from 'internal';
+import { Entity } from '../entity.type';
 
 export type User = Entity<ObjectId> & {
     username: string;

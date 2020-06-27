@@ -27,6 +27,8 @@
   },
   "homepage": "https://github.com/alvinquach/fgo-ervant-planner-server#readme",
   "dependencies": {
+    "@types/axios": "^0.14.0",
+    "axios": "^0.19.2",
     "bcryptjs": "^2.4.3",
     "connect-mongo": "^3.2.0",
     "dotenv": "^8.2.0",

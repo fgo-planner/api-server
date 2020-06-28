@@ -4,9 +4,5 @@
 export enum GameItemType {
     Master = 'Master',
     Enhancement = 'Enhancement',
-    Skill = 'Skill',
-    Ascension = 'Ascension',
-    EventItem = 'EventItem',
-    QuestUnlockingKey = 'QuestUnlockingKey',
-    EventBPRecoveryItem = 'EventBPRecoveryItem'
+    EventItem = 'EventItem'
 }

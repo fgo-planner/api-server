@@ -1,8 +1,11 @@
 import axios from 'axios';
-import { GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender } from 'data/types';
+import { GameItem, GameItemBackground, GameItemType, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender } from 'data/types';
 import { Service } from 'typedi';
 import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
 import { AtlasAcademyBasicServant } from './types/atlas-academy-basic-servant.type';
+import { AtlasAcademyNiceItemBackground } from './types/atlas-academy-nice-item-background.enum';
+import { AtlasAcademyNiceItemType } from './types/atlas-academy-nice-item-type.enum';
+import { AtlasAcademyNiceItem } from './types/atlas-academy-nice-item.type';
 import { AtlasAcademyNiceLvlUpMaterial } from './types/atlas-academy-nice-lvl-up-material.type';
 import { AtlasAcademyNiceServantAttribute } from './types/atlas-academy-nice-servant-attribute.enum';
 import { AtlasAcademyNiceServantClassName } from './types/atlas-academy-nice-servant-class-name.enum';
@@ -13,11 +16,13 @@ import { AtlasAcademyNiceServant } from './types/atlas-academy-nice-servant.type
 @Service()
 export class AtlasAcademyDataImportService {
 
+    //#region Enum maps
+
     /**
      * Maps `AtlasAcademyNiceServantClassName` enum values to `GameServantClass`
      * enum values.
      */
-    private static readonly _ClassMap = {
+    private static readonly _ServantClassMap = {
         [AtlasAcademyNiceServantClassName.Saber]: GameServantClass.Saber,
         [AtlasAcademyNiceServantClassName.Archer]: GameServantClass.Archer,
         [AtlasAcademyNiceServantClassName.Lancer]: GameServantClass.Lancer,
@@ -46,7 +51,7 @@ export class AtlasAcademyDataImportService {
      * Maps `AtlasAcademyNiceServantGender` enum values to `GameServantGender` enum
      * values.
      */
-    private static readonly _GenderMap = {
+    private static readonly _ServantGenderMap = {
         [AtlasAcademyNiceServantGender.Male]: GameServantGender.Male,
         [AtlasAcademyNiceServantGender.Female]: GameServantGender.Female,
         [AtlasAcademyNiceServantGender.Unknown]: GameServantGender.None
@@ -56,7 +61,7 @@ export class AtlasAcademyDataImportService {
      * Maps `AtlasAcademyNiceServantAttribute` enum values to `GameServantAttribute`
      * enum values.
      */
-    private static readonly _AttributeMap = {
+    private static readonly _ServantAttributeMap = {
         [AtlasAcademyNiceServantAttribute.Human]: GameServantAttribute.Man,
         [AtlasAcademyNiceServantAttribute.Sky]: GameServantAttribute.Sky,
         [AtlasAcademyNiceServantAttribute.Earth]: GameServantAttribute.Earth,
@@ -65,26 +70,73 @@ export class AtlasAcademyDataImportService {
     } as { [key in AtlasAcademyNiceServantAttribute]: GameServantAttribute }
 
     /**
+     * Maps `AtlasAcademyNiceItemBackground` enum values to `GameItemBackground`
+     * enum values.
+     */
+    private static readonly _ItemBackgroundMap = {
+        [AtlasAcademyNiceItemBackground.Zero]: GameItemBackground.None,
+        [AtlasAcademyNiceItemBackground.Bronze]: GameItemBackground.Bronze,
+        [AtlasAcademyNiceItemBackground.Silver]: GameItemBackground.Silver,
+        [AtlasAcademyNiceItemBackground.Gold]: GameItemBackground.Gold,
+        [AtlasAcademyNiceItemBackground.QuestClearQPReward]: GameItemBackground.QPReward
+    } as { [key in AtlasAcademyNiceItemBackground]: GameItemBackground }
+
+    /**
+     * Maps `AtlasAcademyNiceItemType` enum values to `GameItemType` enum values.
+     */
+    private static readonly _ItemTypeMap = {
+        [AtlasAcademyNiceItemType.QP]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.Stone]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.APRecover]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.APAdd]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.Mana]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.Key]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.GachaClass]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.GachaRelic]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.GachaTicket]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.Limit]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.SkillLvUp]: GameItemType.Enhancement,
+        [AtlasAcademyNiceItemType.TdLvUp]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.FriendPoint]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.EventPoint]: GameItemType.EventItem,
+        [AtlasAcademyNiceItemType.EventItem]: GameItemType.EventItem,
+        [AtlasAcademyNiceItemType.QuestRewardQp]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.ChargeStone]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.RPAdd]: GameItemType.EventItem,
+        [AtlasAcademyNiceItemType.BoostItem]: GameItemType.EventItem,
+        [AtlasAcademyNiceItemType.StoneFragments]: GameItemType.EventItem,
+        [AtlasAcademyNiceItemType.Anonymous]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.RarePri]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.CostumeRelease]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.ItemSelect]: GameItemType.Master
+    } as { [key in AtlasAcademyNiceItemType]: GameItemType }
+
+    //#endregion
+
+
+    //#region Servant import methods
+
+    /**
      * Retrieves servant data from the Atlas Academy API and converts it into a
      * list of `GameServant` objects.
      */
-    async getServants(): Promise<GameServant[]> {
+    async getServants(log?: any[]): Promise<GameServant[]> {
         /*
          * Retrieve JP servant data.
          */
-        const jpServants = await this._getServants('JP');
+        const jpServants = await this._getNiceServants('JP', log);
 
         /*
          * Convert the JP servant data into `GameServant` objects.
          */
         const servants = jpServants
-            .map(servant => this._transformJpServantData(servant))
+            .map(servant => this._transformServantData(servant))
             .filter(servant => servant != null);
 
         /**
          * Retrieve basic NA servant data and convert it into name lookup map.
          */
-        const naBasicServants = await this._getBasicServants('NA');
+        const naBasicServants = await this._getBasicServants('NA', log);
         const englishNames: { [key: number]: string } = {};
         for (const servant of naBasicServants) {
             englishNames[servant.collectionNo] = servant.name;
@@ -94,7 +146,7 @@ export class AtlasAcademyDataImportService {
          * Use the name lookup map to populate English names. This method will
          * automatically try to retrieve any names that are missing from the map.
          */
-        await this._populateEnglishNames(servants, englishNames);
+        await this._populateServantEnglishNames(servants, englishNames, log);
 
         return servants;
     }
@@ -103,9 +155,9 @@ export class AtlasAcademyDataImportService {
     /**
      * Retrieves the pre-generated nice servant data from the Atlas Academy API.
      */
-    private async _getServants(region: 'NA' | 'JP'): Promise<AtlasAcademyNiceServant[]> {
+    private async _getNiceServants(region: 'NA' | 'JP', log?: any[]): Promise<AtlasAcademyNiceServant[]> {
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${Constants.NiceServantsFilename}`;
-        console.log(`Calling ${url}`)
+        log?.push(`Calling ${url}`);
         const response = await axios.get(url);
         // TODO Handle errors
         return response.data;
@@ -114,9 +166,9 @@ export class AtlasAcademyDataImportService {
     /**
      * Retrieves the pre-generated basic servant data from the Atlas Academy API.
      */
-    private async _getBasicServants(region: 'NA' | 'JP'): Promise<AtlasAcademyBasicServant[]> {
+    private async _getBasicServants(region: 'NA' | 'JP', log?: any[]): Promise<AtlasAcademyBasicServant[]> {
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${Constants.BasicServantsFilename}`;
-        console.log(`Calling ${url}`)
+        log?.push(`Calling ${url}`);
         const response = await axios.get(url);
         // TODO Handle errors
         return response.data;
@@ -126,19 +178,23 @@ export class AtlasAcademyDataImportService {
      * Retrieves the basic data for a single servant from the Atlas Academy API.
      * The English servant names are always retrieved using this method.
      */
-    private async _getBasicServant(id: number, region: 'NA' | 'JP'): Promise<AtlasAcademyBasicServant> {
+    private async _getBasicServant(id: number, region: 'NA' | 'JP', log?: any[]): Promise<AtlasAcademyBasicServant> {
         const url = `${Constants.BaseUrl}/${Constants.BasicPath}/${region}/${Constants.ServantPath}/${id}`;
         const params = { lang: 'en' };
-        console.log(`Calling ${url} with params ${JSON.stringify(params)}`)
-        const response = await axios.get(url, { params });
-        // TODO Handle errors
-        return response.data;
+        log?.push(`Calling ${url} with params ${JSON.stringify(params)}`);
+        try {
+            const response = await axios.get(url, { params });
+            return response.data;
+        } catch (err) {
+            log?.push(err);
+        }
+        return null;
     }
 
     /**
      * Converts a Atlas Academy `NiceServant` object into a `GameServant` object.
      */
-    private _transformJpServantData(servant: AtlasAcademyNiceServant): GameServant {
+    private _transformServantData(servant: AtlasAcademyNiceServant): GameServant {
 
         // Currently only normal servants (and Mash) are supported.
         if (servant.type !== AtlasAcademyNiceServantType.Normal && servant.type !== AtlasAcademyNiceServantType.Heroine) {
@@ -164,12 +220,12 @@ export class AtlasAcademyDataImportService {
             name: servant.name,
             nameJp: servant.name,
             collectionNo: servant.collectionNo,
-            class: AtlasAcademyDataImportService._ClassMap[servant.className],
+            class: AtlasAcademyDataImportService._ServantClassMap[servant.className],
             rarity: servant.rarity,
             cost: servant.cost,
             maxLevel: servant.lvMax,
-            gender: AtlasAcademyDataImportService._GenderMap[servant.gender],
-            attribute: AtlasAcademyDataImportService._AttributeMap[servant.attribute],
+            gender: AtlasAcademyDataImportService._ServantGenderMap[servant.gender],
+            attribute: AtlasAcademyDataImportService._ServantAttributeMap[servant.attribute],
             hpBase: servant.hpBase,
             hpMax: servant.hpMax,
             atkBase: servant.atkBase,
@@ -202,15 +258,15 @@ export class AtlasAcademyDataImportService {
     }
 
     /**
-     * Populate the servants int he given list with their English names using the
+     * Populate the servants in the given list with their English names using the
      * given lookup map. If the name is not present in the map, then the method
      * will attempt to retrieve the name from the Atlas Academy API.
      */
-    private async _populateEnglishNames(servants: GameServant[], englishNames: { [key: number]: string }) {
+    private async _populateServantEnglishNames(servants: GameServant[], englishNames: { [key: number]: string }, log?: any[]) {
         for (const servant of servants) {
             let name = englishNames[servant.collectionNo];
             if (!name) {
-                const basicServant = await this._getBasicServant(servant.collectionNo, 'JP');
+                const basicServant = await this._getBasicServant(servant.collectionNo, 'JP', log);
                 if (!basicServant) {
                     continue;
                 }
@@ -220,5 +276,104 @@ export class AtlasAcademyDataImportService {
             servant.metadata.displayName = name;
         }
     }
+
+    //#endregion
+
+
+    //#region Item import methods
+
+    /**
+     * Retrieves item data from the Atlas Academy API and converts it into a list
+     * of `GameItem` objects.
+     */
+    async getItems(log?: any[]): Promise<GameItem[]> {
+        /*
+         * Retrieve JP item data.
+         */
+        const jpItems = await this._getNiceItems('JP', log);
+
+        /*
+         * Convert the JP item data into `GameServant` objects.
+         */
+        const items = jpItems
+            .map(item => this._transformItemData(item))
+            .filter(item => item != null);
+
+        /**
+         * Retrieve basic NA item data and convert it into name lookup map.
+         */
+        const naItems = await this._getNiceItems('NA', log);
+        const englishNames: { [key: number]: string } = {};
+        for (const item of naItems) {
+            englishNames[item.id] = item.name;
+        }
+
+        /*
+         * Use the name lookup map to populate English names. This method will
+         * automatically try to retrieve any names that are missing from the map.
+         */
+        await this._populateItemEnglishNames(items, englishNames, log);
+
+        return items;
+    }
+
+    /**
+     * Retrieves the pre-generated nice item data from the Atlas Academy API.
+     */
+    private async _getNiceItems(region: 'NA' | 'JP', log?: any[]): Promise<AtlasAcademyNiceItem[]> {
+        const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${Constants.NiceItemsFilename}`;
+        log?.push(`Calling ${url}`);
+        const response = await axios.get(url);
+        // TODO Handle errors
+        return response.data;
+    }
+
+    /**
+     * Retrieves the data for a single item from the Atlas Academy API. The English
+     * item names are always retrieved using this method.
+     */
+    private async _getNiceItem(id: number, region: 'NA' | 'JP', log?: any[]): Promise<AtlasAcademyNiceItem> {
+        const url = `${Constants.BaseUrl}/${Constants.NicePath}/${region}/${Constants.ItemPath}/${id}`;
+        const params = { lang: 'en' };
+        log?.push(`Calling ${url} with params ${JSON.stringify(params)}`);
+        try {
+            const response = await axios.get(url, { params });
+            return response.data;
+        } catch (err) {
+            log?.push(err);
+        }
+        return null;
+    }
+
+    private _transformItemData(item: AtlasAcademyNiceItem): GameItem {
+        return {
+            _id: item.id,
+            name: item.name,
+            nameJp: item.name,
+            background: AtlasAcademyDataImportService._ItemBackgroundMap[item.background],
+            type: AtlasAcademyDataImportService._ItemTypeMap[item.type]
+        };
+    }
+
+    /**
+     * Populate the items int he given list with their English names using the
+     * given lookup map. If the name is not present in the map, then the method
+     * will attempt to retrieve the name from the Atlas Academy API.
+     */
+    private async _populateItemEnglishNames(items: GameItem[], englishNames: { [key: number]: string }, log?: any[]) {
+        for (const item of items) {
+            let name = englishNames[item._id];
+            if (!name) {
+                const niceItem = await this._getNiceItem(item._id, 'JP', log);
+                if (!niceItem) {
+                    continue;
+                }
+                name = niceItem.name;
+            }
+            item.name = name;
+        }
+    }
+
+    //#endregion
 
 }

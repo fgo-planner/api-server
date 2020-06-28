@@ -6,7 +6,7 @@ import { AtlasAcademyNiceItemType } from './atlas-academy-nice-item-type.enum';
  */
 export type AtlasAcademyNiceItem = {
     id: number;
-    name: number;
+    name: string;
     type: AtlasAcademyNiceItemType;
     background: AtlasAcademyNiceItemBackground;
 }

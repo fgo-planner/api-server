@@ -10,7 +10,8 @@
     "rules": {
         "indent": [
             "warn",
-            4
+            4,
+            { "SwitchCase": 1 }
         ],
         "max-len": [
             "warn",

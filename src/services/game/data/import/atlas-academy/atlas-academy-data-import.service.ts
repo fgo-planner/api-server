@@ -193,7 +193,7 @@ export class AtlasAcademyDataImportService {
             return {
                 itemId: item.item.id,
                 quantity: item.amount
-            }
+            };
         });
         return {
             materials: items,

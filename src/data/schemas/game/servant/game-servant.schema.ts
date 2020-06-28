@@ -85,7 +85,7 @@ const GameServantAscensionMaterialsSchema = new Schema({
  * Mongoose schema for the `GameServant.metadata` property.
  */
 const GameServantMetadataSchema = new Schema({
-    name: {
+    displayName: {
         type: String
     },
     links: {

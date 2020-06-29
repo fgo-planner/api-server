@@ -69,7 +69,7 @@ export class Logger {
             object.end = this._end;
         }
         object.messages = this._messages;
-        return JSON.stringify(object);
+        return object;
     }
 
 }

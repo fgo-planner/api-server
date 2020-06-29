@@ -29,6 +29,10 @@ export class GameItemService {
         return GameItemModel.find().exec();
     }
 
+    async findAllIds(): Promise<number[]> {
+        return GameItemModel.distinct('_id').exec();
+    }
+
     async findPage(page: Pagination): Promise<{data: GameItemDocument[]; total: number}> {
         const size = page.size;
         const skip = size * (page.page - 1);

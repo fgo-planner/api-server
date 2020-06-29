@@ -120,8 +120,10 @@ export class AtlasAcademyDataImportService {
     /**
      * Retrieves servant data from the Atlas Academy API and converts it into a
      * list of `GameServant` objects.
+     * 
+     * @param skipIds The set of IDs to omit from the result.
      */
-    async getServants(logger?: Logger): Promise<GameServant[]> {
+    async getServants(skipIds: Set<number>, logger?: Logger): Promise<GameServant[]> {
         /*
          * Retrieve JP servant data.
          */
@@ -132,7 +134,7 @@ export class AtlasAcademyDataImportService {
          */
         const servants = jpServants
             .map(servant => this._transformServantData(servant))
-            .filter(servant => servant != null);
+            .filter(servant => servant != null && !skipIds.has(servant._id));
 
         /**
          * Retrieve basic NA servant data and convert it into name lookup map.
@@ -290,8 +292,10 @@ export class AtlasAcademyDataImportService {
     /**
      * Retrieves item data from the Atlas Academy API and converts it into a list
      * of `GameItem` objects.
+     * 
+     * @param skipIds The set of IDs to omit from the result.
      */
-    async getItems(logger?: Logger): Promise<GameItem[]> {
+    async getItems(skipIds: Set<number>, logger?: Logger): Promise<GameItem[]> {
         /*
          * Retrieve JP item data.
          */
@@ -302,7 +306,7 @@ export class AtlasAcademyDataImportService {
          */
         const items = jpItems
             .map(item => this._transformItemData(item))
-            .filter(item => item != null);
+            .filter(item => item != null && !skipIds.has(item._id));
 
         /**
          * Retrieve basic NA item data and convert it into name lookup map.

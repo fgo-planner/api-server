@@ -1,6 +1,8 @@
+import { Logger } from 'internal';
+
 export type GameDataImportResult = {
     updated: number;
     created: number;
     errors: number;
-    log?: any[];
+    logs?: Logger;
 }

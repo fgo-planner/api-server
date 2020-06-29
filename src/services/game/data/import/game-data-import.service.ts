@@ -1,5 +1,6 @@
 import { GameItem, GameServant } from 'data/types';
 import { GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
+import { Logger } from 'internal';
 import { Inject, Service } from 'typedi';
 import { GameItemService } from '../../game-item.service';
 import { GameServantService } from '../../game-servant.service';
@@ -21,15 +22,21 @@ export class GameDataImportService {
         const resultSet: GameDataImportResultSet = {};
         // TODO Ensure entities are sorted before writing to database.
         if (options.servants?.import) {
-            const log: any[] = [];
-            const servants = await this._atlasAcademyDataImportService.getServants(log);
-            const result = await this._processServants(servants, options, log);
+            const logger: Logger = new Logger();
+            logger.setStart();
+            const servants = await this._atlasAcademyDataImportService.getServants(logger);
+            const result = await this._processServants(servants, options, logger);
+            logger.setEnd();
+            result.logs = logger;
             resultSet.servants = result;
         }
         if (options.items?.import) {
-            const log: any[] = [];
-            const items = await this._atlasAcademyDataImportService.getItems(log);
-            const result = await this._processItems(items, options, log);
+            const logger: Logger = new Logger();
+            logger.setStart();
+            const items = await this._atlasAcademyDataImportService.getItems(logger);
+            const result = await this._processItems(items, options, logger);
+            logger.setEnd();
+            result.logs = logger;
             resultSet.items = result;
         }
         return resultSet;
@@ -42,10 +49,11 @@ export class GameDataImportService {
      * Assumes that there are no conflicts with unique fields such as
      * `collectionNo`.
      */
-    private async _processServants(servants: GameServant[], options: GameDataImportOptions, log: any[] = []): Promise<GameDataImportResult> {
+    private async _processServants(servants: GameServant[], options: GameDataImportOptions, logger: Logger): Promise<GameDataImportResult> {
         let updated = 0, created = 0, errors = 0;
         const override = !!options.servants.override;
         for (const servant of servants) {
+            logger.info(`Processing servant collectionNo=${servant.collectionNo}.`);
             try {
                 let exists: boolean;
                 if (override) {
@@ -54,16 +62,18 @@ export class GameDataImportService {
                     exists = await this._processServantAppend(servant);
                 }
                 if (exists) {
+                    logger.info(`Servant (collectionNo=${servant.collectionNo}) was updated.`);
                     updated++;
                 } else {
+                    logger.info(`Servant (collectionNo=${servant.collectionNo}) was created.`);
                     created++;
                 }
             } catch (err) {
-                log.push(err);
+                logger.error(err);
                 errors++;
             }
         }
-        return { updated, created, errors, log };
+        return { updated, created, errors };
     }
 
     /**
@@ -105,10 +115,11 @@ export class GameDataImportService {
     /**
      * Writes the imported items to the database according to the options.
      */
-    private async _processItems(items: GameItem[], options: GameDataImportOptions, log: any[] = []): Promise<GameDataImportResult> {
+    private async _processItems(items: GameItem[], options: GameDataImportOptions, logger: Logger): Promise<GameDataImportResult> {
         let updated = 0, created = 0, errors = 0;
         const override = !!options.items.override;
         for (const item of items) {
+            logger.info(`Processing item id=${item._id}.`);
             try {
                 let exists: boolean;
                 if (override) {
@@ -117,16 +128,18 @@ export class GameDataImportService {
                     exists = await this._processItemAppend(item);
                 }
                 if (exists) {
+                    logger.info(`Item (id=${item._id}) was updated.`);
                     updated++;
                 } else {
+                    logger.info(`Item (id=${item._id}) was created.`);
                     created++;
                 }
             } catch (err) {
-                log.push(err);
+                logger.error(err);
                 errors++;
             }
         }
-        return { updated, created, errors, log };
+        return { updated, created, errors };
     }
 
     /**

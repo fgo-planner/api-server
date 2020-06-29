@@ -351,6 +351,13 @@ export class AtlasAcademyDataImportService {
     }
 
     private _transformItemData(item: AtlasAcademyNiceItem): GameItem {
+        /*
+         * As of 6/28/2020, some item types in the Atlas Academy data set have not been
+         * given a name (`25` and `26`). These items will be skipped for now.
+         */
+        if (typeof item.type === 'number') {
+            return null;
+        }
         return {
             _id: item.id,
             name: item.name,

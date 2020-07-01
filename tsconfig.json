@@ -18,6 +18,9 @@
       "data/types": [
         "src/data/types"
       ],
+      "data/validators": [
+        "src/data/validators"
+      ],
       "data/schemas": [
         "src/data/schemas"
       ],

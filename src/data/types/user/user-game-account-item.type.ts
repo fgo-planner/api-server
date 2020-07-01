@@ -1,9 +1,9 @@
 /**
  * Represents a unique item stack that is owned by the player account.
  */
-export type GameAccountItem = {
+export type UserGameAccountItem = {
 
-    gameId: number;
+    itemId: number;
 
     quantity: number;
 

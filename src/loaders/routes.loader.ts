@@ -1,4 +1,4 @@
-import { GameAccountController, GameDataImportController, GameItemController, GameServantController, LoginController, TestController, UserController } from 'controllers';
+import { UserGameAccountController, GameDataImportController, GameItemController, GameServantController, LoginController, TestController, UserController } from 'controllers';
 import { Application, Router } from 'express';
 import { Dictionary, RequestHandler } from 'express-serve-static-core';
 import { Class, ControllerMetadata, ControllerMetadataKey, RouteMetadata, RouteMetadataMapKey, UserAccessLevel } from 'internal';
@@ -11,7 +11,7 @@ const ResourceApiPrefix = '/rest';
 const Controllers: Class<any>[] = [
     LoginController,
     UserController,
-    GameAccountController,
+    UserGameAccountController,
     GameDataImportController,
     GameItemController,
     GameServantController,

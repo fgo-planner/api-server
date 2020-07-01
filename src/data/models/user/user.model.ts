@@ -1,24 +1,20 @@
+import { UserSchemaDefinition } from 'data/schemas';
 import { User } from 'data/types';
-import mongoose, { Document, Model, NativeError, Schema, SchemaDefinition } from 'mongoose';
+import mongoose, { Document, Model, NativeError, Schema } from 'mongoose';
 
 export type UserDocument = Document & User;
 
 type UserModel = Model<UserDocument> & {
-    setActiveStatus: (id: string, status: boolean, callback: (err: NativeError, doc: UserDocument) => void) => void;
+
+    setEnabledStatus: (id: string, status: boolean, callback: (err: NativeError, doc: UserDocument) => void) => void;
+
     setAdminStatus: (id: string, isAdmin: boolean, callback: (err: NativeError, doc: UserDocument) => void) => void;
+
 };
 
-const UserSchemaDefinition: SchemaDefinition = {
-    username: { type: String, unique: true },
-    hash: String,
-    email: { type: String, unique: true },
-    admin: Boolean,
-    active: Boolean
-};
+//#region Static function implementations
 
-const UserSchema = new Schema(UserSchemaDefinition, { timestamps: true });
-
-UserSchema.statics.setActiveStatus = function (
+const setEnabledStatus = function (
     this: UserModel,
     id: string,
     status: boolean,
@@ -27,7 +23,7 @@ UserSchema.statics.setActiveStatus = function (
     this.updateOne({ _id: id }, { active: status }, callback);
 };
 
-UserSchema.statics.setAdminStatus = function (this: UserModel,
+const setAdminStatus = function (this: UserModel,
     id: string,
     isAdmin: boolean,
     callback: (err: NativeError, doc: UserDocument) => void
@@ -40,5 +36,28 @@ UserSchema.statics.setAdminStatus = function (this: UserModel,
     }
     this.updateOne({ _id: id }, update, callback);
 };
+
+//#endregion
+
+/**
+ * Properties and functions that can be assigned as statics on the schema.
+ */
+const Statics = {
+    setEnabledStatus,
+    setAdminStatus
+};
+
+/**
+ * Mongoose schema for the `User` type.
+ */
+const UserSchema = new Schema(UserSchemaDefinition, { timestamps: true });
+
+// Add the static properties to the schema.
+Object.assign(UserSchema.statics, Statics);
+
+UserSchema.set('toJSON', {
+    // virtuals: true,
+    versionKey: false,
+});
 
 export const UserModel = mongoose.model<UserDocument, UserModel>('User', UserSchema, 'Users');

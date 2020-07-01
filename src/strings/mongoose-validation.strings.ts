@@ -24,10 +24,9 @@ export class MongooseValidationStrings {
     static readonly NumberMax = ''; // TODO Implement this
 
     //#endregion
-
     
-    static readonly GameAccountIdFormat = `${MongooseValidationStrings.GenericInvalidFormat} It must be exactly 9 characters long and can only contain numerical digits.`;
+    static readonly UserGameAccountFriendIdFormat = `${MongooseValidationStrings.GenericInvalidFormat} It must be exactly 9 characters long and can only contain numerical digits.`;
 
-    static readonly GameAccountServantFirstSkillUnlocked = `${MongooseValidationStrings.GenericInvalidValue} The first skill must always be unlocked.`;
+    static readonly UserGameAccountServantFirstSkillUnlocked = `${MongooseValidationStrings.GenericInvalidValue} The first skill must always be unlocked.`;
 
 }

@@ -28,7 +28,7 @@ export class GameItemController {
         );
     }
 
-    @GetMapping('/page', UserAccessLevel.Admin)
+    @GetMapping('/page')
     getItemsPage(req: Request, res: Response) {
         const pagination = PaginationUtils.parse(req.query);
         this._gameItemService.findPage(pagination).then(

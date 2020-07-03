@@ -20,7 +20,6 @@ export class GameServantController {
         );
     }
 
-    @GetMapping(UserAccessLevel.Admin)
     getServants(req: Request, res: Response) {
         this._gameServantService.findAll().then(
             servants => res.send(servants),
@@ -28,7 +27,7 @@ export class GameServantController {
         );
     }
 
-    @GetMapping('/search')
+    @GetMapping('/page')
     getServantsPage(req: Request, res: Response) {
         const pagination = PaginationUtils.parse(req.query);
         this._gameServantService.findPage(pagination).then(

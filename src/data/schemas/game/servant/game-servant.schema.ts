@@ -228,14 +228,14 @@ export const GameServantSchemaDefinition: SchemaDefinition = {
     growthCurve: {
         type: Number,
         required: true,
-        min: 1,
-        max: 30,
+        min: 0,
+        max: 25,
         // TODO Validate specific values
         validate: {
             validator: Number.isInteger,
             message: MongooseValidationStrings.NumberInteger
         },
-        default: 5
+        default: 0
     },
     skillMaterials: {
         type: GameServantSkillMaterialsSchema,

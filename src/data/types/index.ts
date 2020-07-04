@@ -14,6 +14,7 @@ export * from './game/servant/game-servant-class.enum';
 export * from './game/servant/game-servant-deck.enum';
 export * from './game/servant/game-servant-enhancement.type';
 export * from './game/servant/game-servant-gender.enum';
+export * from './game/servant/game-servant-growth-curve.enum';
 export * from './game/servant/game-servant.type';
 export * from './user/user-game-account-item.type';
 export * from './user/user-game-account-servant.type';

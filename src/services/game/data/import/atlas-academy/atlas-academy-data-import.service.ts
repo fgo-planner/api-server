@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { GameItem, GameItemBackground, GameItemType, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender } from 'data/types';
+import { GameItem, GameItemBackground, GameItemType, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve } from 'data/types';
 import { Logger } from 'internal';
 import { Service } from 'typedi';
 import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
@@ -233,7 +233,7 @@ export class AtlasAcademyDataImportService {
             hpMax: servant.hpMax,
             atkBase: servant.atkBase,
             atkMax: servant.atkMax,
-            growthCurve: servant.growthCurve,
+            growthCurve: this._convertGrowthCurve(servant.growthCurve),
             ascensionMaterials,
             skillMaterials,
             metadata: {
@@ -258,6 +258,23 @@ export class AtlasAcademyDataImportService {
             materials: items,
             qp: material.qp
         };
+    }
+
+    /**
+     * Converts a servant's in-game growth curve ID to a `GameServantGrowthCurve`
+     * value.
+     */
+    private _convertGrowthCurve(growthCurve: number): GameServantGrowthCurve {
+        if (growthCurve <= 5) {
+            return GameServantGrowthCurve.Linear;
+        } else if (growthCurve <= 10) {
+            return GameServantGrowthCurve.ReverseS;
+        } else if (growthCurve <= 15) {
+            return GameServantGrowthCurve.S;
+        } else if (growthCurve <= 25) {
+            return GameServantGrowthCurve.SemiReverseS;
+        }
+        return GameServantGrowthCurve.SemiS;
     }
 
     /**

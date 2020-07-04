@@ -136,10 +136,11 @@ export class AtlasAcademyDataImportService {
             .map(servant => this._transformServantData(servant))
             .filter(servant => servant != null && !skipIds.has(servant._id));
 
-        /**
-         * Retrieve basic NA servant data and convert it into name lookup map.
+        /*
+         * Retrieve basic servant data with English names and convert it into name
+         * lookup map.
          */
-        const naBasicServants = await this._getBasicServants('NA', logger);
+        const naBasicServants = await this._getBasicServants(logger);
         const englishNames: { [key: number]: string } = {};
         for (const servant of naBasicServants) {
             englishNames[servant.collectionNo] = servant.name;
@@ -154,7 +155,6 @@ export class AtlasAcademyDataImportService {
         return servants;
     }
 
-
     /**
      * Retrieves the pre-generated nice servant data from the Atlas Academy API.
      */
@@ -168,9 +168,11 @@ export class AtlasAcademyDataImportService {
 
     /**
      * Retrieves the pre-generated basic servant data from the Atlas Academy API.
+     * This method will always retrieve the JP region data with English language
+     * names.
      */
-    private async _getBasicServants(region: 'NA' | 'JP', logger?: Logger): Promise<AtlasAcademyBasicServant[]> {
-        const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${Constants.BasicServantsFilename}`;
+    private async _getBasicServants(logger?: Logger): Promise<AtlasAcademyBasicServant[]> {
+        const url = `${Constants.BaseUrl}/${Constants.ExportPath}/JP/${Constants.BasicServantsFilename}`;
         logger?.info(`Calling ${url}`);
         const response = await axios.get(url);
         // TODO Handle errors
@@ -180,6 +182,9 @@ export class AtlasAcademyDataImportService {
     /**
      * Retrieves the basic data for a single servant from the Atlas Academy API.
      * The English servant names are always retrieved using this method.
+     * 
+     * @deprecated No longer needed as a pre-generated JP servant list with English
+     * is now available.
      */
     private async _getBasicServant(id: number, region: 'NA' | 'JP', logger?: Logger): Promise<AtlasAcademyBasicServant> {
         const url = `${Constants.BaseUrl}/${Constants.BasicPath}/${region}/${Constants.ServantPath}/${id}`;
@@ -279,22 +284,18 @@ export class AtlasAcademyDataImportService {
 
     /**
      * Populate the servants in the given list with their English names using the
-     * given lookup map. If the name is not present in the map, then the method
-     * will attempt to retrieve the name from the Atlas Academy API.
+     * given lookup map. If the name is not present in the map, the Japanese names
+     * will be retained.
      */
     private async _populateServantEnglishNames(servants: GameServant[], englishNames: { [key: number]: string }, logger?: Logger) {
         for (const servant of servants) {
-            let name = englishNames[servant.collectionNo];
+            const name = englishNames[servant.collectionNo];
             if (!name) {
-                const basicServant = await this._getBasicServant(servant.collectionNo, 'JP', logger);
-                if (!basicServant) {
-                    logger?.warn(
-                        `Servant with collectionNo ${servant.collectionNo} could not be loaded. 
-                        English name population will be skipped.`
-                    );
-                    continue;
-                }
-                name = basicServant.name;
+                logger?.warn(
+                    `English name not available for servant (collectionNo=${servant.collectionNo}).
+                    English name population will be skipped.`
+                );
+                continue;
             }
             servant.name = name;
             servant.metadata.displayName = name;
@@ -389,7 +390,7 @@ export class AtlasAcademyDataImportService {
     }
 
     /**
-     * Populate the items int he given list with their English names using the
+     * Populate the items in the given list with their English names using the
      * given lookup map. If the name is not present in the map, then the method
      * will attempt to retrieve the name from the Atlas Academy API.
      */

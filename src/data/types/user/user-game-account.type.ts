@@ -1,6 +1,7 @@
 import { ObjectId } from 'bson';
-import { UserGameAccountItem, UserGameAccountServant } from 'data/types';
 import { Entity } from '../entity.type';
+import { UserGameAccountItem } from './user-game-account-item.type';
+import { UserGameAccountServant } from './user-game-account-servant.type';
 
 export type UserGameAccount = Entity<ObjectId> & {
 

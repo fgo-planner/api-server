@@ -25,5 +25,7 @@ export enum AtlasAcademyNiceItemType {
     Anonymous = 'anonymous',
     RarePri = 'rarePri',
     CostumeRelease = 'costumeRelease',
-    ItemSelect = 'itemSelect'
+    ItemSelect = 'itemSelect',
+    CommandCardPrmUp = 'commandCardPrmUp',
+    Dice = 'dice'
 }

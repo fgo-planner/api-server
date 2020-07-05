@@ -97,7 +97,7 @@ export class AtlasAcademyDataImportService {
         [AtlasAcademyNiceItemType.GachaTicket]: GameItemType.Master,
         [AtlasAcademyNiceItemType.Limit]: GameItemType.Master,
         [AtlasAcademyNiceItemType.SkillLvUp]: GameItemType.Enhancement,
-        [AtlasAcademyNiceItemType.TdLvUp]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.TdLvUp]: GameItemType.Enhancement,
         [AtlasAcademyNiceItemType.FriendPoint]: GameItemType.Master,
         [AtlasAcademyNiceItemType.EventPoint]: GameItemType.EventItem,
         [AtlasAcademyNiceItemType.EventItem]: GameItemType.EventItem,
@@ -109,7 +109,9 @@ export class AtlasAcademyDataImportService {
         [AtlasAcademyNiceItemType.Anonymous]: GameItemType.Master,
         [AtlasAcademyNiceItemType.RarePri]: GameItemType.Master,
         [AtlasAcademyNiceItemType.CostumeRelease]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.ItemSelect]: GameItemType.Master
+        [AtlasAcademyNiceItemType.ItemSelect]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.CommandCardPrmUp]: GameItemType.Master,
+        [AtlasAcademyNiceItemType.Dice]: GameItemType.EventItem
     } as { [key in AtlasAcademyNiceItemType]: GameItemType }
 
     //#endregion

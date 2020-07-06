@@ -1,7 +1,9 @@
+import { ObjectId } from 'bson';
 import { GameEventDocument, GameEventModel } from 'data/models';
 import { GameEvent } from 'data/types';
 import { Pagination } from 'internal';
 import { Service } from 'typedi';
+import { ObjectIdUtils } from 'utils';
 
 @Service()
 export class GameEventService {
@@ -18,7 +20,7 @@ export class GameEventService {
         return await GameEventModel.exists({ _id: id });
     }
 
-    async findById(id: number): Promise<GameEventDocument> {
+    async findById(id: ObjectId): Promise<GameEventDocument> {
         if (!id) {
             throw 'Event ID is missing or invalid.';
         }
@@ -51,8 +53,8 @@ export class GameEventService {
     }
 
     async update(event: GameEvent): Promise<GameEventDocument> {
-        const id = Number(event._id);
-        if (!id && id !== 0) {
+        const id = ObjectIdUtils.convertToObjectId(event._id);
+        if (!id) {
             throw 'ID is missing or invalid.';
         }
         return await GameEventModel.findOneAndUpdate(

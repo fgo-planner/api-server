@@ -105,7 +105,7 @@ export class AtlasAcademyDataImportService {
         [AtlasAcademyNiceItemType.ChargeStone]: GameItemType.Master,
         [AtlasAcademyNiceItemType.RPAdd]: GameItemType.EventItem,
         [AtlasAcademyNiceItemType.BoostItem]: GameItemType.EventItem,
-        [AtlasAcademyNiceItemType.StoneFragments]: GameItemType.EventItem,
+        [AtlasAcademyNiceItemType.StoneFragments]: GameItemType.Master,
         [AtlasAcademyNiceItemType.Anonymous]: GameItemType.Master,
         [AtlasAcademyNiceItemType.RarePri]: GameItemType.Master,
         [AtlasAcademyNiceItemType.CostumeRelease]: GameItemType.Master,

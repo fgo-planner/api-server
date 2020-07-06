@@ -1,6 +1,7 @@
 import { GameEventMaterialSourceType } from 'data/types';
 import { Schema } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
+import { NumberUtils } from 'utils';
 
 /**
  * Mongoose schema for the `GameEventMaterialSource.materials` property.
@@ -41,12 +42,12 @@ export const GameEventMaterialSourceSchema = new Schema({
     },
     currencyId: {
         type: Number,
-        required: true,
         min: 0,
         validate: {
-            validator: Number.isInteger,
+            validator: NumberUtils.isNullOrInteger,
             message: MongooseValidationStrings.NumberInteger
-        }
+        },
+        default: null
     },
     materials: {
         type: [GameEventMaterialSourceMaterialsSchema],

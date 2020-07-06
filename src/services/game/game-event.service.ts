@@ -19,7 +19,7 @@ export class GameEventService {
     }
 
     async findById(id: number): Promise<GameEventDocument> {
-        if (!id && id !== 0) {
+        if (!id) {
             throw 'Event ID is missing or invalid.';
         }
         return await GameEventModel.findById(id).exec();

@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { GameEventService } from 'services';
 import { Inject } from 'typedi';
-import { PaginationUtils } from 'utils';
+import { PaginationUtils, ObjectIdUtils } from 'utils';
 
 @RestController('/game-event', UserAccessLevel.Public)
 export class GameEventController {
@@ -39,8 +39,8 @@ export class GameEventController {
 
     @GetMapping('/:id')
     getEvent(req: Request, res: Response) {
-        const id = Number(req.params.id);
-        this._gameEventService.findById(id).then(
+        const id = ObjectIdUtils.convertToObjectId(req.params.id);
+        this._gameEventService.findById(id as any).then(
             event => {
                 if (event) {
                     return res.send(event);

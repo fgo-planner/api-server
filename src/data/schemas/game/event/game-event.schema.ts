@@ -22,7 +22,7 @@ export const GameEventSchemaDefinition: SchemaDefinition = {
         required: true,
         index: true
     },
-    materialSource: {
+    materialSources: {
         type: [GameEventMaterialSourceSchema],
         required: true,
         default: []

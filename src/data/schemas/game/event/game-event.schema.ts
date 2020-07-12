@@ -1,5 +1,6 @@
 import { SchemaDefinition } from 'mongoose';
-import { GameEventMaterialSourceSchema } from './game-event-material-source.schema';
+import { GameEventRewardSourceSchema } from './game-event-reward-source.schema';
+import { truncate } from 'fs';
 
 /**
  * Mongoose schema definition for the `GameEvent` type.
@@ -22,8 +23,14 @@ export const GameEventSchemaDefinition: SchemaDefinition = {
         required: true,
         index: true
     },
-    materialSources: {
-        type: [GameEventMaterialSourceSchema],
+    rerun:  {
+        type: Boolean,
+        required: true, 
+        index: true,
+        default: false
+    },
+    rewardSources: {
+        type: [GameEventRewardSourceSchema],
         required: true,
         default: []
     }

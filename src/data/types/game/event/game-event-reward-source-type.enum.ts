@@ -1,4 +1,4 @@
-export enum GameEventMaterialSourceType {
+export enum GameEventRewardSourceType {
     Shop = 'Shop',
     Missions = 'Missions',
     Ladder = 'Ladder',

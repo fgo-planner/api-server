@@ -1,12 +1,13 @@
 import { UserGameAccountModel } from 'data/models';
 import { UserGameAccount } from 'data/types';
 import { Service } from 'typedi';
+import { ObjectIdUtils } from 'utils';
 
 @Service()
 export class UserGameAccountService {
 
     async addAccount(userId: string, account: UserGameAccount) {
-        account.userId = userId;
+        account.userId = ObjectIdUtils.convertToObjectId(userId);
         const _account = new UserGameAccountModel(account);
         const errors = _account.validateSync();
         if (errors) {

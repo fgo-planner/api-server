@@ -1,7 +1,9 @@
+import { ObjectId } from 'bson';
 import { UserGameAccountSchemaDefinition } from 'data/schemas';
 import { UserGameAccount } from 'data/types';
 import { UserGameAccountValidators } from 'data/validators';
-import mongoose, { Document, Model, Schema } from 'mongoose';
+import mongoose, { Document, DocumentQuery, Model, NativeError, Schema } from 'mongoose';
+
 
 export type UserGameAccountDocument = Document & UserGameAccount;
 
@@ -17,13 +19,37 @@ type UserGameAccountModel = Model<UserGameAccountDocument> & {
      */
     isFriendIdFormatValid: (id: string) => boolean;
 
+    /**
+     * Finds the game accounts associated with the given `userId`. Returns a
+     * simplified version of the game account data.
+     */
+    findByUserId: (userId: ObjectId, callback?: (err: NativeError, res: UserGameAccountDocument[]) => void) =>
+        DocumentQuery<UserGameAccountDocument[], UserGameAccountDocument>;
+
 };
+
+//#region Static function implementations
+
+const findByUserId = function (
+    this: UserGameAccountModel,
+    userId: ObjectId,
+    callback?: (err: NativeError, res: UserGameAccountDocument[]) => void
+) {
+    const projection = {
+        name: 1,
+        friendId: 1
+    };
+    return this.find({ userId }, projection, callback);
+};
+
+//#endregion
 
 /**
  * Properties and functions that can be assigned as statics on the schema.
  */
 const Statics = {
-    isFriendIdFormatValid: UserGameAccountValidators.isFriendIdFormatValid
+    isFriendIdFormatValid: UserGameAccountValidators.isFriendIdFormatValid,
+    findByUserId
 };
 
 /**

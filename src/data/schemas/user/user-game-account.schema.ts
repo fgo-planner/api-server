@@ -15,17 +15,20 @@ export const UserGameAccountSchemaDefinition: SchemaDefinition = {
         required: true,
         index: true
     },
+    name: {
+        type: String,
+        trim: true,
+        maxlength: 31
+    },
     friendId: {
         type: String,
-        required: true,
         validate: {
             validator: UserGameAccountValidators.isFriendIdFormatValid,
             message: MongooseValidationStrings.UserGameAccountFriendIdFormat
         },
         index: true
-        // TODO Make unique?
     },
-    experience: {
+    exp: {
         type: Number,
         min: 0,
         max: 367421977, // TODO Define this as a constant
@@ -34,6 +37,17 @@ export const UserGameAccountSchemaDefinition: SchemaDefinition = {
             message: MongooseValidationStrings.NumberInteger
         },
         default: null
+    },
+    qp: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 999999999, // TODO Define this as a constant
+        validate: {
+            validator: Number.isInteger,
+            message: MongooseValidationStrings.NumberInteger
+        },
+        default: 0
     },
     items: {
         type: [UserGameAccountItemSchema],

@@ -7,9 +7,16 @@ export type UserGameAccount = Entity<ObjectId> & {
 
     userId: ObjectId;
 
-    friendId: string;
+    /**
+     * Account nickname.
+     */
+    name?: string;
 
-    experience: number;
+    friendId?: string;
+
+    exp?: number;
+
+    qp: number;
 
     items: UserGameAccountItem[];
 

@@ -6,23 +6,23 @@ import { Service } from 'typedi';
 @Service()
 export class UserGameAccountService {
 
-    async addAccount(userId: ObjectId, account: UserGameAccount) {
+    async addAccount(userId: ObjectId, account: UserGameAccount): Promise<UserGameAccount> {
         account.userId = userId;
         return UserGameAccountModel.create(account);
     }
 
-    async findById(id: ObjectId) {
+    async findById(id: ObjectId): Promise<UserGameAccount> {
         if (!id) {
             throw 'Account ID is missing or invalid.';
         }
         return await UserGameAccountModel.findById(id).exec();
     }
 
-    async findByUserId(userId: ObjectId) {
+    async findByUserId(userId: ObjectId): Promise<UserGameAccount[]> {
         return await UserGameAccountModel.findByUserId(userId);
     }
 
-    async update(account: Partial<UserGameAccount>) {
+    async update(account: Partial<UserGameAccount>): Promise<UserGameAccount> {
         if (!account._id) {
             throw 'Account ID is missing or invalid.';
         }
@@ -41,7 +41,7 @@ export class UserGameAccountService {
      * @param id The game account ID. Must not be null.
      * @param userId The user's ID. Must not be null.
      */
-    async isOwner(id: ObjectId, userId: ObjectId) {
+    async isOwner(id: ObjectId, userId: ObjectId): Promise<boolean> {
         // TODO Add null checks?
         const user = await UserGameAccountModel.findById(id, { userId: 1 });
         return userId.equals(user.userId);

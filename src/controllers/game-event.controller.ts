@@ -40,7 +40,7 @@ export class GameEventController {
     @GetMapping('/:id')
     getEvent(req: Request, res: Response) {
         const id = ObjectIdUtils.convertToObjectId(req.params.id);
-        this._gameEventService.findById(id as any).then(
+        this._gameEventService.findById(id).then(
             event => {
                 if (event) {
                     return res.send(event);

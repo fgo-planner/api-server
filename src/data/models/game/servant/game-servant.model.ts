@@ -31,7 +31,7 @@ const findByCollectionNo = function (
     collectionNo: number,
     callback?: (err: NativeError, res: GameServantDocument) => void
 ) {
-    return this.findOne({ collectionNo } as any, callback);
+    return this.findOne({ collectionNo }, callback);
 };
 
 const findByClass = function (
@@ -39,7 +39,7 @@ const findByClass = function (
     cls: GameServantClass,
     callback?: (err: NativeError, res: GameServantDocument[]) => void
 ) {
-    return this.find({ class : cls } as any, callback);
+    return this.find({ class : cls }, callback);
 };
 
 

@@ -28,7 +28,7 @@ const findByTypes = function (
     if (!Array.isArray(types)) {
         types = [types];
     }
-    return this.findOne({ type: { $in: types } } as any, callback);
+    return this.findOne({ type: { $in: types } }, callback);
 };
 
 //#endregion

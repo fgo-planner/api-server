@@ -56,7 +56,7 @@ export class GameItemService {
             throw 'ID is missing or invalid.';
         }
         return await GameItemModel.findOneAndUpdate(
-            { _id: id } as any,
+            { _id: id },
             { $set: item },
             { runValidators: true, new: true }
         ).exec();

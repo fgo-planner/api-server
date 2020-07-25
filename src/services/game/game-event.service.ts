@@ -58,7 +58,7 @@ export class GameEventService {
             throw 'ID is missing or invalid.';
         }
         return await GameEventModel.findOneAndUpdate(
-            { _id: id } as any,
+            { _id: id },
             { $set: event },
             { runValidators: true, new: true }
         ).exec();

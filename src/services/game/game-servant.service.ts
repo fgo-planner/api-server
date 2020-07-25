@@ -59,7 +59,7 @@ export class GameServantService {
             throw 'ID is missing or invalid.';
         }
         return await GameServantModel.findOneAndUpdate(
-            { _id: id } as any,
+            { _id: id },
             { $set: servant },
             { runValidators: true, new: true }
         ).exec();

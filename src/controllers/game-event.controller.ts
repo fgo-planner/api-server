@@ -1,9 +1,8 @@
-import { GameEvent } from 'data/types';
 import { Request, Response } from 'express';
 import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { GameEventService } from 'services';
 import { Inject } from 'typedi';
-import { PaginationUtils, ObjectIdUtils } from 'utils';
+import { ObjectIdUtils, PaginationUtils } from 'utils';
 
 @RestController('/game-event', UserAccessLevel.Public)
 export class GameEventController {
@@ -12,57 +11,63 @@ export class GameEventController {
     private _gameEventService: GameEventService;
 
     @PutMapping(UserAccessLevel.Admin)
-    createEvent(req: Request, res: Response) {
-        const event: GameEvent = req.body;
-        this._gameEventService.create(event).then(
-            created => res.send(created),
-            err => res.status(400).send(err)
-        );
+    async createEvent(req: Request, res: Response): Promise<any> {
+        let event = req.body;
+        try {
+            event = await this._gameEventService.create(event);
+            res.send(event);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @GetMapping()
-    getEvents(req: Request, res: Response) {
-        this._gameEventService.findAll().then(
-            events => res.send(events),
-            err => res.status(400).send(err)
-        );
+    async getEvents(req: Request, res: Response): Promise<any> {
+        try {
+            const events = await this._gameEventService.findAll();
+            res.send(events);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @GetMapping('/page')
-    getEventsPage(req: Request, res: Response) {
-        const pagination = PaginationUtils.parse(req.query);
-        this._gameEventService.findPage(pagination).then(
-            data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
-            err => res.status(404).send(err)
-        );
+    async getEventsPage(req: Request, res: Response): Promise<any> {
+        try {
+            const pagination = PaginationUtils.parse(req.query);
+            const page = await this._gameEventService.findPage(pagination);
+            res.send(PaginationUtils.toPage(page.data, page.total, pagination));
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @GetMapping('/:id')
-    getEvent(req: Request, res: Response) {
+    async getEvent(req: Request, res: Response): Promise<any> {
         const id = ObjectIdUtils.convertToObjectId(req.params.id);
-        this._gameEventService.findById(id).then(
-            event => {
-                if (event) {
-                    return res.send(event);
-                }
-                res.status(404).send(`Event ID ${id} could not be found.`);
-            },
-            err => res.status(400).send(err)
-        );
+        try {
+            const event = await this._gameEventService.findById(id);
+            if (!event) {
+                return res.status(404).send(`Event ID ${id} could not be found.`);
+            }
+            res.send(event);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @PostMapping(UserAccessLevel.Admin)
-    updateEvent(req: Request, res: Response) {
-        const event = req.body;
-        this._gameEventService.update(event).then(
-            updated => {
-                if (updated) {
-                    return res.send(updated);
-                }
-                res.status(404).send(`Event ID ${event._id} does not exist.`);
-            },
-            err => res.status(400).send(err)
-        );
+    async updateEvent(req: Request, res: Response): Promise<any> {
+        let event = req.body;
+        try {
+            event = await this._gameEventService.update(event);
+            if (!event) {
+                return res.status(404).send(`Event ID ${req.body._id} does not exist.`);
+            }
+            res.send(event);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
 }

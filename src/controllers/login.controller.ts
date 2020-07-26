@@ -13,34 +13,34 @@ export class LoginController {
     private _userService: UserService;
 
     @PostMapping('/admin')
-    adminLogin(req: Request, res: Response) {
-        this._authService.generateAccessToken(req.body.username, req.body.password, true).then(jwt => {
-            if (!jwt) {
-                return res.status(401).send('Invalid username or password.');
-            }
-            res.send(jwt);
-        });
+    async adminLogin(req: Request, res: Response): Promise<any> {
+        const jwt = await this._authService.generateAccessToken(req.body.username, req.body.password, true);
+        if (!jwt) {
+            return res.status(401).send('Invalid username or password.');
+        }
+        res.send(jwt);
     }
 
     @PostMapping()
-    login(req: Request, res: Response) {
-        this._authService.generateAccessToken(req.body.username, req.body.password).then(jwt => {
-            if (!jwt) {
-                return res.status(401).send('Invalid username or password.');
-            }
-            res.send(jwt);
-        });
+    async login(req: Request, res: Response): Promise<any> {
+        const jwt = await this._authService.generateAccessToken(req.body.username, req.body.password);
+        if (!jwt) {
+            return res.status(401).send('Invalid username or password.');
+        }
+        res.send(jwt);
     }
 
     @PostMapping('/register')
-    register(req: Request, res: Response) {
-        this._userService.register(req.body.username, req.body.email, req.body.password).then(
-            () => res.send('success'),
-            err => res.status(400).send(err)
-        );
+    async register(req: Request, res: Response): Promise<any> {
+        try {
+            await this._userService.register(req.body.username, req.body.email, req.body.password);
+            res.send('success');
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
-    requestPasswordReset(req: Request, res: Response) {
+    async requestPasswordReset(req: Request, res: Response): Promise<any> {
         // TODO Implement this
     }
 

@@ -1,4 +1,3 @@
-import { GameItem } from 'data/types';
 import { Request, Response } from 'express';
 import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { GameItemService } from 'services';
@@ -12,57 +11,63 @@ export class GameItemController {
     private _gameItemService: GameItemService;
 
     @PutMapping(UserAccessLevel.Admin)
-    createItem(req: Request, res: Response) {
-        const item: GameItem = req.body;
-        this._gameItemService.create(item).then(
-            created => res.send(created),
-            err => res.status(400).send(err)
-        );
+    async createItem(req: Request, res: Response): Promise<any> {
+        let item = req.body;
+        try {
+            item = await this._gameItemService.create(item);
+            res.send(item);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @GetMapping()
-    getItems(req: Request, res: Response) {
-        this._gameItemService.findAll().then(
-            items => res.send(items),
-            err => res.status(400).send(err)
-        );
+    async getItems(req: Request, res: Response): Promise<any> {
+        try {
+            const items = await this._gameItemService.findAll();
+            res.send(items);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @GetMapping('/page')
-    getItemsPage(req: Request, res: Response) {
-        const pagination = PaginationUtils.parse(req.query);
-        this._gameItemService.findPage(pagination).then(
-            data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
-            err => res.status(404).send(err)
-        );
+    async getItemsPage(req: Request, res: Response): Promise<any> {
+        try {
+            const pagination = PaginationUtils.parse(req.query);
+            const page = await this._gameItemService.findPage(pagination);
+            res.send(PaginationUtils.toPage(page.data, page.total, pagination));
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @GetMapping('/:id')
-    getItem(req: Request, res: Response) {
+    async getItem(req: Request, res: Response): Promise<any> {
         const id = Number(req.params.id);
-        this._gameItemService.findById(id).then(
-            item => {
-                if (item) {
-                    return res.send(item);
-                }
-                res.status(404).send(`Item ID ${id} could not be found.`);
-            },
-            err => res.status(400).send(err)
-        );
+        try {
+            const item = await this._gameItemService.findById(id);
+            if (!item) {
+                return res.status(404).send(`Item ID ${id} could not be found.`);
+            }
+            res.send(item);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @PostMapping(UserAccessLevel.Admin)
-    updateItem(req: Request, res: Response) {
-        const item = req.body;
-        this._gameItemService.update(item).then(
-            updated => {
-                if (updated) {
-                    return res.send(updated);
-                }
-                res.status(404).send(`Item ID ${item._id} does not exist.`);
-            },
-            err => res.status(400).send(err)
-        );
+    async updateItem(req: Request, res: Response): Promise<any> {
+        let item = req.body;
+        try {
+            item = await this._gameItemService.update(item);
+            if (!item) {
+                return res.status(404).send(`Item ID ${req.body._id} does not exist.`);
+            }
+            res.send(item);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
 }

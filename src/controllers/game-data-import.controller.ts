@@ -1,4 +1,3 @@
-import { GameDataImportOptions } from 'dto';
 import { Request, Response } from 'express';
 import { PostMapping, RestController, UserAccessLevel } from 'internal';
 import { GameDataImportService } from 'services';
@@ -11,12 +10,14 @@ export class GameDataImportController {
     private _dataImportService: GameDataImportService;
 
     @PostMapping('/atlas-academy')
-    import(req: Request, res: Response) {
-        const options: GameDataImportOptions = req.body;
-        this._dataImportService.importFromAtlasAcademy(options).then(
-            data => res.send(data),
-            err => res.status(500).send(err)
-        );
+    async import(req: Request, res: Response): Promise<any> {
+        const options = req.body;
+        try {
+            const data = await this._dataImportService.importFromAtlasAcademy(options);
+            res.send(data);
+        } catch (err) {
+            res.status(500).send(err);
+        }
     }
 
 }

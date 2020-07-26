@@ -1,4 +1,3 @@
-import { GameServant } from 'data/types';
 import { Request, Response } from 'express';
 import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { GameServantService } from 'services';
@@ -12,56 +11,62 @@ export class GameServantController {
     private _gameServantService: GameServantService;
 
     @PutMapping(UserAccessLevel.Admin)
-    createServant(req: Request, res: Response) {
-        const servant: GameServant = req.body;
-        this._gameServantService.create(servant).then(
-            created => res.send(created),
-            err => res.status(400).send(err)
-        );
+    async createServant(req: Request, res: Response): Promise<any> {
+        let servant = req.body;
+        try {
+            servant = await this._gameServantService.create(servant);
+            res.send(servant);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
-    getServants(req: Request, res: Response) {
-        this._gameServantService.findAll().then(
-            servants => res.send(servants),
-            err => res.status(400).send(err)
-        );
+    async getServants(req: Request, res: Response): Promise<any> {
+        try {
+            const servants = await this._gameServantService.findAll();
+            res.send(servants);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @GetMapping('/page')
-    getServantsPage(req: Request, res: Response) {
-        const pagination = PaginationUtils.parse(req.query);
-        this._gameServantService.findPage(pagination).then(
-            data => res.send(PaginationUtils.toPage(data.data, data.total, pagination)),
-            err => res.status(400).send(err)
-        );
+    async getServantsPage(req: Request, res: Response): Promise<any> {
+        try {
+            const pagination = PaginationUtils.parse(req.query);
+            const page = await this._gameServantService.findPage(pagination);
+            res.send(PaginationUtils.toPage(page.data, page.total, pagination));
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @GetMapping('/:id')
-    getServant(req: Request, res: Response) {
+    async getServant(req: Request, res: Response): Promise<any> {
         const id = Number(req.params.id);
-        this._gameServantService.findById(id).then(
-            servant => {
-                if (servant) {
-                    return res.send(servant);
-                }
-                res.status(404).send(`Servant ID ${id} could not be found.`);
-            },
-            err => res.status(400).send(err)
-        );
+        try {
+            const servant = await this._gameServantService.findById(id);
+            if (!servant) {
+                return res.status(404).send(`Servant ID ${id} could not be found.`);
+            }
+            res.send(servant);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     @PostMapping(UserAccessLevel.Admin)
-    updateServant(req: Request, res: Response) {
-        const servant = req.body;
-        this._gameServantService.update(servant).then(
-            updated => {
-                if (updated) {
-                    return res.send(updated);
-                }
-                res.status(404).send(`Servant ID ${servant._id} does not exist.`);
-            },
-            err => res.status(400).send(err)
-        );
+    async updateServant(req: Request, res: Response): Promise<any> {
+        let servant = req.body;
+        try {
+            servant = await this._gameServantService.update(servant);
+            if (!servant) {
+                return res.status(404).send(`Servant ID ${req.body._id} does not exist.`);
+            }
+            res.send(servant);
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
 }

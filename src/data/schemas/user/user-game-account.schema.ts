@@ -23,7 +23,7 @@ export const UserGameAccountSchemaDefinition: SchemaDefinition = {
     friendId: {
         type: String,
         validate: {
-            validator: UserGameAccountValidators.isFriendIdFormatValid,
+            validator: UserGameAccountValidators.isFriendIdFormalValidOrEmpty,
             message: MongooseValidationStrings.UserGameAccountFriendIdFormat
         },
         index: true

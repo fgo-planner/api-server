@@ -18,7 +18,7 @@ export class UserGameAccountService {
         return await UserGameAccountModel.findById(id).exec();
     }
 
-    async findByUserId(userId: ObjectId): Promise<UserGameAccount[]> {
+    async findByUserId(userId: ObjectId): Promise<Partial<UserGameAccount>[]> {
         return await UserGameAccountModel.findByUserId(userId);
     }
 

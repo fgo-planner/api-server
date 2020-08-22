@@ -23,8 +23,8 @@ type UserGameAccountModel = Model<UserGameAccountDocument> & {
      * Finds the game accounts associated with the given `userId`. Returns a
      * simplified version of the game account data.
      */
-    findByUserId: (userId: ObjectId, callback?: (err: NativeError, res: UserGameAccountDocument[]) => void) =>
-        DocumentQuery<UserGameAccountDocument[], UserGameAccountDocument>;
+    findByUserId: (userId: ObjectId, callback?: (err: NativeError, res: Partial<UserGameAccountDocument>[]) => void) =>
+        DocumentQuery<Partial<UserGameAccountDocument>[], UserGameAccountDocument>;
 
 };
 
@@ -33,7 +33,7 @@ type UserGameAccountModel = Model<UserGameAccountDocument> & {
 const findByUserId = function (
     this: UserGameAccountModel,
     userId: ObjectId,
-    callback?: (err: NativeError, res: UserGameAccountDocument[]) => void
+    callback?: (err: NativeError, res: Partial<UserGameAccountDocument>[]) => void
 ) {
     const projection = {
         name: 1,

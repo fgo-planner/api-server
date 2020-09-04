@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
-import { UserModel } from 'data/models';
+import { ObjectId } from 'bson';
+import { UserModel, UserDocument } from 'data/models';
 import { Service } from 'typedi';
 
 /** 
@@ -14,6 +15,28 @@ export class UserService {
         UserModel.setAdminStatus(id, status, (err, doc) => {
             console.log(doc);
         });
+    }
+
+    async findById(id: ObjectId): Promise<UserDocument> {
+        if (!id) {
+            throw 'User ID is missing or invalid.';
+        }
+        return await UserModel.findById(id).exec();
+    }
+
+    async findByIdBasic(id: ObjectId): Promise<UserDocument> {
+        if (!id) {
+            throw 'User ID is missing or invalid.';
+        }
+        const projection = {
+            _id: 0,
+            hash: 0,
+            admin: 0,
+            enabled: 0,
+            createdAt: 0,
+            updatedAt: 0
+        };
+        return await UserModel.findById(id, projection).exec();
     }
 
     // TODO Create DTO for parameters if it gets too big.

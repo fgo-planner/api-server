@@ -127,24 +127,28 @@ export class AtlasAcademyDataImportService {
      */
     async getServants(skipIds: Set<number>, logger?: Logger): Promise<GameServant[]> {
         /*
-         * Retrieve JP servant data.
+         * Retrieve 'nice' JP servant data.
          */
-        const jpServants = await this._getNiceServants('JP', logger);
+        const niceServants = await this._getNiceServants('JP', logger);
+
+        console.log(niceServants.length);
 
         /*
          * Convert the JP servant data into `GameServant` objects.
          */
-        const servants = jpServants
+        const servants = niceServants
             .map(servant => this._transformServantData(servant))
             .filter(servant => servant != null && !skipIds.has(servant._id));
 
+        console.log(servants.length);
+
         /*
-         * Retrieve basic servant data with English names and convert it into name
+         * Retrieve 'basic' JP servant data with English names and convert it into name
          * lookup map.
          */
-        const naBasicServants = await this._getBasicServants(logger);
+        const basicServants = await this._getBasicServants(logger);
         const englishNames: { [key: number]: string } = {};
-        for (const servant of naBasicServants) {
+        for (const servant of basicServants) {
             englishNames[servant.collectionNo] = servant.name;
         }
 
@@ -182,26 +186,6 @@ export class AtlasAcademyDataImportService {
     }
 
     /**
-     * Retrieves the basic data for a single servant from the Atlas Academy API.
-     * The English servant names are always retrieved using this method.
-     * 
-     * @deprecated No longer needed as a pre-generated JP servant list with English
-     * is now available.
-     */
-    private async _getBasicServant(id: number, region: 'NA' | 'JP', logger?: Logger): Promise<AtlasAcademyBasicServant> {
-        const url = `${Constants.BaseUrl}/${Constants.BasicPath}/${region}/${Constants.ServantPath}/${id}`;
-        const params = { lang: 'en' };
-        logger?.info(`Calling ${url} with params ${JSON.stringify(params)}`);
-        try {
-            const response = await axios.get(url, { params });
-            return response.data;
-        } catch (err) {
-            logger?.error(err);
-        }
-        return null;
-    }
-
-    /**
      * Converts a Atlas Academy `NiceServant` object into a `GameServant` object.
      */
     private _transformServantData(servant: AtlasAcademyNiceServant): GameServant {
@@ -215,7 +199,8 @@ export class AtlasAcademyDataImportService {
         // Mash does not have any ascension materials to import.
         if (servant.type !== AtlasAcademyNiceServantType.Heroine) {
             ascensionMaterials = {};
-            for (let i = 1; i <= Constants.AscensionLevelCount; i++) {
+            // As of 10/8/2020, ascension materials start at index 0 instead of 1.
+            for (let i = 0; i < Constants.AscensionLevelCount; i++) {
                 ascensionMaterials[i] = this._transformEnhancementMaterials((servant.ascensionMaterials as any)[i]);
             }
         }
@@ -245,7 +230,7 @@ export class AtlasAcademyDataImportService {
             skillMaterials,
             metadata: {
                 displayName: servant.name,
-                links: []
+                links: [] as any[]
             }
         };
     }
@@ -329,7 +314,7 @@ export class AtlasAcademyDataImportService {
             .filter(item => item != null && !skipIds.has(item._id));
 
         /**
-         * Retrieve basic NA item data and convert it into name lookup map.
+         * Retrieve NA item data and convert it into name lookup map.
          */
         const naItems = await this._getNiceItems('NA', logger);
         const englishNames: { [key: number]: string } = {};
@@ -357,23 +342,6 @@ export class AtlasAcademyDataImportService {
         return response.data;
     }
 
-    /**
-     * Retrieves the data for a single item from the Atlas Academy API. The English
-     * item names are always retrieved using this method.
-     */
-    private async _getNiceItem(id: number, region: 'NA' | 'JP', logger?: Logger): Promise<AtlasAcademyNiceItem> {
-        const url = `${Constants.BaseUrl}/${Constants.NicePath}/${region}/${Constants.ItemPath}/${id}`;
-        const params = { lang: 'en' };
-        logger?.info(`Calling ${url} with params ${JSON.stringify(params)}`);
-        try {
-            const response = await axios.get(url, { params });
-            return response.data;
-        } catch (err) {
-            logger?.error(err);
-        }
-        return null;
-    }
-
     private _transformItemData(item: AtlasAcademyNiceItem): GameItem {
         /*
          * As of 6/28/2020, some item types in the Atlas Academy data set have not been
@@ -398,17 +366,13 @@ export class AtlasAcademyDataImportService {
      */
     private async _populateItemEnglishNames(items: GameItem[], englishNames: { [key: number]: string }, logger?: Logger) {
         for (const item of items) {
-            let name = englishNames[item._id];
+            const name = englishNames[item._id];
             if (!name) {
-                const niceItem = await this._getNiceItem(item._id, 'JP', logger);
-                if (!niceItem) {
-                    logger?.warn(
-                        `Item with ID ${item._id} could not be loaded. 
-                        English name population will be skipped.`
-                    );
-                    continue;
-                }
-                name = niceItem.name;
+                logger?.warn(
+                    `Item with ID ${item._id} could not be loaded. 
+                    English name population will be skipped.`
+                );
+                continue;
             }
             item.name = name;
         }

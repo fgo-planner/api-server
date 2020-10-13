@@ -4,7 +4,7 @@ import { UserModel, UserDocument } from 'data/models';
 import { Service } from 'typedi';
 
 /** 
- * Handles retriving and updating users (excluding adminstrative operations).
+ * Handles retrieving and updating users (excluding administrative operations).
  */
 @Service()
 export class UserService {

@@ -36,6 +36,13 @@ export class GameServantService {
         return GameServantModel.find().exec();
     }
 
+    async findByIds(ids: number[]): Promise<GameServantDocument[]> {
+        if (!ids || !ids.length) {
+            return [];
+        }
+        return GameServantModel.find({ _id: { $in: ids } }).exec();
+    }
+
     async findAllIds(): Promise<number[]> {
         return GameServantModel.distinct('_id').exec();
     }

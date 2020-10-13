@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { GameServantService } from 'services';
 import { Inject } from 'typedi';
-import { PaginationUtils } from 'utils';
+import { PaginationUtils, HttpRequestUtils } from 'utils';
 
 @RestController('/game-servant', UserAccessLevel.Public)
 export class GameServantController {
@@ -21,9 +21,16 @@ export class GameServantController {
         }
     }
 
+    @GetMapping()
     async getServants(req: Request, res: Response): Promise<any> {
         try {
-            const servants = await this._gameServantService.findAll();
+            let servants;
+            if (req.query.ids) {
+                const ids = HttpRequestUtils.parseIntegerList(req.query.ids);
+                servants = await this._gameServantService.findByIds(ids);
+            } else {
+                servants = await this._gameServantService.findAll();
+            }
             res.send(servants);
         } catch (err) {
             res.status(400).send(err);

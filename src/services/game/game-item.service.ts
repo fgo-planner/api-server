@@ -28,6 +28,13 @@ export class GameItemService {
     async findAll(): Promise<GameItemDocument[]> {
         return GameItemModel.find().exec();
     }
+    
+    async findByIds(ids: number[]): Promise<GameItemDocument[]> {
+        if (!ids || !ids.length) {
+            return [];
+        }
+        return GameItemModel.find({ _id: { $in: ids } }).exec();
+    }
 
     async findAllIds(): Promise<number[]> {
         return GameItemModel.distinct('_id').exec();

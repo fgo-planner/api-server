@@ -1,15 +1,15 @@
 import { ObjectId } from 'bson';
-import { UserGameAccountValidators } from 'data/validators';
+import { MasterAccountValidators } from 'data/validators';
 import { SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
 import { NumberUtils } from 'utils';
-import { UserGameAccountItemSchema } from './user-game-account-item.schema';
-import { UserGameAccountServantSchema } from './user-game-account-servant.schema';
+import { MasterItemSchema } from './master-item.schema';
+import { MasterServantSchema } from './master-servant.schema';
 
 /**
- * Mongoose schema definition for the `UserGameAccount` type.
+ * Mongoose schema definition for the `MasterAccount` type.
  */
-export const UserGameAccountSchemaDefinition: SchemaDefinition = {
+export const MasterAccountSchemaDefinition: SchemaDefinition = {
     userId: {
         type: ObjectId,
         required: true,
@@ -23,8 +23,8 @@ export const UserGameAccountSchemaDefinition: SchemaDefinition = {
     friendId: {
         type: String,
         validate: {
-            validator: UserGameAccountValidators.isFriendIdFormalValidOrEmpty,
-            message: MongooseValidationStrings.UserGameAccountFriendIdFormat
+            validator: MasterAccountValidators.isFriendIdFormalValidOrEmpty,
+            message: MongooseValidationStrings.MasterFriendIdFormat
         },
         index: true
     },
@@ -50,12 +50,12 @@ export const UserGameAccountSchemaDefinition: SchemaDefinition = {
         default: 0
     },
     items: {
-        type: [UserGameAccountItemSchema],
+        type: [MasterItemSchema],
         required: true,
         default: []
     },
     servants: {
-        type: [UserGameAccountServantSchema],
+        type: [MasterServantSchema],
         required: true,
         default: []
     }

@@ -1,1 +1,1 @@
-export * from './user/user-game-account.validators';
+export * from './user/master-account.validators';

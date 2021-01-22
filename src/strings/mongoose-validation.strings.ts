@@ -25,8 +25,8 @@ export class MongooseValidationStrings {
 
     //#endregion
     
-    static readonly UserGameAccountFriendIdFormat = `${MongooseValidationStrings.GenericInvalidFormat} It must be exactly 9 characters long and can only contain numerical digits.`;
+    static readonly MasterFriendIdFormat = `${MongooseValidationStrings.GenericInvalidFormat} It must be exactly 9 characters long and can only contain numerical digits.`;
 
-    static readonly UserGameAccountServantFirstSkillUnlocked = `${MongooseValidationStrings.GenericInvalidValue} The first skill must always be unlocked.`;
+    static readonly MasterServantFirstSkillUnlocked = `${MongooseValidationStrings.GenericInvalidValue} The first skill must always be unlocked.`;
 
 }

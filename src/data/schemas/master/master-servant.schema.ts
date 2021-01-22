@@ -1,12 +1,12 @@
+import { MasterAccountValidators } from 'data/validators';
 import { Schema } from 'mongoose';
-import { NumberUtils } from 'utils';
 import { MongooseValidationStrings } from 'strings';
-import { UserGameAccountValidators } from 'data/validators';
+import { NumberUtils } from 'utils';
 
 /**
- * Mongoose schema for the `UserGameAccountServant.skillLevels` property.
+ * Mongoose schema for the `MasterServant.skillLevels` property.
  */
-const UserGameAccountServantSkillLevelsSchema = new Schema({
+const MasterServantSkillLevelsSchema = new Schema({
     1: {
         type: Number,
         min: 1,
@@ -37,9 +37,9 @@ const UserGameAccountServantSkillLevelsSchema = new Schema({
 });
 
 /**
- * Mongoose schema for the `UserGameAccountServant` type.
+ * Mongoose schema for the `MasterServant` type.
  */
-export const UserGameAccountServantSchema = new Schema({
+export const MasterServantSchema = new Schema({
     gameId: {
         type: Number,
         required: true,
@@ -89,7 +89,7 @@ export const UserGameAccountServantSchema = new Schema({
         min: 0,
         max: 2000,
         validate: {
-            validator: UserGameAccountValidators.isFouValueValid,
+            validator: MasterAccountValidators.isFouValueValid,
             message: MongooseValidationStrings.GenericInvalidValue
         }
     },
@@ -98,12 +98,12 @@ export const UserGameAccountServantSchema = new Schema({
         min: 0,
         max: 2000,
         validate: {
-            validator: UserGameAccountValidators.isFouValueValid,
+            validator: MasterAccountValidators.isFouValueValid,
             message: MongooseValidationStrings.GenericInvalidValue
         }
     },
     skillLevels: {
-        type: UserGameAccountServantSkillLevelsSchema,
+        type: MasterServantSkillLevelsSchema,
         required: true,
         default: {}
     },

@@ -2,9 +2,9 @@ import { Schema } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
 
 /**
- * Mongoose schema for the `UserGameAccountItem` type.
+ * Mongoose schema for the `MasterItem` type.
  */
-export const UserGameAccountItemSchema = new Schema({
+export const MasterItemSchema = new Schema({
     itemId: {
         type: Number,
         required: true,

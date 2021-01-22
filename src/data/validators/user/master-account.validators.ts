@@ -1,9 +1,8 @@
-export class UserGameAccountValidators {
+export class MasterAccountValidators {
 
     /**
-     * Regex for checking if a game account ID string is in a valid format. Game
-     * account IDs must be exactly 9 characters long and can only contain numerical
-     * digits.
+     * Regex for checking if a friend ID string is in a valid format. Friend IDs
+     * must be exactly 9 characters long and can only contain numerical digits.
      */
     private static readonly _FriendIdFormatValidationRegex = /^\d{9}$/;
 
@@ -12,7 +11,7 @@ export class UserGameAccountValidators {
      * the given friend ID string to check if it's in a valid format.
      */
     static isFriendIdFormatValid(id: string) {
-        return UserGameAccountValidators._FriendIdFormatValidationRegex.test(id);
+        return MasterAccountValidators._FriendIdFormatValidationRegex.test(id);
     };
 
     /**
@@ -24,7 +23,7 @@ export class UserGameAccountValidators {
         if (!id) {
             return true;
         }
-        return UserGameAccountValidators._FriendIdFormatValidationRegex.test(id);
+        return MasterAccountValidators._FriendIdFormatValidationRegex.test(id);
     };
 
     /**

@@ -10,6 +10,9 @@ export class GameServantController {
     @Inject()
     private _gameServantService: GameServantService;
 
+    // TODO Implement auto expire
+    private _gameServantsCachedResponse: string;
+
     @PutMapping(UserAccessLevel.Admin)
     async createServant(req: Request, res: Response): Promise<any> {
         let servant = req.body;
@@ -24,14 +27,17 @@ export class GameServantController {
     @GetMapping()
     async getServants(req: Request, res: Response): Promise<any> {
         try {
-            let servants;
             if (req.query.ids) {
                 const ids = HttpRequestUtils.parseIntegerList(req.query.ids);
-                servants = await this._gameServantService.findByIds(ids);
+                const servants = await this._gameServantService.findByIds(ids);
+                res.send(servants);
             } else {
-                servants = await this._gameServantService.findAll();
+                if (!this._gameServantsCachedResponse) {
+                    const servants = await this._gameServantService.findAll();
+                    this._gameServantsCachedResponse = JSON.stringify(servants);
+                }
+                res.send(this._gameServantsCachedResponse);
             }
-            res.send(servants);
         } catch (err) {
             res.status(400).send(err);
         }

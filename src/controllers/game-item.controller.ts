@@ -10,6 +10,9 @@ export class GameItemController {
     @Inject()
     private _gameItemService: GameItemService;
 
+    // TODO Implement auto expire
+    private _gameItemsCachedResponse: string;
+
     @PutMapping(UserAccessLevel.Admin)
     async createItem(req: Request, res: Response): Promise<any> {
         let item = req.body;
@@ -24,14 +27,17 @@ export class GameItemController {
     @GetMapping()
     async getItems(req: Request, res: Response): Promise<any> {
         try {
-            let items;
             if (req.query.ids) {
                 const ids = HttpRequestUtils.parseIntegerList(req.query.ids);
-                items = await this._gameItemService.findByIds(ids);
+                const items = await this._gameItemService.findByIds(ids);
+                res.send(items);
             } else {
-                items = await this._gameItemService.findAll();
+                if (!this._gameItemsCachedResponse) {
+                    const items = await this._gameItemService.findAll();
+                    this._gameItemsCachedResponse = JSON.stringify(items);
+                }
+                res.send(this._gameItemsCachedResponse);
             }
-            res.send(items);
         } catch (err) {
             res.status(400).send(err);
         }

@@ -9,12 +9,14 @@ import { NumberUtils } from 'utils';
 const MasterServantSkillLevelsSchema = new Schema({
     1: {
         type: Number,
+        required: true,
         min: 1,
         max: 10,
         validate: {
             validator: NumberUtils.isNullOrInteger,
             message: MongooseValidationStrings.NumberInteger
-        }
+        },
+        default: 1
     },
     2: {
         type: Number,

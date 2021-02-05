@@ -21,7 +21,7 @@ export type MasterServant = {
 
     skillLevels: {
 
-        1?: number;
+        1: number;
 
         2?: number;
 

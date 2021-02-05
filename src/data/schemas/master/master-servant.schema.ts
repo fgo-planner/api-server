@@ -40,6 +40,15 @@ const MasterServantSkillLevelsSchema = new Schema({
  * Mongoose schema for the `MasterServant` type.
  */
 export const MasterServantSchema = new Schema({
+    instanceId: {
+        type: Number,
+        required: true,
+        validate: {
+            // TODO This must be unique
+            validator: Number.isInteger,
+            message: MongooseValidationStrings.NumberInteger
+        }
+    },
     gameId: {
         type: Number,
         required: true,

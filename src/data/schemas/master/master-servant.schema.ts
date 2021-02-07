@@ -88,7 +88,7 @@ export const MasterServantSchema = new Schema({
     },
     bond: {
         type: Number,
-        min: 1,
+        min: 0,
         max: 15,
         validate: {
             validator: NumberUtils.isNullOrInteger,

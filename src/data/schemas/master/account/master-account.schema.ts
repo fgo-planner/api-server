@@ -3,8 +3,8 @@ import { MasterAccountValidators } from 'data/validators';
 import { SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
 import { NumberUtils } from 'utils';
-import { MasterItemSchema } from './master-item.schema';
-import { MasterServantSchema } from './master-servant.schema';
+import { MasterItemSchema } from '../item/master-item.schema';
+import { MasterServantSchema } from '../servant/master-servant.schema';
 
 /**
  * Mongoose schema definition for the `MasterAccount` type.

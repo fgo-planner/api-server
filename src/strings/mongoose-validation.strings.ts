@@ -11,6 +11,8 @@ export class MongooseValidationStrings {
     static readonly GenericInvalidFormat = 'Path `{PATH}` ({VALUE}) is in an incorrect format.'
 
     static readonly GenericInvalidValue = 'Path `{PATH}` ({VALUE}) contains an invalid value.'
+
+    static readonly GenericInvalidValuePathOnly = 'Path `{PATH}` contains an invalid value.'
     
     //#endregion
 
@@ -25,8 +27,15 @@ export class MongooseValidationStrings {
 
     //#endregion
     
+
+    //#region Master account validation messages
+
     static readonly MasterFriendIdFormat = `${MongooseValidationStrings.GenericInvalidFormat} It must be exactly 9 characters long and can only contain numerical digits.`;
 
     static readonly MasterServantFirstSkillUnlocked = `${MongooseValidationStrings.GenericInvalidValue} The first skill must always be unlocked.`;
+    
+    static readonly MasterServantUniqueInstanceId = `${MongooseValidationStrings.GenericInvalidValuePathOnly} Servant instanceIds must be unique.`;
+    
+    //#endregion
 
 }

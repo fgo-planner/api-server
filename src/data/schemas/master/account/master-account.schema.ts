@@ -57,6 +57,10 @@ export const MasterAccountSchemaDefinition: SchemaDefinition = {
     servants: {
         type: [MasterServantSchema],
         required: true,
+        validate: {
+            validator: MasterAccountValidators.servantInstanceIdsUnique,
+            message: MongooseValidationStrings.MasterServantUniqueInstanceId
+        },
         default: []
     }
 };

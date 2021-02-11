@@ -1,3 +1,5 @@
+import { MasterServant } from 'data/types';
+
 export class MasterAccountValidators {
 
     /**
@@ -10,7 +12,7 @@ export class MasterAccountValidators {
      * Validator function that tests the friend ID format validation RegExp against
      * the given friend ID string to check if it's in a valid format.
      */
-    static isFriendIdFormatValid(id: string) {
+    static isFriendIdFormatValid(id: string): boolean {
         return MasterAccountValidators._FriendIdFormatValidationRegex.test(id);
     };
 
@@ -19,7 +21,7 @@ export class MasterAccountValidators {
      * the given friend ID string to check if it's in a valid format. Null or empty
      * inputs will return true.
      */
-    static isFriendIdFormalValidOrEmpty(id: string) {
+    static isFriendIdFormalValidOrEmpty(id: string): boolean {
         if (!id) {
             return true;
         }
@@ -31,11 +33,26 @@ export class MasterAccountValidators {
      * the value is less than or equal to 1000, the value must be a multiple of 10.
      * Otherwise, the value must be a multiple of 20.
      */
-    static isFouValueValid(value: number) {
+    static isFouValueValid(value: number): boolean {
         if (value <= 1000) {
             return value % 10 === 0;
         }
         return value % 20 === 0;
     };
+
+    static servantInstanceIdsUnique(servants: MasterServant[]): boolean {
+        if (!servants.length) {
+            return true;
+        }
+        const instanceIds = new Set<number>();
+        for (const servant of servants) {
+            const instanceId = servant.instanceId;
+            if (instanceIds.has(instanceId)) {
+                return false;
+            }
+            instanceIds.add(instanceId);
+        }
+        return true;
+    }
 
 }

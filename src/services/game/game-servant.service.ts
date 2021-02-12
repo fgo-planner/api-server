@@ -12,16 +12,10 @@ export class GameServantService {
     }
 
     async existsById(id: number) {
-        if (!id && id !== 0) {
-            throw 'Servant ID is missing or invalid.';
-        }
         return await GameServantModel.exists({ _id: id });
     }
 
-    async findById(id: number): Promise<GameServantDocument> {
-        if (!id && id !== 0) {
-            throw 'Servant ID is missing or invalid.';
-        }
+    async findById(id: number): Promise<GameServantDocument | null> {
         return await GameServantModel.findById(id).exec();
     }
 
@@ -60,7 +54,7 @@ export class GameServantService {
         return { data, total: count };
     }
 
-    async update(servant: GameServant): Promise<GameServantDocument> {
+    async update(servant: GameServant): Promise<GameServantDocument | null> {
         const id = Number(servant._id);
         if (!id && id !== 0) {
             throw 'ID is missing or invalid.';

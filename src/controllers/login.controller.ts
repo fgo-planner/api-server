@@ -7,10 +7,10 @@ import { Inject } from 'typedi';
 export class LoginController {
 
     @Inject()
-    private _authService: AuthenticationService;
+    private _authService!: AuthenticationService;
 
     @Inject()
-    private _userService: UserService;
+    private _userService!: UserService;
 
     @PostMapping('/admin')
     async adminLogin(req: Request, res: Response): Promise<any> {

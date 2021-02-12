@@ -1,10 +1,21 @@
 import { Request, Response } from 'express';
 import { GetMapping, RestController, UserAccessLevel } from 'internal';
+import { ObjectId } from 'bson';
 
-@RestController('/test', UserAccessLevel.Admin)
+@RestController('/test', UserAccessLevel.Public)
 export class TestController {
 
-    @GetMapping('/file-upload')
+    @GetMapping()
+    testObjectId(req: Request, res: Response) {
+        try {
+            const data = new ObjectId(undefined);
+            res.send(data);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
+    @GetMapping('/file-upload', UserAccessLevel.Admin)
     test(req: Request, res: Response) {
         const fileContents = req.file.buffer.toString();
         try {

@@ -12,16 +12,10 @@ export class GameItemService {
     }
 
     async existsById(id: number) {
-        if (!id && id !== 0) {
-            throw 'Servant ID is missing or invalid.';
-        }
         return await GameItemModel.exists({ _id: id });
     }
 
-    async findById(id: number): Promise<GameItemDocument> {
-        if (!id && id !== 0) {
-            throw 'Item ID is missing or invalid.';
-        }
+    async findById(id: number): Promise<GameItemDocument | null> {
         return await GameItemModel.findById(id).exec();
     }
 
@@ -57,10 +51,10 @@ export class GameItemService {
         return GameItemModel.findByTypes(types).exec();
     }
 
-    async update(item: GameItem): Promise<GameItemDocument> {
+    async update(item: GameItem): Promise<GameItemDocument | null> {
         const id = Number(item._id);
         if (!id && id !== 0) {
-            throw 'ID is missing or invalid.';
+            throw 'Item ID is missing or invalid.';
         }
         return await GameItemModel.findOneAndUpdate(
             { _id: id },

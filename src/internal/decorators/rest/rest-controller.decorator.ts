@@ -1,5 +1,7 @@
 import { UserAccessLevel } from 'internal';
 
+type Decorator = (target: any) => void;
+
 export const ControllerMetadataKey = 'controller';
 
 /**
@@ -27,7 +29,7 @@ const parseInputs = (param1?: string | UserAccessLevel, param2?: UserAccessLevel
  * The minimum user access level required to access any methods in the
  * controller is set to 'admin only' by default.
  */
-export function RestController(): (target: any) => void;
+export function RestController(): Decorator;
 
 /**
  * Decorator for indicating that the class is a REST controller. Methods in
@@ -40,7 +42,7 @@ export function RestController(): (target: any) => void;
  * @param prefix An optional prefix that will be prepended to each mapped 
  *               resource URIs in this contoller.
  */
-export function RestController(prefix: string): (target: any) => void;
+export function RestController(prefix: string): Decorator;
 
 /**
  * Decorator for indicating that the class is a REST controller. Methods in
@@ -50,7 +52,7 @@ export function RestController(prefix: string): (target: any) => void;
  * @param defaultAccessLevel Sets the user access level that is required to
  *                           access the resources on this controller.
  */
-export function RestController(defaultAccessLevel: UserAccessLevel): (target: any) => void;
+export function RestController(defaultAccessLevel: UserAccessLevel): Decorator;
 
 /**
  * Decorator for indicating that the class is a REST controller. Methods in
@@ -62,7 +64,7 @@ export function RestController(defaultAccessLevel: UserAccessLevel): (target: an
  * @param defaultAccessLevel Sets the user access level that is required to
  *                           access the resources on this controller.
  */
-export function RestController(prefix: string, defaultAccessLevel: UserAccessLevel): (target: any) => void;
+export function RestController(prefix: string, defaultAccessLevel: UserAccessLevel): Decorator;
 
 /**
  * `RestController` function implementation.

@@ -1,22 +1,22 @@
 import { ObjectId } from 'bson';
-import { Request, Response } from 'express';
-import { AccessTokenPayload, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
+import { Response } from 'express';
+import { AccessTokenPayload, AuthenticatedRequest, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { MasterAccountService } from 'services';
 import { Inject } from 'typedi';
-import { ObjectIdUtils } from 'utils';
+import { HttpRequestUtils, ObjectIdUtils } from 'utils';
 
 @RestController('/user/master-account', UserAccessLevel.Authenticated)
 export class MasterAccountController {
 
     @Inject()
-    private _masterAccountService: MasterAccountService;
+    private _masterAccountService!: MasterAccountService;
 
     @PutMapping()
-    async addAccount(req: Request, res: Response): Promise<any> {
+    async addAccount(req: AuthenticatedRequest, res: Response): Promise<any> {
         let account = req.body;
-        const userId = ObjectIdUtils.convertToObjectId(req.token.id);
+        const userId = new ObjectId(req.token.id);
         try {
-            account = await this._masterAccountService.addAccount(userId, req.body);
+            account = await this._masterAccountService.addAccount(userId, account);
             res.send(account);
         } catch (err) {
             res.status(400).send(err);
@@ -24,9 +24,9 @@ export class MasterAccountController {
     }
 
     @GetMapping('/current-user')
-    async getAccountsForCurrentUser(req: Request, res: Response): Promise<any> {
-        const userId = ObjectIdUtils.convertToObjectId(req.token.id);
+    async getAccountsForCurrentUser(req: AuthenticatedRequest, res: Response): Promise<any> {
         try {
+            const userId = new ObjectId(req.token.id);
             const accounts = await this._masterAccountService.findByUserId(userId);
             res.send(accounts);
         } catch (err) {
@@ -35,9 +35,9 @@ export class MasterAccountController {
     }
 
     @GetMapping('/:id')
-    async getAccount(req: Request, res: Response): Promise<any> {
-        const id = ObjectIdUtils.convertToObjectId(req.params.id);
+    async getAccount(req: AuthenticatedRequest, res: Response): Promise<any> {
         try {
+            const id = HttpRequestUtils.parseObjectIdFromParams(req.params, 'id');
             if (!await this._hasAccess(id, req.token)) {
                 return res.status(401).send(); // TODO Add message
             }
@@ -49,10 +49,10 @@ export class MasterAccountController {
     }
 
     @PostMapping()
-    async updateAccount(req: Request, res: Response): Promise<any> {
+    async updateAccount(req: AuthenticatedRequest, res: Response): Promise<any> {
         let account = req.body;
-        const id = account._id = ObjectIdUtils.convertToObjectId(account._id);
         try {
+            const id = account._id = ObjectIdUtils.instantiate(account._id);
             if (!await this._hasAccess(id, req.token)) {
                 return res.status(401).send(); // TODO Add message
             }
@@ -72,23 +72,23 @@ export class MasterAccountController {
      * @param id The master account ID.
      * @param token The requesting user's access token payload.
      */
-    private async _hasAccess(id: ObjectId, token: AccessTokenPayload): Promise<boolean> {
+    private async _hasAccess(masterAccountId: ObjectId, token: AccessTokenPayload): Promise<boolean> {
         const userId = this._getRequestorId(token);
         if (!userId) {
             return true;
         }
-        return await this._masterAccountService.isOwner(id, userId);
+        return await this._masterAccountService.isOwner(masterAccountId, userId);
     }
 
     /**
      * Extracts the Id of the user making the request for verification purposes. If
      * the user is an admin, then null is returned. 
      */
-    private _getRequestorId(token: AccessTokenPayload): ObjectId {
+    private _getRequestorId(token: AccessTokenPayload): ObjectId | null {
         if (token.admin) {
             return null;
         }
-        return ObjectIdUtils.convertToObjectId(token.id);
+        return ObjectIdUtils.instantiate(token.id);
     }
 
 }

@@ -2,7 +2,7 @@ import { ObjectId } from 'bson';
 import { MasterAccountSchemaDefinition } from 'data/schemas';
 import { MasterAccount } from 'data/types';
 import { MasterAccountValidators } from 'data/validators';
-import mongoose, { Document, DocumentQuery, Model, NativeError, Schema } from 'mongoose';
+import mongoose, { Document, DocumentQuery, Model, NativeError, Schema, QueryOptions } from 'mongoose';
 
 
 export type MasterAccountDocument = Document & MasterAccount;
@@ -38,7 +38,7 @@ const findByUserId = function (
         name: 1,
         friendId: 1
     };
-    return this.find({ userId }, projection, callback);
+    return this.find({ userId }, projection, {}, callback);
 };
 
 //#endregion

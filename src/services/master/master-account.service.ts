@@ -11,7 +11,7 @@ export class MasterAccountService {
         return MasterAccountModel.create(account);
     }
 
-    async findById(id: ObjectId): Promise<MasterAccount> {
+    async findById(id: ObjectId): Promise<MasterAccount | null> {
         if (!id) {
             throw 'Account ID is missing or invalid.';
         }
@@ -22,7 +22,7 @@ export class MasterAccountService {
         return await MasterAccountModel.findByUserId(userId);
     }
 
-    async update(account: Partial<MasterAccount>): Promise<MasterAccount> {
+    async update(account: Partial<MasterAccount>): Promise<MasterAccount | null> {
         if (!account._id) {
             throw 'Account ID is missing or invalid.';
         }
@@ -41,10 +41,9 @@ export class MasterAccountService {
      * @param id The master account ID. Must not be null.
      * @param userId The user's ID. Must not be null.
      */
-    async isOwner(id: ObjectId, userId: ObjectId): Promise<boolean> {
-        // TODO Add null checks?
-        const user = await MasterAccountModel.findById(id, { userId: 1 });
-        return userId.equals(user.userId);
+    async isOwner(masterAccountId: ObjectId, userId: ObjectId): Promise<boolean> {
+        const user = await MasterAccountModel.findById(masterAccountId, { userId: 1 });
+        return user ? userId.equals(user.userId) : false;
     }
 
 }

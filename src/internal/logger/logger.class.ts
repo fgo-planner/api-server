@@ -5,12 +5,12 @@ export class Logger {
 
     private readonly _messages: LoggerMessage[] = [];
 
-    private _start: Date;
+    private _start?: Date;
     get start() {
         return this._start;
     }
 
-    private _end: Date;
+    private _end?: Date;
     get end() {
         return this._end;
     }

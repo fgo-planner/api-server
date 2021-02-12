@@ -10,13 +10,13 @@ import { AtlasAcademyDataImportService } from './atlas-academy/atlas-academy-dat
 export class GameDataImportService {
 
     @Inject()
-    private _gameItemService: GameItemService;
+    private _gameItemService!: GameItemService;
 
     @Inject()
-    private _gameServantService: GameServantService;
+    private _gameServantService!: GameServantService;
 
     @Inject()
-    private _atlasAcademyDataImportService: AtlasAcademyDataImportService;
+    private _atlasAcademyDataImportService!: AtlasAcademyDataImportService;
 
     async importFromAtlasAcademy(options: GameDataImportOptions): Promise<GameDataImportResultSet> {
         const resultSet: GameDataImportResultSet = {};

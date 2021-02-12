@@ -14,16 +14,10 @@ export class GameEventService {
     }
 
     async existsById(id: number) {
-        if (!id && id !== 0) {
-            throw 'Servant ID is missing or invalid.';
-        }
         return await GameEventModel.exists({ _id: id });
     }
 
-    async findById(id: ObjectId): Promise<GameEventDocument> {
-        if (!id) {
-            throw 'Event ID is missing or invalid.';
-        }
+    async findById(id: ObjectId): Promise<GameEventDocument | null> {
         return await GameEventModel.findById(id).exec();
     }
 
@@ -52,10 +46,10 @@ export class GameEventService {
         return GameEventModel.findByYear(year).exec();
     }
 
-    async update(event: GameEvent): Promise<GameEventDocument> {
-        const id = ObjectIdUtils.convertToObjectId(event._id);
+    async update(event: GameEvent): Promise<GameEventDocument | null> {
+        const id = ObjectIdUtils.instantiate(event._id);
         if (!id) {
-            throw 'ID is missing or invalid.';
+            throw 'Event ID is missing or invalid.';
         }
         return await GameEventModel.findOneAndUpdate(
             { _id: id },

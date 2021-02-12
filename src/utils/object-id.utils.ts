@@ -1,15 +1,20 @@
 import { ObjectId } from 'bson';
+import { Nullable } from 'internal';
 
 export class ObjectIdUtils {
 
-    static convertToObjectId(id: ObjectId | string) {
-        if (typeof id !== 'string') {
-            return id;
+    /**
+     * Wrapper for the `ObjectId` constructor that throws an exception on a `null`
+     * or `undefined` input instead of returning a new `ObjectId`.
+     */
+    static instantiate(id: Nullable<string | number | ObjectId>): ObjectId {
+        if (id == null) {
+            throw Error('Input ID is null or undefined.');
         }
-        if (ObjectId.isValid(id)) {
-            return new ObjectId(id);
+        if (!ObjectId.isValid(id)) {
+            throw Error(`'${id}' is not a valid ObjectId.`);
         }
-        return null;
+        return new ObjectId(id);
     }
 
 }

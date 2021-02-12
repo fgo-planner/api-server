@@ -2,16 +2,16 @@ import { Request, Response } from 'express';
 import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { GameItemService } from 'services';
 import { Inject } from 'typedi';
-import { PaginationUtils, HttpRequestUtils } from 'utils';
+import { HttpRequestUtils, PaginationUtils } from 'utils';
 
 @RestController('/game-item', UserAccessLevel.Public)
 export class GameItemController {
 
     @Inject()
-    private _gameItemService: GameItemService;
+    private _gameItemService!: GameItemService;
 
     // TODO Implement auto expire
-    private _gameItemsCachedResponse: string;
+    private _gameItemsCachedResponse?: string;
 
     @PutMapping(UserAccessLevel.Admin)
     async createItem(req: Request, res: Response): Promise<any> {
@@ -28,7 +28,13 @@ export class GameItemController {
     async getItems(req: Request, res: Response): Promise<any> {
         try {
             if (req.query.ids) {
+                console.log(Array.isArray(req.query.ids));
+                console.log(req.query.ids);
+                const asdf = HttpRequestUtils.flattenParamsList(req.query.ids);
+                console.log(asdf);
                 const ids = HttpRequestUtils.parseIntegerList(req.query.ids);
+                console.log(ids);
+
                 const items = await this._gameItemService.findByIds(ids);
                 res.send(items);
             } else {
@@ -56,8 +62,8 @@ export class GameItemController {
 
     @GetMapping('/:id')
     async getItem(req: Request, res: Response): Promise<any> {
-        const id = Number(req.params.id);
         try {
+            const id = HttpRequestUtils.parseNumericalIdFromParams(req.params, 'id');
             const item = await this._gameItemService.findById(id);
             if (!item) {
                 return res.status(404).send(`Item ID ${id} could not be found.`);

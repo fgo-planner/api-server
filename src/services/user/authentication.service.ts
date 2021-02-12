@@ -1,17 +1,26 @@
 import bcrypt from 'bcryptjs';
 import { UserModel } from 'data/models';
 import { NextFunction, Request, Response } from 'express';
-import { AccessTokenPayload } from 'internal';
+import { AccessTokenPayload, AuthenticatedRequest } from 'internal';
 import jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
 
 @Service()
 export class AuthenticationService {
 
-    private readonly _BearerTokenPrefix = 'Bearer ';
+    private static readonly _BearerTokenPrefix = 'Bearer ';
+
+    // This cannot be static because it reads from .env file.
+    private get _jwtSecret(): string {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            console.error('JWT secret was not defined in .env file.');
+        }
+        return secret ?? '';
+    }
 
     /**
-     * Verifies provided user credentials, and genereates and returns a JWT access
+     * Verifies provided user credentials, and generates and returns a JWT access
      * token if the credentials are valid. If the credentials were not valid, then
      * null is returned.
      * 
@@ -39,7 +48,7 @@ export class AuthenticationService {
         }
 
         // If the hash compare failed, then return null.
-        if (!(await bcrypt.compare(password, user.hash))) {
+        if (!(await bcrypt.compare(password, user.hash ?? ''))) {
             return null;
         }
 
@@ -49,8 +58,8 @@ export class AuthenticationService {
             admin: user.admin
         };
 
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { algorithm: 'HS512' });
-        return `${this._BearerTokenPrefix}${token}`;
+        const token = jwt.sign(payload, this._jwtSecret, { algorithm: 'HS512' });
+        return `${AuthenticationService._BearerTokenPrefix}${token}`;
     }
 
     /**
@@ -66,7 +75,7 @@ export class AuthenticationService {
         if (req.method !== 'OPTIONS') {
             const payload = this._parseAccessTokenFromRequest(req);
             if (payload) {
-                req.token = payload;
+                (req as AuthenticatedRequest).token = payload;
             }
         }
         next();
@@ -90,7 +99,7 @@ export class AuthenticationService {
         
         const payload = this._parseAccessTokenFromRequest(req);
         if (payload) {
-            req.token = payload;
+            (req as AuthenticatedRequest).token = payload;
             next();
         } else {
             res.status(401).send('Unauthorized');
@@ -99,9 +108,9 @@ export class AuthenticationService {
 
     /**
      * Middleware function for check if the requestor is an admin user. 
-     * `@authenticateAccessToken` must be called before this function.
+     * `authenticateAccessToken` must be called before this function.
      */
-    authenticateAdminUser(req: Request, res: Response, next: NextFunction) {
+    authenticateAdminUser(req: Request & { token?: AccessTokenPayload }, res: Response, next: NextFunction) {
         if (req.token && req.token.admin) {
             next();
         } else {
@@ -109,20 +118,20 @@ export class AuthenticationService {
         }
     }
 
-    private _parseAccessTokenFromRequest(req: Request): AccessTokenPayload {
+    private _parseAccessTokenFromRequest(req: Request): AccessTokenPayload | null {
         let bearer = req.headers.authorization;
         if (!bearer) {
             return null;
         }
-        if (bearer.indexOf(this._BearerTokenPrefix) === 0) {
-            bearer = bearer.substring(this._BearerTokenPrefix.length);
+        if (bearer.indexOf(AuthenticationService._BearerTokenPrefix) === 0) {
+            bearer = bearer.substring(AuthenticationService._BearerTokenPrefix.length);
         }
         return this._parseToken(bearer);
     }
 
-    private _parseToken<T>(token: string): T {
+    private _parseToken<T>(token: string): T | null {
         try {
-            return jwt.verify(token, process.env.JWT_SECRET) as any;
+            return jwt.verify(token, this._jwtSecret) as any;
         } catch {
             return null;
         }

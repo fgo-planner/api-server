@@ -7,7 +7,7 @@ import { Inject } from 'typedi';
 export class GameDataImportController {
 
     @Inject()
-    private _dataImportService: GameDataImportService;
+    private _dataImportService!: GameDataImportService;
 
     @PostMapping('/atlas-academy')
     async import(req: Request, res: Response): Promise<any> {

@@ -34,8 +34,10 @@ export class PaginationUtils {
     static toPage<T>(data: T[], total: number, page: number, size: number): Page<T>;
     static toPage<T>(data: T[], total: number, page: number | Pagination, size?: number): Page<T> {
         if (typeof page === 'object') {
+            size = page.size;
             page = page.page;
         }
+        size = size as number;
         return { data, total, page, size };
     }
 

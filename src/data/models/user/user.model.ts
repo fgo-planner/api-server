@@ -20,7 +20,7 @@ const setEnabledStatus = function (
     status: boolean,
     callback: (err: NativeError, doc: UserDocument) => void
 ) {
-    this.updateOne({ _id: id }, { active: status }, callback);
+    this.updateOne({ _id: id }, { active: status }, { new: true }, callback);
 };
 
 const setAdminStatus = function (this: UserModel,
@@ -34,7 +34,7 @@ const setAdminStatus = function (this: UserModel,
     } else {
         update.$unset = { admin: null };
     }
-    this.updateOne({ _id: id }, update, callback);
+    this.updateOne({ _id: id }, update, { new: true }, callback);
 };
 
 //#endregion

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { GameItem, GameItemBackground, GameItemType, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve } from 'data/types';
+import { GameItem, GameItemBackground, GameItemType, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity } from 'data/types';
 import { Logger } from 'internal';
 import { Service } from 'typedi';
 import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
@@ -137,10 +137,8 @@ export class AtlasAcademyDataImportService {
          * Convert the JP servant data into `GameServant` objects.
          */
         const servants = niceServants
-            .map(servant => this._transformServantData(servant))
-            .filter(servant => servant != null && !skipIds.has(servant._id));
-
-        console.log(servants.length);
+            .map(this._transformServantData.bind(this))
+            .filter(servant => servant != null && !skipIds.has(servant._id)) as GameServant[];
 
         /*
          * Retrieve 'basic' JP servant data with English names and convert it into name
@@ -188,7 +186,7 @@ export class AtlasAcademyDataImportService {
     /**
      * Converts a Atlas Academy `NiceServant` object into a `GameServant` object.
      */
-    private _transformServantData(servant: AtlasAcademyNiceServant): GameServant {
+    private _transformServantData(servant: AtlasAcademyNiceServant): GameServant | null {
 
         // Currently only normal servants (and Mash) are supported.
         if (servant.type !== AtlasAcademyNiceServantType.Normal && servant.type !== AtlasAcademyNiceServantType.Heroine) {
@@ -216,7 +214,7 @@ export class AtlasAcademyDataImportService {
             nameJp: servant.name,
             collectionNo: servant.collectionNo,
             class: AtlasAcademyDataImportService._ServantClassMap[servant.className],
-            rarity: servant.rarity,
+            rarity: servant.rarity as GameServantRarity,
             cost: servant.cost,
             maxLevel: servant.lvMax,
             gender: AtlasAcademyDataImportService._ServantGenderMap[servant.gender],
@@ -274,7 +272,7 @@ export class AtlasAcademyDataImportService {
      * given lookup map. If the name is not present in the map, the Japanese names
      * will be retained.
      */
-    private async _populateServantEnglishNames(servants: GameServant[], englishNames: { [key: number]: string }, logger?: Logger) {
+    private async _populateServantEnglishNames(servants: GameServant[], englishNames: Record<number, string>, logger?: Logger): Promise<void> {
         for (const servant of servants) {
             const name = englishNames[servant.collectionNo];
             if (!name) {
@@ -311,7 +309,7 @@ export class AtlasAcademyDataImportService {
          */
         const items = jpItems
             .map(item => this._transformItemData(item))
-            .filter(item => item != null && !skipIds.has(item._id));
+            .filter(item => item != null && !skipIds.has(item._id)) as GameItem[];
 
         /**
          * Retrieve NA item data and convert it into name lookup map.
@@ -342,7 +340,7 @@ export class AtlasAcademyDataImportService {
         return response.data;
     }
 
-    private _transformItemData(item: AtlasAcademyNiceItem): GameItem {
+    private _transformItemData(item: AtlasAcademyNiceItem): GameItem | null {
         /*
          * As of 6/28/2020, some item types in the Atlas Academy data set have not been
          * given a name (`25` and `26`). These items will be skipped for now.
@@ -364,7 +362,7 @@ export class AtlasAcademyDataImportService {
      * given lookup map. If the name is not present in the map, then the method
      * will attempt to retrieve the name from the Atlas Academy API.
      */
-    private async _populateItemEnglishNames(items: GameItem[], englishNames: { [key: number]: string }, logger?: Logger) {
+    private async _populateItemEnglishNames(items: GameItem[], englishNames: Record<number, string>, logger?: Logger): Promise<void> {
         for (const item of items) {
             const name = englishNames[item._id];
             if (!name) {

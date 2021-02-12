@@ -2,13 +2,13 @@ import { Request, Response } from 'express';
 import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { GameEventService } from 'services';
 import { Inject } from 'typedi';
-import { ObjectIdUtils, PaginationUtils } from 'utils';
+import { HttpRequestUtils, PaginationUtils } from 'utils';
 
 @RestController('/game-event', UserAccessLevel.Public)
 export class GameEventController {
 
     @Inject()
-    private _gameEventService: GameEventService;
+    private _gameEventService!: GameEventService;
 
     @PutMapping(UserAccessLevel.Admin)
     async createEvent(req: Request, res: Response): Promise<any> {
@@ -44,8 +44,8 @@ export class GameEventController {
 
     @GetMapping('/:id')
     async getEvent(req: Request, res: Response): Promise<any> {
-        const id = ObjectIdUtils.convertToObjectId(req.params.id);
         try {
+            const id = HttpRequestUtils.parseObjectIdFromParams(req.params, 'id');
             const event = await this._gameEventService.findById(id);
             if (!event) {
                 return res.status(404).send(`Event ID ${id} could not be found.`);

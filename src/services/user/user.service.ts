@@ -11,20 +11,21 @@ export class UserService {
 
     private readonly _bcryptStrength = Number(process.env.BCRYPT_STRENGTH) || 4;
 
+    // TODO Remove this
     test(id: string, status: boolean) {
         UserModel.setAdminStatus(id, status, (err, doc) => {
             console.log(doc);
         });
     }
 
-    async findById(id: ObjectId): Promise<UserDocument> {
+    async findById(id: ObjectId): Promise<UserDocument | null> {
         if (!id) {
             throw 'User ID is missing or invalid.';
         }
         return await UserModel.findById(id).exec();
     }
 
-    async findByIdBasic(id: ObjectId): Promise<UserDocument> {
+    async findByIdBasic(id: ObjectId): Promise<UserDocument | null> {
         if (!id) {
             throw 'User ID is missing or invalid.';
         }
@@ -40,7 +41,7 @@ export class UserService {
     }
 
     // TODO Create DTO for parameters if it gets too big.
-    async register(username: string, email: string, password: string) {
+    async register(username: string, email: string, password: string): Promise<void> {
         if (!username) {
             throw 'Username is required';
         }
@@ -66,28 +67,28 @@ export class UserService {
     /**
      * Checks if the username is already in use by another registered user.
      */
-    async usernameExists(username: string) {
+    async usernameExists(username: string): Promise<boolean> {
         return await UserModel.exists({ username });
     }
 
     /**
      * Checks if the email address is in use by another registered user.
      */
-    async emailExists(email: string) {
+    async emailExists(email: string): Promise<boolean> {
         return await UserModel.exists({ email });
     }
 
-    private _passwordIsValid(password: string) {
+    private _passwordIsValid(password: string): boolean {
         // TODO Implement this.
         return !!password;
     }
 
-    private _emailIsValid(email: string) {
+    private _emailIsValid(email: string): boolean {
         // TODO Implement this.
         return !!email;
     }
 
-    private _hashPassword(password: string) {
+    private _hashPassword(password: string): string {
         const salt = bcrypt.genSaltSync(this._bcryptStrength);
         return bcrypt.hashSync(password, salt);
     }

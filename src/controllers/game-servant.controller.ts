@@ -2,16 +2,16 @@ import { Request, Response } from 'express';
 import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { GameServantService } from 'services';
 import { Inject } from 'typedi';
-import { PaginationUtils, HttpRequestUtils } from 'utils';
+import { HttpRequestUtils, PaginationUtils } from 'utils';
 
 @RestController('/game-servant', UserAccessLevel.Public)
 export class GameServantController {
 
     @Inject()
-    private _gameServantService: GameServantService;
+    private _gameServantService!: GameServantService;
 
     // TODO Implement auto expire
-    private _gameServantsCachedResponse: string;
+    private _gameServantsCachedResponse?: string;
 
     @PutMapping(UserAccessLevel.Admin)
     async createServant(req: Request, res: Response): Promise<any> {
@@ -56,8 +56,8 @@ export class GameServantController {
 
     @GetMapping('/:id')
     async getServant(req: Request, res: Response): Promise<any> {
-        const id = Number(req.params.id);
         try {
+            const id = HttpRequestUtils.parseNumericalIdFromParams(req.params, 'id');
             const servant = await this._gameServantService.findById(id);
             if (!servant) {
                 return res.status(404).send(`Servant ID ${id} could not be found.`);

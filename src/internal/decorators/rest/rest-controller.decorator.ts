@@ -1,4 +1,5 @@
 import { UserAccessLevel } from 'internal';
+import { Service } from 'typedi';
 
 type Decorator = (target: any) => void;
 
@@ -74,6 +75,7 @@ export function RestController(param1?: string | UserAccessLevel, param2?: UserA
 
     return (target: any) => {
         Reflect.defineMetadata(ControllerMetadataKey, params, target);
+        Service()(target);
     };
 };
 

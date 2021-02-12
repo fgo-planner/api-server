@@ -41,7 +41,7 @@ export function RestController(): Decorator;
  * controller is set to 'admin only' by default.
  * 
  * @param prefix An optional prefix that will be prepended to each mapped 
- *               resource URIs in this contoller.
+ *               resource URIs in this controller.
  */
 export function RestController(prefix: string): Decorator;
 
@@ -61,7 +61,7 @@ export function RestController(defaultAccessLevel: UserAccessLevel): Decorator;
  * equivalent shortcut decorators.
  * 
  * @param prefix An optional prefix that will be prepended to each mapped 
- *               resource URIs in this contoller.
+ *               resource URIs in this controller.
  * @param defaultAccessLevel Sets the user access level that is required to
  *                           access the resources on this controller.
  */
@@ -75,6 +75,8 @@ export function RestController(param1?: string | UserAccessLevel, param2?: UserA
 
     return (target: any) => {
         Reflect.defineMetadata(ControllerMetadataKey, params, target);
+
+        // Register the RestController as a typedi Service.
         Service()(target);
     };
 };

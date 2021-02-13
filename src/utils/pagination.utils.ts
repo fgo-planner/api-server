@@ -1,5 +1,5 @@
+import { Page, Pagination } from 'data/types';
 import { Request } from 'express';
-import { Page, Pagination } from 'internal';
 
 export class PaginationUtils {
 

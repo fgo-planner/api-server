@@ -1,6 +1,5 @@
 import { GameServantDocument, GameServantModel } from 'data/models';
-import { GameServant } from 'data/types';
-import { Pagination } from 'internal';
+import { GameServant, Pagination } from 'data/types';
 import { Service } from 'typedi';
 
 @Service()

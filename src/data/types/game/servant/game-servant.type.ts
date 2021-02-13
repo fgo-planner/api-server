@@ -1,5 +1,5 @@
 import { Entity } from '../../entity.type';
-import { ExternalLink } from '../../external/external-link.type';
+import { ExternalLink } from '../../external-link.type';
 import { GameServantAttribute } from './game-servant-attribute.enum';
 import { GameServantClass } from './game-servant-class.enum';
 import { GameServantEnhancement } from './game-servant-enhancement.type';

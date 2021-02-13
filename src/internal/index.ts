@@ -8,8 +8,6 @@ export * from './types/authenticated-request.type';
 export * from './types/controller-metadata.type';
 export * from './types/generics/class.type';
 export * from './types/generics/nullable.type';
-export * from './types/page.type';
-export * from './types/pagination.type';
 export * from './types/range.type';
 export * from './types/route-metadata.type';
 export * from './types/token-payload.type';

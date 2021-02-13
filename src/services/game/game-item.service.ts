@@ -1,6 +1,5 @@
 import { GameItemDocument, GameItemModel } from 'data/models';
-import { GameItem, GameItemType } from 'data/types';
-import { Pagination } from 'internal';
+import { GameItem, GameItemType, Pagination } from 'data/types';
 import { Service } from 'typedi';
 
 @Service()

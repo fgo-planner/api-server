@@ -1,5 +1,5 @@
 export * from './entity.type';
-export * from './external/external-link.type';
+export * from './external-link.type';
 export * from './game/event/game-event-reward-source-type.enum';
 export * from './game/event/game-event-reward-source.type';
 export * from './game/event/game-event.type';
@@ -21,4 +21,6 @@ export * from './master/servant/master-servant-ascension-level.type';
 export * from './master/servant/master-servant-bond-level.type';
 export * from './master/servant/master-servant-noble-phantasm-level.type';
 export * from './master/servant/master-servant.type';
+export * from './page.type';
+export * from './pagination.type';
 export * from './user/user.type';

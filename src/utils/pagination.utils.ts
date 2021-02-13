@@ -1,4 +1,4 @@
-import { Page, Pagination } from 'data/types';
+import { Page, Pagination } from 'dto';
 import { Request } from 'express';
 
 export class PaginationUtils {

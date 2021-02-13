@@ -1,6 +1,7 @@
 import { ObjectId } from 'bson';
 import { GameEventDocument, GameEventModel } from 'data/models';
-import { GameEvent, Pagination } from 'data/types';
+import { GameEvent } from 'data/types';
+import { Pagination } from 'dto';
 import { Service } from 'typedi';
 import { ObjectIdUtils } from 'utils';
 

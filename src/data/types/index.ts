@@ -21,6 +21,4 @@ export * from './master/servant/master-servant-ascension-level.type';
 export * from './master/servant/master-servant-bond-level.type';
 export * from './master/servant/master-servant-noble-phantasm-level.type';
 export * from './master/servant/master-servant.type';
-export * from './page.type';
-export * from './pagination.type';
 export * from './user/user.type';

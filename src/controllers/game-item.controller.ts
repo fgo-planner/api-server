@@ -28,13 +28,7 @@ export class GameItemController {
     async getItems(req: Request, res: Response): Promise<any> {
         try {
             if (req.query.ids) {
-                console.log(Array.isArray(req.query.ids));
-                console.log(req.query.ids);
-                const asdf = HttpRequestUtils.flattenParamsList(req.query.ids);
-                console.log(asdf);
                 const ids = HttpRequestUtils.parseIntegerList(req.query.ids);
-                console.log(ids);
-
                 const items = await this._gameItemService.findByIds(ids);
                 res.send(items);
             } else {

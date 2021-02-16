@@ -42,6 +42,7 @@ export class GameItemController {
                     const items = await this._gameItemService.findAll();
                     this._gameItemsCachedResponse = JSON.stringify(items);
                 }
+                res.setHeader('content-type', 'application/json'); // TODO un-hardcode this
                 res.send(this._gameItemsCachedResponse);
             }
         } catch (err) {

@@ -36,6 +36,7 @@ export class GameServantController {
                     const servants = await this._gameServantService.findAll();
                     this._gameServantsCachedResponse = JSON.stringify(servants);
                 }
+                res.setHeader('content-type', 'application/json'); // TODO un-hardcode this
                 res.send(this._gameServantsCachedResponse);
             }
         } catch (err) {

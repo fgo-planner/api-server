@@ -14,7 +14,8 @@ export class LoginController {
 
     @PostMapping('/admin')
     async adminLogin(req: Request, res: Response): Promise<any> {
-        const jwt = await this._authService.generateAccessToken(req.body.username, req.body.password, true);
+        const { username, password } = req.body;
+        const jwt = await this._authService.generateAccessToken(username, password, true);
         if (!jwt) {
             return res.status(401).send('Invalid username or password.');
         }
@@ -23,25 +24,12 @@ export class LoginController {
 
     @PostMapping()
     async login(req: Request, res: Response): Promise<any> {
-        const jwt = await this._authService.generateAccessToken(req.body.username, req.body.password);
+        const { username, password } = req.body;
+        const jwt = await this._authService.generateAccessToken(username, password);
         if (!jwt) {
             return res.status(401).send('Invalid username or password.');
         }
         res.send(jwt);
-    }
-
-    @PostMapping('/register')
-    async register(req: Request, res: Response): Promise<any> {
-        try {
-            await this._userService.register(req.body.username, req.body.email, req.body.password);
-            res.send('success');
-        } catch (err) {
-            res.status(400).send(err);
-        }
-    }
-
-    async requestPasswordReset(req: Request, res: Response): Promise<any> {
-        // TODO Implement this
     }
 
 }

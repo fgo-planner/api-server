@@ -1,4 +1,5 @@
 import { MasterServant } from 'data/types';
+import { Nullable } from 'internal';
 
 export class MasterAccountValidators {
 
@@ -21,7 +22,7 @@ export class MasterAccountValidators {
      * the given friend ID string to check if it's in a valid format. Null or empty
      * inputs will return true.
      */
-    static isFriendIdFormalValidOrEmpty(id: string): boolean {
+    static isFriendIdFormalValidOrEmpty(id: Nullable<string>): boolean {
         if (!id) {
             return true;
         }

@@ -6,8 +6,8 @@ import { Service } from 'typedi';
 @Service()
 export class MasterAccountService {
 
-    async addAccount(userId: ObjectId, account: MasterAccount): Promise<MasterAccount> {
-        account.userId = userId;
+    async addAccount(userId: ObjectId, account: Omit<MasterAccount, 'userId' | '_id'>): Promise<MasterAccount> {
+        (account as MasterAccount).userId = userId;
         return MasterAccountModel.create(account);
     }
 

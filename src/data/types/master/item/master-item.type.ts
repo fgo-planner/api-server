@@ -7,4 +7,4 @@ export type MasterItem = {
 
     quantity: number;
 
-}
+};

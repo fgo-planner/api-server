@@ -11,4 +11,4 @@ export type AtlasAcademyBasicServant = {
     type: AtlasAcademyNiceServantType;
     className: AtlasAcademyNiceServantClassName;
     rarity: number;
-}
+};

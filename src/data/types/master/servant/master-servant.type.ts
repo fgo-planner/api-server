@@ -35,4 +35,4 @@ export type MasterServant = {
 
     noblePhantasmLevel: MasterServantNoblePhantasmLevel;
 
-}
+};

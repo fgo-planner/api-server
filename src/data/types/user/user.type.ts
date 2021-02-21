@@ -13,4 +13,4 @@ export type User = Entity<ObjectId> & {
 
     enabled: boolean;
     
-}
+};

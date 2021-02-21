@@ -8,4 +8,4 @@ export type Entity<ID> = {
 
     _id: ID;
     
-}
+};

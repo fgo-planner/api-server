@@ -22,4 +22,4 @@ export type MasterAccount = Entity<ObjectId> & {
 
     servants: MasterServant[];
 
-}
+};

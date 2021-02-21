@@ -98,4 +98,4 @@ export type GameServant = Entity<number> & {
 
     };
 
-}
+};

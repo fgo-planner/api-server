@@ -9,4 +9,4 @@ export type GameEvent = Entity<ObjectId> & {
     endDate: Date;
     rerun: boolean;
     rewardSources: GameEventRewardSource[];
-}
+};

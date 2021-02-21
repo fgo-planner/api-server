@@ -9,4 +9,4 @@ export type AtlasAcademyNiceItem = {
     name: string;
     type: AtlasAcademyNiceItemType;
     background: AtlasAcademyNiceItemBackground;
-}
+};

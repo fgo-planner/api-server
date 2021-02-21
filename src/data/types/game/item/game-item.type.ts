@@ -20,4 +20,4 @@ export type GameItem = Entity<number> & {
 
     type: GameItemType;
 
-}
+};

@@ -4,7 +4,7 @@ import { MongooseValidationStrings } from 'strings';
 import { NumberUtils } from 'utils';
 
 /**
- * Mongoose schema for the `MasterServant.skillLevels` property.
+ * Mongoose schema for the `MasterServant.skills` property.
  */
 const MasterServantSkillLevelsSchema = new Schema({
     1: {
@@ -60,9 +60,16 @@ export const MasterServantSchema = new Schema({
             message: MongooseValidationStrings.NumberInteger
         }
     },
-    dateAcquired: {
-        type: Date
-        // TODO Add range validation
+    np: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5,
+        validate: {
+            validator: Number.isInteger,
+            message: MongooseValidationStrings.NumberInteger
+        },
+        default: 1
     },
     level: {
         type: Number,
@@ -75,7 +82,7 @@ export const MasterServantSchema = new Schema({
         },
         default: 1
     },
-    ascensionLevel: {
+    ascension: {
         type: Number,
         required: true,
         min: 0,
@@ -113,20 +120,13 @@ export const MasterServantSchema = new Schema({
             message: MongooseValidationStrings.GenericInvalidValue
         }
     },
-    skillLevels: {
+    skills: {
         type: MasterServantSkillLevelsSchema,
         required: true,
         default: {}
     },
-    noblePhantasmLevel: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 5,
-        validate: {
-            validator: Number.isInteger,
-            message: MongooseValidationStrings.NumberInteger
-        },
-        default: 1
+    acquired: {
+        type: Date
+        // TODO Add range validation
     }
 }, { _id: false, storeSubdocValidationError: false });

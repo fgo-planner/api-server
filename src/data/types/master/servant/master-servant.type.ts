@@ -11,11 +11,11 @@ export type MasterServant = {
 
     gameId: number;
     
-    dateAcquired?: Date;
+    np: MasterServantNoblePhantasmLevel;
 
     level: number;
 
-    ascensionLevel: MasterServantAscensionLevel;
+    ascension: MasterServantAscensionLevel;
 
     bond?: MasterServantBondLevel;
 
@@ -23,7 +23,7 @@ export type MasterServant = {
 
     fouHp?: number;
 
-    skillLevels: {
+    skills: {
 
         1: number;
 
@@ -33,6 +33,6 @@ export type MasterServant = {
 
     };
 
-    noblePhantasmLevel: MasterServantNoblePhantasmLevel;
+    acquired?: Date;
 
 };

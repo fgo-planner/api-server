@@ -6,6 +6,16 @@ import { Service } from 'typedi';
 @Service()
 export class GameItemService {
 
+    /**
+     * Projection that returns basic version of the document.
+     */
+    // TODO Add method parameters to request basic payloads.
+    private readonly _basicProjection = { 
+        description: 0,
+        createdAt: 0,
+        updatedAt: 0
+    };
+
     async create(item: GameItem): Promise<GameItemDocument> {
         // TODO Validation
         return GameItemModel.create(item);
@@ -16,18 +26,18 @@ export class GameItemService {
     }
 
     async findById(id: number): Promise<GameItemDocument | null> {
-        return await GameItemModel.findById(id).exec();
+        return await GameItemModel.findById(id, this._basicProjection).exec();
     }
 
     async findAll(): Promise<GameItemDocument[]> {
-        return GameItemModel.find().exec();
+        return GameItemModel.find({}, this._basicProjection).exec();
     }
     
     async findByIds(ids: number[]): Promise<GameItemDocument[]> {
         if (!ids || !ids.length) {
             return [];
         }
-        return GameItemModel.find({ _id: { $in: ids } }).exec();
+        return GameItemModel.find({ _id: { $in: ids } }, this._basicProjection).exec();
     }
 
     async findAllIds(): Promise<number[]> {
@@ -40,7 +50,7 @@ export class GameItemService {
         const sort = { [page.sort]: page.direction === 'ASC' ? 1 : -1 };
         const count = await GameItemModel.find()
             .countDocuments();
-        const data = await GameItemModel.find()
+        const data = await GameItemModel.find({}, this._basicProjection)
             .sort(sort)
             .skip(skip)
             .limit(size);

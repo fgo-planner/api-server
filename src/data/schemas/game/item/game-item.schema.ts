@@ -1,4 +1,4 @@
-import { GameItemBackground, GameItemType } from 'data/types';
+import { GameItemBackground, GameItemUsage } from 'data/types';
 import { SchemaDefinition } from 'mongoose';
 import { MongooseValidationStrings } from 'strings';
 
@@ -16,9 +16,13 @@ export const GameItemSchemaDefinition: SchemaDefinition = {
         }
     },
     name: {
-        type: String
+        type: String,
+        required: true
     },
     nameJp: {
+        type: String
+    },
+    description: {
         type: String
     },
     background: {
@@ -27,10 +31,11 @@ export const GameItemSchemaDefinition: SchemaDefinition = {
         required: true,
         default: GameItemBackground.Bronze
     },
-    type: {
-        type: String,
-        enum: Object.keys(GameItemType),
+    uses: {
+        type: [String],
+        enum: Object.keys(GameItemUsage),
         required: true,
-        index: true
+        index: true,
+        default: []
     }
 };

@@ -1,5 +1,5 @@
 import { GameItemSchemaDefinition } from 'data/schemas';
-import { GameItem, GameItemType } from 'data/types';
+import { GameItem, GameItemUsage } from 'data/types';
 import mongoose, { Document, Schema, NativeError, DocumentQuery, Model } from 'mongoose';
 
 export type GameItemDocument = Document & GameItem;
@@ -11,24 +11,24 @@ type GameItemModel = Model<GameItemDocument> & {
 
     /**
      * Creates a Query for retrieving the items that belong to any of the given
-     * types from the collection.
+     * usages from the collection.
      */
-    findByTypes: (categories: GameItemType | GameItemType[], callback?: (err: NativeError, res: GameItemDocument[]) => void) =>
+    findByUsage: (usage: GameItemUsage | GameItemUsage[], callback?: (err: NativeError, res: GameItemDocument[]) => void) =>
         DocumentQuery<GameItemDocument[], GameItemDocument>;
 
 };
 
 //#region Static function implementations
 
-const findByTypes = function (
+const findByUsage = function (
     this: GameItemModel,
-    types: GameItemType | GameItemType[],
+    usage: GameItemUsage | GameItemUsage[],
     callback?: (err: NativeError, res: GameItemDocument[]) => void
 ) {
-    if (!Array.isArray(types)) {
-        types = [types];
+    if (!Array.isArray(usage)) {
+        usage = [usage];
     }
-    return this.findOne({ type: { $in: types } }, callback);
+    return this.findOne({ uses: { $in: usage } }, callback);
 };
 
 //#endregion
@@ -37,7 +37,7 @@ const findByTypes = function (
  * Properties and functions that can be assigned as statics on the schema.
  */
 const Statics = {
-    findByTypes
+    findByUsage
 };
 
 /**

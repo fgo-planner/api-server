@@ -9,4 +9,4 @@ export type GameDataImportOptions = {
         import?: boolean;
         onExisting?: GameDataImportExistingAction;
     };
-}
+};

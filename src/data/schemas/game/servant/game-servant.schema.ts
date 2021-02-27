@@ -99,7 +99,7 @@ const GameServantMetadataSchema = new Schema({
 }, { _id: false, storeSubdocValidationError: false });
 
 /**
- * Mongoose schema definition for the `GameServant` model.
+ * Mongoose schema definition for the `GameServant` data schema.
  */
 export const GameServantSchemaDefinition: SchemaDefinition = {
     _id: {

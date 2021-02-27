@@ -1,5 +1,6 @@
-import { AtlasAcademyNiceServantClassName } from './atlas-academy-nice-servant-class-name.enum';
-import { AtlasAcademyNiceServantType } from './atlas-academy-nice-servant-type.enum';
+import { AtlasAcademyNiceSvtFlag } from './atlas-academy-nice-svt-flag.type';
+import { AtlasAcademyNiceSvtType } from './atlas-academy-nice-svt-type.type';
+import { AtlasAcademySvtClass } from './atlas-academy-svt-class.type';
 
 /**
  * Partial type definition for Atlas Academy's `BasicServant` data schema.
@@ -8,7 +9,8 @@ export type AtlasAcademyBasicServant = {
     id: number;
     collectionNo: number;
     name: string;
-    type: AtlasAcademyNiceServantType;
-    className: AtlasAcademyNiceServantClassName;
+    type: AtlasAcademyNiceSvtType;
+    flag: AtlasAcademyNiceSvtFlag;
+    className: AtlasAcademySvtClass;
     rarity: number;
 };

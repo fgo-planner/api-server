@@ -1,18 +1,18 @@
 import axios from 'axios';
-import { GameItem, GameItemBackground, GameItemType, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity } from 'data/types';
+import { GameItem, GameItemBackground, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity } from 'data/types';
 import { Logger } from 'internal';
 import { Service } from 'typedi';
 import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
+import { AtlasAcademyAttribute } from './types/atlas-academy-attribute.enum';
 import { AtlasAcademyBasicServant } from './types/atlas-academy-basic-servant.type';
-import { AtlasAcademyNiceItemBackground } from './types/atlas-academy-nice-item-background.enum';
-import { AtlasAcademyNiceItemType } from './types/atlas-academy-nice-item-type.enum';
+import { AtlasAcademyNiceGender } from './types/atlas-academy-nice-gender.type';
+import { AtlasAcademyNiceItemBGType } from './types/atlas-academy-nice-item-bg-type.type';
+import { AtlasAcademyNiceItemType } from './types/atlas-academy-nice-item-type.type';
+import { AtlasAcademyNiceItemUse } from './types/atlas-academy-nice-item-use.type';
 import { AtlasAcademyNiceItem } from './types/atlas-academy-nice-item.type';
 import { AtlasAcademyNiceLvlUpMaterial } from './types/atlas-academy-nice-lvl-up-material.type';
-import { AtlasAcademyNiceServantAttribute } from './types/atlas-academy-nice-servant-attribute.enum';
-import { AtlasAcademyNiceServantClassName } from './types/atlas-academy-nice-servant-class-name.enum';
-import { AtlasAcademyNiceServantGender } from './types/atlas-academy-nice-servant-gender.enum';
-import { AtlasAcademyNiceServantType } from './types/atlas-academy-nice-servant-type.enum';
 import { AtlasAcademyNiceServant } from './types/atlas-academy-nice-servant.type';
+import { AtlasAcademySvtClass } from './types/atlas-academy-svt-class.type';
 
 @Service()
 export class AtlasAcademyDataImportService {
@@ -20,99 +20,95 @@ export class AtlasAcademyDataImportService {
     //#region Enum maps
 
     /**
-     * Maps `AtlasAcademyNiceServantClassName` enum values to `GameServantClass`
-     * enum values.
+     * Maps the `AtlasAcademySvtClass` values to the `GameServantClass` enum
+     * values.
      */
     private static readonly _ServantClassMap = {
-        [AtlasAcademyNiceServantClassName.Saber]: GameServantClass.Saber,
-        [AtlasAcademyNiceServantClassName.Archer]: GameServantClass.Archer,
-        [AtlasAcademyNiceServantClassName.Lancer]: GameServantClass.Lancer,
-        [AtlasAcademyNiceServantClassName.Rider]: GameServantClass.Rider,
-        [AtlasAcademyNiceServantClassName.Caster]: GameServantClass.Caster,
-        [AtlasAcademyNiceServantClassName.Assassin]: GameServantClass.Assassin,
-        [AtlasAcademyNiceServantClassName.Berserker]: GameServantClass.Berserker,
-        [AtlasAcademyNiceServantClassName.Shielder]: GameServantClass.Shielder,
-        [AtlasAcademyNiceServantClassName.Ruler]: GameServantClass.Ruler,
-        [AtlasAcademyNiceServantClassName.AlterEgo]: GameServantClass.AlterEgo,
-        [AtlasAcademyNiceServantClassName.Avenger]: GameServantClass.Avenger,
-        [AtlasAcademyNiceServantClassName.DemonGodPillar]: GameServantClass.Unknown,
-        [AtlasAcademyNiceServantClassName.MoonCancer]: GameServantClass.MoonCancer,
-        [AtlasAcademyNiceServantClassName.Foreigner]: GameServantClass.Foreigner,
-        [AtlasAcademyNiceServantClassName.GrandCaster]: GameServantClass.Caster,
-        [AtlasAcademyNiceServantClassName.BeastII]: GameServantClass.BeastII,
-        [AtlasAcademyNiceServantClassName.BeastI]: GameServantClass.BeastI,
-        [AtlasAcademyNiceServantClassName.BeastIIIR]: GameServantClass.BeastIIIR,
-        [AtlasAcademyNiceServantClassName.BeastIIIL]: GameServantClass.BeastIIIL,
-        [AtlasAcademyNiceServantClassName.BeastUnknown]: GameServantClass.Unknown,
-        [AtlasAcademyNiceServantClassName.Unknown]: GameServantClass.Unknown,
-        [AtlasAcademyNiceServantClassName.All]: GameServantClass.Unknown // TODO Implement 'All' class
-    } as { [key in AtlasAcademyNiceServantClassName]: GameServantClass }
+        'saber': GameServantClass.Saber,
+        'archer': GameServantClass.Archer,
+        'lancer': GameServantClass.Lancer,
+        'rider': GameServantClass.Rider,
+        'caster': GameServantClass.Caster,
+        'assassin': GameServantClass.Assassin,
+        'berserker': GameServantClass.Berserker,
+        'shielder': GameServantClass.Shielder,
+        'ruler': GameServantClass.Ruler,
+        'alterEgo': GameServantClass.AlterEgo,
+        'avenger': GameServantClass.Avenger,
+        'demonGodPillar': GameServantClass.Unknown,
+        'moonCancer': GameServantClass.MoonCancer,
+        'foreigner': GameServantClass.Foreigner,
+        'grandCaster': GameServantClass.Caster,
+        'beastII': GameServantClass.BeastII,
+        'beastI': GameServantClass.BeastI,
+        'beastIIIR': GameServantClass.BeastIIIR,
+        'beastIIIL': GameServantClass.BeastIIIL,
+        'beastUnknown': GameServantClass.Unknown,
+        'unknown': GameServantClass.Unknown,
+        'ALL': GameServantClass.Unknown // TODO Implement 'All' class
+    } as { readonly [key in AtlasAcademySvtClass]: GameServantClass };
 
     /**
-     * Maps `AtlasAcademyNiceServantGender` enum values to `GameServantGender` enum
+     * Maps the `AtlasAcademyNiceGender` values to the `GameServantGender` enum
      * values.
      */
     private static readonly _ServantGenderMap = {
-        [AtlasAcademyNiceServantGender.Male]: GameServantGender.Male,
-        [AtlasAcademyNiceServantGender.Female]: GameServantGender.Female,
-        [AtlasAcademyNiceServantGender.Unknown]: GameServantGender.None
-    } as { [key in AtlasAcademyNiceServantGender]: GameServantGender }
+        'male': GameServantGender.Male,
+        'female': GameServantGender.Female,
+        'unknown': GameServantGender.None
+    } as { readonly [key in AtlasAcademyNiceGender]: GameServantGender };
 
     /**
-     * Maps `AtlasAcademyNiceServantAttribute` enum values to `GameServantAttribute`
-     * enum values.
+     * Maps the `AtlasAcademyAttribute` values to the `GameServantAttribute` enum
+     * values.
      */
     private static readonly _ServantAttributeMap = {
-        [AtlasAcademyNiceServantAttribute.Human]: GameServantAttribute.Man,
-        [AtlasAcademyNiceServantAttribute.Sky]: GameServantAttribute.Sky,
-        [AtlasAcademyNiceServantAttribute.Earth]: GameServantAttribute.Earth,
-        [AtlasAcademyNiceServantAttribute.Star]: GameServantAttribute.Star,
-        [AtlasAcademyNiceServantAttribute.Beast]: GameServantAttribute.Beast
-    } as { [key in AtlasAcademyNiceServantAttribute]: GameServantAttribute }
+        'human': GameServantAttribute.Man,
+        'sky': GameServantAttribute.Sky,
+        'earth': GameServantAttribute.Earth,
+        'star': GameServantAttribute.Star,
+        'beast': GameServantAttribute.Beast
+    } as { readonly [key in AtlasAcademyAttribute]: GameServantAttribute };
 
     /**
-     * Maps `AtlasAcademyNiceItemBackground` enum values to `GameItemBackground`
+     * Maps the `AtlasAcademyNiceItemBGType` values to the `GameItemBackground`
      * enum values.
      */
     private static readonly _ItemBackgroundMap = {
-        [AtlasAcademyNiceItemBackground.Zero]: GameItemBackground.None,
-        [AtlasAcademyNiceItemBackground.Bronze]: GameItemBackground.Bronze,
-        [AtlasAcademyNiceItemBackground.Silver]: GameItemBackground.Silver,
-        [AtlasAcademyNiceItemBackground.Gold]: GameItemBackground.Gold,
-        [AtlasAcademyNiceItemBackground.QuestClearQPReward]: GameItemBackground.QPReward
-    } as { [key in AtlasAcademyNiceItemBackground]: GameItemBackground }
+        'zero': GameItemBackground.None,
+        'bronze': GameItemBackground.Bronze,
+        'silver': GameItemBackground.Silver,
+        'gold': GameItemBackground.Gold,
+        'questClearQPReward': GameItemBackground.QPReward
+    } as { readonly [key in AtlasAcademyNiceItemBGType]: GameItemBackground };
 
     /**
-     * Maps `AtlasAcademyNiceItemType` enum values to `GameItemType` enum values.
+     * Maps the `AtlasAcademyNiceItemUse` values to the `GameItemUsage`
+     * enum values.
      */
-    private static readonly _ItemTypeMap = {
-        [AtlasAcademyNiceItemType.QP]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.Stone]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.APRecover]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.APAdd]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.Mana]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.Key]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.GachaClass]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.GachaRelic]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.GachaTicket]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.Limit]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.SkillLvUp]: GameItemType.Enhancement,
-        [AtlasAcademyNiceItemType.TdLvUp]: GameItemType.Enhancement,
-        [AtlasAcademyNiceItemType.FriendPoint]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.EventPoint]: GameItemType.EventItem,
-        [AtlasAcademyNiceItemType.EventItem]: GameItemType.EventItem,
-        [AtlasAcademyNiceItemType.QuestRewardQp]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.ChargeStone]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.RPAdd]: GameItemType.EventItem,
-        [AtlasAcademyNiceItemType.BoostItem]: GameItemType.EventItem,
-        [AtlasAcademyNiceItemType.StoneFragments]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.Anonymous]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.RarePri]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.CostumeRelease]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.ItemSelect]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.CommandCardPrmUp]: GameItemType.Master,
-        [AtlasAcademyNiceItemType.Dice]: GameItemType.EventItem
-    } as { [key in AtlasAcademyNiceItemType]: GameItemType }
+    private static readonly _ItemUsageMap = {
+        'skill': GameItemUsage.Skill,
+        'ascension': GameItemUsage.Ascension,
+        'costume': GameItemUsage.Costume
+    } as { readonly [key in AtlasAcademyNiceItemUse]: GameItemUsage };
+
+    //#endregion
+
+
+    //#region Additional data
+
+    /**
+     * Types of items that are imported even if they don't have any enhancement
+     * uses defined.
+     */
+    private static readonly _AdditionalItemImportTypes = new Set<AtlasAcademyNiceItemType>([
+        'qp',           // QP
+        'stone',        // Saint quartz
+        'gachaTicket',  // Summon tickets
+        'friendPoint',  // Friend points
+        'anonymous',    // USOs
+        'tdLvUp'        // Statues and grails
+    ]);
 
     //#endregion
 
@@ -145,7 +141,7 @@ export class AtlasAcademyDataImportService {
          * lookup map.
          */
         const basicServants = await this._getBasicServants(logger);
-        const englishNames: { [key: number]: string } = {};
+        const englishNames: Record<number, string> = {};
         for (const servant of basicServants) {
             englishNames[servant.collectionNo] = servant.name;
         }
@@ -189,17 +185,17 @@ export class AtlasAcademyDataImportService {
     private _transformServantData(servant: AtlasAcademyNiceServant): GameServant | null {
 
         // Currently only normal servants (and Mash) are supported.
-        if (servant.type !== AtlasAcademyNiceServantType.Normal && servant.type !== AtlasAcademyNiceServantType.Heroine) {
+        if (servant.type !== 'normal' && servant.type !== 'heroine') {
             return null;
         }
 
         let ascensionMaterials: any;
         // Mash does not have any ascension materials to import.
-        if (servant.type !== AtlasAcademyNiceServantType.Heroine) {
+        if (servant.type !== 'heroine') {
             ascensionMaterials = {};
             // As of 10/8/2020, ascension materials start at index 0 instead of 1.
             for (let i = 0; i < Constants.AscensionLevelCount; i++) {
-                ascensionMaterials[i] = this._transformEnhancementMaterials((servant.ascensionMaterials as any)[i]);
+                ascensionMaterials[i + 1] = this._transformEnhancementMaterials((servant.ascensionMaterials as any)[i]);
             }
         }
 
@@ -272,7 +268,12 @@ export class AtlasAcademyDataImportService {
      * given lookup map. If the name is not present in the map, the Japanese names
      * will be retained.
      */
-    private async _populateServantEnglishNames(servants: GameServant[], englishNames: Record<number, string>, logger?: Logger): Promise<void> {
+    private async _populateServantEnglishNames(
+        servants: GameServant[], 
+        englishNames: Record<number, string>, 
+        logger?: Logger
+    ): Promise<void> {
+
         for (const servant of servants) {
             const name = englishNames[servant.collectionNo];
             if (!name) {
@@ -315,16 +316,16 @@ export class AtlasAcademyDataImportService {
          * Retrieve NA item data and convert it into name lookup map.
          */
         const naItems = await this._getNiceItems('NA', logger);
-        const englishNames: { [key: number]: string } = {};
+        const englishItems: Record<number, AtlasAcademyNiceItem> = {};
         for (const item of naItems) {
-            englishNames[item.id] = item.name;
+            englishItems[item.id] = item;
         }
 
         /*
          * Use the name lookup map to populate English names. This method will
          * automatically try to retrieve any names that are missing from the map.
          */
-        await this._populateItemEnglishNames(items, englishNames, logger);
+        await this._populateItemEnglishStrings(items, englishItems, logger);
 
         return items;
     }
@@ -341,38 +342,55 @@ export class AtlasAcademyDataImportService {
     }
 
     private _transformItemData(item: AtlasAcademyNiceItem): GameItem | null {
-        /*
-         * As of 6/28/2020, some item types in the Atlas Academy data set have not been
-         * given a name (`25` and `26`). These items will be skipped for now.
-         */
-        if (typeof item.type === 'number') {
+        if (!this._shouldImportItem(item)) {
             return null;
         }
+        const background = AtlasAcademyDataImportService._ItemBackgroundMap[item.background];
+        const uses = item.uses.map(use => AtlasAcademyDataImportService._ItemUsageMap[use]);
         return {
             _id: item.id,
             name: item.name,
             nameJp: item.name,
-            background: AtlasAcademyDataImportService._ItemBackgroundMap[item.background],
-            type: AtlasAcademyDataImportService._ItemTypeMap[item.type]
+            description: item.detail,
+            background,
+            uses
         };
     }
 
     /**
-     * Populate the items in the given list with their English names using the
-     * given lookup map. If the name is not present in the map, then the method
-     * will attempt to retrieve the name from the Atlas Academy API.
+     * Only enhancement items and a select number of master items will be imported.
      */
-    private async _populateItemEnglishNames(items: GameItem[], englishNames: Record<number, string>, logger?: Logger): Promise<void> {
+    private _shouldImportItem(item: AtlasAcademyNiceItem): boolean {
+        const { type, uses } = item;
+        if (uses.length) {
+            // Always import if the item has enhancement uses defined.
+            return true;
+        }
+        return AtlasAcademyDataImportService._AdditionalItemImportTypes.has(type);
+    }
+
+    /**
+     * Populate the items in the given list with their English strings using the
+     * given lookup map. If the string data is not present in the map, the Japanese
+     * values will be retained.
+     */
+    private async _populateItemEnglishStrings(
+        items: GameItem[],
+        englishStrings: Record<number, AtlasAcademyNiceItem>,
+        logger?: Logger
+    ): Promise<void> {
+
         for (const item of items) {
-            const name = englishNames[item._id];
-            if (!name) {
+            const strings = englishStrings[item._id];
+            if (!strings) {
                 logger?.warn(
                     `Item with ID ${item._id} could not be loaded. 
                     English name population will be skipped.`
                 );
                 continue;
             }
-            item.name = name;
+            item.name = strings.name;
+            item.description = strings.detail;
         }
     }
 

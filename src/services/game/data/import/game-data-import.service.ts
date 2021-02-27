@@ -251,7 +251,7 @@ export class GameDataImportService {
         if (!existing) {
             await this._gameItemService.create(item);
         } else {
-            existing.type = item.type;
+            existing.uses = item.uses; // TODO Push instead of replace
             await this._gameItemService.update(existing);
         }
         return !!existing;

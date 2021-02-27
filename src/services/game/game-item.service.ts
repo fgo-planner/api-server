@@ -1,5 +1,5 @@
 import { GameItemDocument, GameItemModel } from 'data/models';
-import { GameItem, GameItemType } from 'data/types';
+import { GameItem, GameItemUsage } from 'data/types';
 import { Pagination } from 'dto';
 import { Service } from 'typedi';
 
@@ -47,8 +47,8 @@ export class GameItemService {
         return { data, total: count };
     }
 
-    async findByTypes(types: GameItemType | GameItemType[]): Promise<GameItemDocument[]> {
-        return GameItemModel.findByTypes(types).exec();
+    async findByUsage(usage: GameItemUsage | GameItemUsage[]): Promise<GameItemDocument[]> {
+        return GameItemModel.findByUsage(usage).exec();
     }
 
     async update(item: GameItem): Promise<GameItemDocument | null> {

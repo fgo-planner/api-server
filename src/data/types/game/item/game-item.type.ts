@@ -1,6 +1,6 @@
 import { Entity } from '../../entity.type';
 import { GameItemBackground } from './game-item-background.enum';
-import { GameItemUsage } from './game-item-enhancement-usage.enum';
+import { GameItemUsage } from './game-item-usage.enum';
 
 /**
  * An inventory item.

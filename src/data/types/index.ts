@@ -4,7 +4,7 @@ export * from './game/event/game-event-reward-source-type.enum';
 export * from './game/event/game-event-reward-source.type';
 export * from './game/event/game-event.type';
 export * from './game/item/game-item-background.enum';
-export * from './game/item/game-item-enhancement-usage.enum';
+export * from './game/item/game-item-usage.enum';
 export * from './game/item/game-item.type';
 export * from './game/servant/game-servant-attribute.enum';
 export * from './game/servant/game-servant-card-type.enum';

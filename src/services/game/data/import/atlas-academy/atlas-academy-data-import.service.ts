@@ -102,12 +102,12 @@ export class AtlasAcademyDataImportService {
      * uses defined.
      */
     private static readonly _AdditionalItemImportTypes = new Set<AtlasAcademyNiceItemType>([
-        'qp',           // QP
-        'stone',        // Saint quartz
-        'gachaTicket',  // Summon tickets
-        'friendPoint',  // Friend points
-        'anonymous',    // USOs
-        'tdLvUp'        // Statues and grails
+        'questRewardQp',    // QP
+        'chargeStone',      // Saint quartz
+        'gachaTicket',      // Summon tickets
+        'friendPoint',      // Friend points
+        'anonymous',        // USOs
+        'tdLvUp'            // Statues and grails
     ]);
 
     //#endregion
@@ -347,7 +347,7 @@ export class AtlasAcademyDataImportService {
         }
         const background = AtlasAcademyDataImportService._ItemBackgroundMap[item.background];
         const uses = item.uses.map(use => AtlasAcademyDataImportService._ItemUsageMap[use]);
-        return {
+        const result = {
             _id: item.id,
             name: item.name,
             nameJp: item.name,
@@ -355,6 +355,8 @@ export class AtlasAcademyDataImportService {
             background,
             uses
         };
+        this._additionalTransforms(result);
+        return result;
     }
 
     /**
@@ -391,6 +393,17 @@ export class AtlasAcademyDataImportService {
             }
             item.name = strings.name;
             item.description = strings.detail;
+        }
+    }
+
+    private _additionalTransforms(item: GameItem) {
+        // Friend Point ID should be 12 to match its image ID.
+        if (item._id === 4) {
+            item._id = 12;
+        }
+        // Remove 'Quest Clear Reward' from QP name.
+        if (item._id === 5) {
+            item.name = 'Quantum Particles';
         }
     }
 

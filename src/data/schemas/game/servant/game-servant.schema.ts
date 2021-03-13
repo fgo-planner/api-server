@@ -248,6 +248,10 @@ export const GameServantSchemaDefinition: SchemaDefinition = {
     ascensionMaterials: {
         type: GameServantAscensionMaterialsSchema
     },
+    costumeMaterials: {
+        type: Map,
+        of: GameServantEnhancementSchema
+    },
     metadata: {
         type: GameServantMetadataSchema,
         required: true,

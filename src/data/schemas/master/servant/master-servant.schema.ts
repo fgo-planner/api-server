@@ -125,6 +125,10 @@ export const MasterServantSchema = new Schema({
         required: true,
         default: {}
     },
+    costumes: {
+        type: [Number],
+        default: []
+    },
     acquired: {
         type: Date
         // TODO Add range validation

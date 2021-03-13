@@ -5,6 +5,10 @@ import { AtlasAcademyNiceLvlUpMaterial } from './atlas-academy-nice-lvl-up-mater
 import { AtlasAcademyNiceSvtType } from './atlas-academy-nice-svt-type.type';
 import { AtlasAcademyNiceSvtFlag } from './atlas-academy-nice-svt-flag.type';
 
+export type AscensionMaterialKey = 0 | 1 | 2 | 3;
+
+export type SkillMaterialKey = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+
 /**
  * Partial type definition for Atlas Academy's `NiceServant` data schema.
  */
@@ -25,21 +29,7 @@ export type AtlasAcademyNiceServant = {
     hpBase: number;
     hpMax: number;
     growthCurve: number;
-    ascensionMaterials: {
-        0: AtlasAcademyNiceLvlUpMaterial;
-        1: AtlasAcademyNiceLvlUpMaterial;
-        2: AtlasAcademyNiceLvlUpMaterial;
-        3: AtlasAcademyNiceLvlUpMaterial;
-    };
-    skillMaterials: {
-        1: AtlasAcademyNiceLvlUpMaterial;
-        2: AtlasAcademyNiceLvlUpMaterial;
-        3: AtlasAcademyNiceLvlUpMaterial;
-        4: AtlasAcademyNiceLvlUpMaterial;
-        5: AtlasAcademyNiceLvlUpMaterial;
-        6: AtlasAcademyNiceLvlUpMaterial;
-        7: AtlasAcademyNiceLvlUpMaterial;
-        8: AtlasAcademyNiceLvlUpMaterial;
-        9: AtlasAcademyNiceLvlUpMaterial;
-    };
+    ascensionMaterials: Record<AscensionMaterialKey, AtlasAcademyNiceLvlUpMaterial>;
+    skillMaterials: Record<SkillMaterialKey, AtlasAcademyNiceLvlUpMaterial>;
+    costumeMaterials: Record<number, AtlasAcademyNiceLvlUpMaterial>;
 };

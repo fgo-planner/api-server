@@ -33,7 +33,7 @@ export type MasterServant = {
 
     };
 
-    costumes: number[];
+    costumes?: number[];
 
     acquired?: Date;
 

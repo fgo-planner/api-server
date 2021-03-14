@@ -126,8 +126,7 @@ export const MasterServantSchema = new Schema({
         default: {}
     },
     costumes: {
-        type: [Number],
-        default: []
+        type: [Number]
     },
     acquired: {
         type: Date

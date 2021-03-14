@@ -205,10 +205,14 @@ export class AtlasAcademyDataImportService {
             skillMaterials[i] = this._transformEnhancementMaterials(skillMaterial);
         }
 
-        const costumeMaterials: Record<number, GameServantEnhancement> = {};
-        for (const costumeMaterialEntry of Object.entries(servant.costumeMaterials)) {
-            const id = Number(costumeMaterialEntry[0]); // Costume IDs should always be numbers.
-            costumeMaterials[id] = this._transformEnhancementMaterials(costumeMaterialEntry[1]);
+        let costumeMaterials: Record<number, GameServantEnhancement> | undefined;
+        const costumeMaterialEntries = Object.entries(servant.costumeMaterials);
+        if (costumeMaterialEntries.length) {
+            costumeMaterials = {};
+            for (const costumeMaterialEntry of costumeMaterialEntries) {
+                const id = Number(costumeMaterialEntry[0]); // Costume IDs should always be numbers.
+                costumeMaterials[id] = this._transformEnhancementMaterials(costumeMaterialEntry[1]);
+            }
         }
 
         const result: GameServant = {

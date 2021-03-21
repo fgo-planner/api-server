@@ -1,7 +1,7 @@
 {
-  "name": "fgo-servant-planner-server",
+  "name": "fgo-planner-api-server",
   "version": "0.0.1",
-  "description": "Backend server for the FGO servant planner project.",
+  "description": "Backend API server for the FGO Planner project.",
   "scripts": {
     "start": "npm run serve",
     "build": "npm run build-ts && npm run lint",

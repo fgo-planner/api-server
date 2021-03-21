@@ -1,4 +1,4 @@
-import { GameItem, GameServant } from 'data/types';
+import { GameItem, GameServant } from '@fgo-planner/data';
 import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
 import { Logger } from 'internal';
 import { Inject, Service } from 'typedi';

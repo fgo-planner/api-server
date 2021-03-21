@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import moduleAlias from './loaders/module-alias.loader';
 
 // Resolve module paths before importing anything else.
-moduleAlias(require('./tsconfig.json'), __dirname); // eslint-disable-line
+moduleAlias(require('../tsconfig.json'), __dirname); // eslint-disable-line
 
 import dotenv from 'dotenv';
 import express from 'express';

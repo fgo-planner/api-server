@@ -10,24 +10,12 @@
     "target": "es6",
     "noImplicitAny": true,
     "moduleResolution": "node",
-    "sourceMap": true,
+    "sourceMap": false,
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
       "controllers": [
         "src/controllers"
-      ],
-      "data/types": [
-        "src/data/types"
-      ],
-      "data/validators": [
-        "src/data/validators"
-      ],
-      "data/schemas": [
-        "src/data/schemas"
-      ],
-      "data/models": [
-        "src/data/models"
       ],
       "dto": [
         "src/dto"
@@ -43,6 +31,9 @@
       ],
       "utils": [
         "src/utils"
+      ],
+      "@fgo-planner/data": [
+        "node_modules/@fgo-planner/data/src"
       ],
       "*": [
         "node_modules/*"

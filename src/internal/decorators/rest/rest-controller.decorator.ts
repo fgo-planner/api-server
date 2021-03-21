@@ -79,6 +79,6 @@ export function RestController(param1?: string | UserAccessLevel, param2?: UserA
         // Register the RestController as a typedi Service.
         Service()(target);
     };
-};
+}
 
 

@@ -1,5 +1,5 @@
+import { UserModel } from '@fgo-planner/data';
 import bcrypt from 'bcryptjs';
-import { UserModel } from 'data/models';
 import { NextFunction, Request, Response } from 'express';
 import { AccessTokenPayload, AuthenticatedRequest } from 'internal';
 import jwt from 'jsonwebtoken';

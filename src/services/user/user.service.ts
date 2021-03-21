@@ -1,7 +1,6 @@
+import { MasterAccountValidators, UserDocument, UserModel } from '@fgo-planner/data';
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'bson';
-import { UserDocument, UserModel } from 'data/models';
-import { MasterAccountValidators } from 'data/validators';
 import { Nullable } from 'internal';
 import { Inject, Service } from 'typedi';
 import { MasterAccountService } from '../master/master-account.service';

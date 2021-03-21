@@ -1,5 +1,4 @@
-import { GameServantDocument, GameServantModel } from 'data/models';
-import { GameServant } from 'data/types';
+import { GameServant, GameServantDocument, GameServantModel } from '@fgo-planner/data';
 import { Pagination } from 'dto';
 import { Service } from 'typedi';
 

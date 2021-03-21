@@ -1,6 +1,5 @@
+import { GameEvent, GameEventDocument, GameEventModel } from '@fgo-planner/data';
 import { ObjectId } from 'bson';
-import { GameEventDocument, GameEventModel } from 'data/models';
-import { GameEvent } from 'data/types';
 import { Pagination } from 'dto';
 import { Service } from 'typedi';
 import { ObjectIdUtils } from 'utils';

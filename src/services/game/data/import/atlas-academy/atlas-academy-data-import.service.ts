@@ -1,10 +1,10 @@
+import { GameItem, GameItemBackground, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity } from '@fgo-planner/data';
 import axios from 'axios';
-import { GameItem, GameItemBackground, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity } from 'data/types';
 import { Logger } from 'internal';
 import { Service } from 'typedi';
-import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
 import { AtlasAcademyAttribute } from './atlas-academy-attribute.enum';
 import { AtlasAcademyBasicServant } from './atlas-academy-basic-servant.type';
+import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
 import { AtlasAcademyNiceGender } from './atlas-academy-nice-gender.type';
 import { AtlasAcademyNiceItemBGType } from './atlas-academy-nice-item-bg-type.type';
 import { AtlasAcademyNiceItemType } from './atlas-academy-nice-item-type.type';

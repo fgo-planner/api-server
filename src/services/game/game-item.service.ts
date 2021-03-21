@@ -1,5 +1,4 @@
-import { GameItemDocument, GameItemModel } from 'data/models';
-import { GameItem, GameItemUsage } from 'data/types';
+import { GameItem, GameItemDocument, GameItemModel, GameItemUsage } from '@fgo-planner/data';
 import { Pagination } from 'dto';
 import { Service } from 'typedi';
 

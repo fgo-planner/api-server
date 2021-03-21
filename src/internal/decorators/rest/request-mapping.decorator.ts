@@ -95,7 +95,7 @@ export function RequestMapping(method: RequestMethod, param1?: string | UserAcce
             handlerName: propertyKey
         };
     };
-};
+}
 
 /**
  * Decorator for mapping GET requests to a handler method in a controller.
@@ -135,7 +135,7 @@ export function GetMapping(param1?: string | UserAccessLevel, param2?: UserAcces
         return RequestMapping(RequestMethod.GET, path);
     }
     return RequestMapping(RequestMethod.GET, path, accessLevel);
-};
+}
 
 /**
  * Decorator for mapping POST requests to a handler method in a controller.
@@ -175,7 +175,7 @@ export function PostMapping(param1?: string | UserAccessLevel, param2?: UserAcce
         return RequestMapping(RequestMethod.POST, path);
     }
     return RequestMapping(RequestMethod.POST, path, accessLevel);
-};
+}
 
 /**
  * Decorator for mapping PUT requests to a handler method in a controller.
@@ -215,7 +215,7 @@ export function PutMapping(param1?: string | UserAccessLevel, param2?: UserAcces
         return RequestMapping(RequestMethod.PUT, path);
     }
     return RequestMapping(RequestMethod.PUT, path, accessLevel);
-};
+}
 
 /**
  * Decorator for mapping DELETE requests to a handler method in a controller.
@@ -255,4 +255,4 @@ export function DeleteMapping(param1?: string | UserAccessLevel, param2?: UserAc
         return RequestMapping(RequestMethod.DELETE, path);
     }
     return RequestMapping(RequestMethod.DELETE, path, accessLevel);
-};
+}

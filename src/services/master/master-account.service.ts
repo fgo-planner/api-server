@@ -1,6 +1,5 @@
+import { MasterAccount, MasterAccountModel } from '@fgo-planner/data';
 import { ObjectId } from 'bson';
-import { MasterAccountModel } from 'data/models';
-import { MasterAccount } from 'data/types';
 import { Service } from 'typedi';
 
 @Service()

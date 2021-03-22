@@ -32,9 +32,6 @@
       "utils": [
         "src/utils"
       ],
-      "@fgo-planner/data": [
-        "node_modules/@fgo-planner/data/src"
-      ],
       "*": [
         "node_modules/*"
       ]

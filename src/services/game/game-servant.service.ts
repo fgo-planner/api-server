@@ -10,19 +10,19 @@ export class GameServantService {
         return GameServantModel.create(servant);
     }
 
-    async existsById(id: number) {
-        return await GameServantModel.exists({ _id: id });
+    async existsById(id: number): Promise<boolean> {
+        return GameServantModel.exists({ _id: id });
     }
 
     async findById(id: number): Promise<GameServantDocument | null> {
-        return await GameServantModel.findById(id).exec();
+        return GameServantModel.findById(id).exec();
     }
 
     async findByCollectionNo(collectionNo: number): Promise<GameServantDocument> {
         if (!collectionNo && collectionNo !== 0) {
             throw 'Collection number is missing or invalid.';
         }
-        return await GameServantModel.findByCollectionNo(collectionNo).exec();
+        return GameServantModel.findByCollectionNo(collectionNo).exec();
     }
 
     async findAll(): Promise<GameServantDocument[]> {
@@ -58,7 +58,7 @@ export class GameServantService {
         if (!id && id !== 0) {
             throw 'ID is missing or invalid.';
         }
-        return await GameServantModel.findOneAndUpdate(
+        return GameServantModel.findOneAndUpdate(
             { _id: id },
             { $set: servant },
             { runValidators: true, new: true }

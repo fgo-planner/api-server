@@ -27,7 +27,7 @@ export class UserService {
         if (!id) {
             throw 'User ID is missing or invalid.';
         }
-        return await UserModel.findById(id).exec();
+        return UserModel.findById(id).exec();
     }
 
     async findByIdBasic(id: ObjectId): Promise<UserDocument | null> {
@@ -42,7 +42,7 @@ export class UserService {
             createdAt: 0,
             updatedAt: 0
         };
-        return await UserModel.findById(id, projection).exec();
+        return UserModel.findById(id, projection).exec();
     }
 
     // TODO Create DTO for parameters if it gets too big.
@@ -89,7 +89,7 @@ export class UserService {
      * Checks if the username is already in use by another registered user.
      */
     async usernameExists(username: string): Promise<boolean> {
-        return await UserModel.exists({ username });
+        return UserModel.exists({ username });
     }
 
     /**
@@ -99,7 +99,7 @@ export class UserService {
         if (!email) {
             return false;
         }
-        return await UserModel.exists({ email });
+        return UserModel.exists({ email });
     }
 
     private _passwordIsValid(password: string): boolean {

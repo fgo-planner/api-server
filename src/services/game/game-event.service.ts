@@ -12,12 +12,12 @@ export class GameEventService {
         return GameEventModel.create(event);
     }
 
-    async existsById(id: number) {
-        return await GameEventModel.exists({ _id: id });
+    async existsById(id: number): Promise<boolean> {
+        return GameEventModel.exists({ _id: id });
     }
 
     async findById(id: ObjectId): Promise<GameEventDocument | null> {
-        return await GameEventModel.findById(id).exec();
+        return GameEventModel.findById(id).exec();
     }
 
     async findAll(): Promise<GameEventDocument[]> {
@@ -50,7 +50,7 @@ export class GameEventService {
         if (!id) {
             throw 'Event ID is missing or invalid.';
         }
-        return await GameEventModel.findOneAndUpdate(
+        return GameEventModel.findOneAndUpdate(
             { _id: id },
             { $set: event },
             { runValidators: true, new: true }

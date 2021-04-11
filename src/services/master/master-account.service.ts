@@ -14,11 +14,11 @@ export class MasterAccountService {
         if (!id) {
             throw 'Account ID is missing or invalid.';
         }
-        return await MasterAccountModel.findById(id).exec();
+        return MasterAccountModel.findById(id).exec();
     }
 
     async findByUserId(userId: ObjectId): Promise<Partial<MasterAccount>[]> {
-        return await MasterAccountModel.findByUserId(userId);
+        return MasterAccountModel.findByUserId(userId);
     }
 
     async update(account: Partial<MasterAccount>): Promise<MasterAccount | null> {
@@ -27,7 +27,7 @@ export class MasterAccountService {
         }
         // Do not allow userId to be updated.
         delete account.userId;
-        return await MasterAccountModel.findOneAndUpdate(
+        return MasterAccountModel.findOneAndUpdate(
             { _id: account._id },
             { $set: account },
             { runValidators: true, new: true }

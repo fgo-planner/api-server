@@ -20,12 +20,12 @@ export class GameItemService {
         return GameItemModel.create(item);
     }
 
-    async existsById(id: number) {
-        return await GameItemModel.exists({ _id: id });
+    async existsById(id: number): Promise<boolean> {
+        return GameItemModel.exists({ _id: id });
     }
 
     async findById(id: number): Promise<GameItemDocument | null> {
-        return await GameItemModel.findById(id, this._basicProjection).exec();
+        return GameItemModel.findById(id, this._basicProjection).exec();
     }
 
     async findAll(): Promise<GameItemDocument[]> {
@@ -65,7 +65,7 @@ export class GameItemService {
         if (!id && id !== 0) {
             throw 'Item ID is missing or invalid.';
         }
-        return await GameItemModel.findOneAndUpdate(
+        return GameItemModel.findOneAndUpdate(
             { _id: id },
             { $set: item },
             { runValidators: true, new: true }

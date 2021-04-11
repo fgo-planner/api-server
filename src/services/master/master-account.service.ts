@@ -37,12 +37,12 @@ export class MasterAccountService {
     /**
      * Checks whether the user is the owner of the master account.
      * 
-     * @param id The master account ID. Must not be null.
+     * @param accountId The master account ID. Must not be null.
      * @param userId The user's ID. Must not be null.
      */
-    async isOwner(masterAccountId: ObjectId, userId: ObjectId): Promise<boolean> {
-        const user = await MasterAccountModel.findById(masterAccountId, { userId: 1 });
-        return user ? userId.equals(user.userId) : false;
+    async isOwner(accountId: ObjectId, userId: ObjectId): Promise<boolean> {
+        const account = await MasterAccountModel.findById(accountId, { userId: 1 });
+        return account ? userId.equals(account.userId) : false;
     }
 
 }

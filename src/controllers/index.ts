@@ -4,5 +4,6 @@ export * from './game-item.controller';
 export * from './game-servant.controller';
 export * from './login.controller';
 export * from './master-account.controller';
+export * from './master-plan.controller';
 export * from './test.controller';
 export * from './user.controller';

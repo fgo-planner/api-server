@@ -69,19 +69,19 @@ export class MasterAccountController {
     /**
      * Verifies that the user has access to the master account in question.
      * 
-     * @param id The master account ID.
+     * @param accountId The master account ID.
      * @param token The requesting user's access token payload.
      */
-    private async _hasAccess(masterAccountId: ObjectId, token: AccessTokenPayload): Promise<boolean> {
+    private async _hasAccess(accountId: ObjectId, token: AccessTokenPayload): Promise<boolean> {
         const userId = this._getRequestorId(token);
         if (!userId) {
             return true;
         }
-        return await this._masterAccountService.isOwner(masterAccountId, userId);
+        return this._masterAccountService.isOwner(accountId, userId);
     }
 
     /**
-     * Extracts the Id of the user making the request for verification purposes. If
+     * Extracts the ID of the user making the request for verification purposes. If
      * the user is an admin, then null is returned. 
      */
     private _getRequestorId(token: AccessTokenPayload): ObjectId | null {

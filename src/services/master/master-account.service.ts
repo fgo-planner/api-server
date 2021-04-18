@@ -34,6 +34,13 @@ export class MasterAccountService {
         ).exec();
     }
 
+    async delete(id: ObjectId): Promise<MasterAccount | null> {
+        if (!id) {
+            throw 'Account ID is missing or invalid.';
+        }
+        return MasterAccountModel.deleteOne({ _id: id }).exec();
+    }
+
     /**
      * Checks whether the user is the owner of the master account.
      * 

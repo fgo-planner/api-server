@@ -1,6 +1,6 @@
 import { ObjectId } from 'bson';
 import { Response } from 'express';
-import { AccessTokenPayload, AuthenticatedRequest, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
+import { AccessTokenPayload, AuthenticatedRequest, DeleteMapping, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { MasterAccountService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, ObjectIdUtils } from 'utils';
@@ -57,6 +57,23 @@ export class MasterAccountController {
                 return res.status(401).send(); // TODO Add message
             }
             account = await this._masterAccountService.update(account);
+            if (!account) {
+                return res.status(404).send(`Account ID ${id} does not exist.`);
+            }
+            res.send(account);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
+    @DeleteMapping('/:id')
+    async deleteAccount(req: AuthenticatedRequest, res: Response): Promise<any> {
+        try {
+            const id = HttpRequestUtils.parseObjectIdFromParams(req.params, 'id');
+            if (!await this._hasAccess(id, req.token)) {
+                return res.status(401).send(); // TODO Add message
+            }
+            const account = await this._masterAccountService.delete(id);
             if (!account) {
                 return res.status(404).send(`Account ID ${id} does not exist.`);
             }

@@ -19,7 +19,7 @@ export class AtlasAcademyDataImportConstants {
 
     static readonly BasicServantsFilename = 'basic_servant_lang_en.json';
 
-    static readonly NiceServantsFilename = 'nice_servant.json';
+    static readonly NiceServantsFilename = 'nice_servant_lore.json';
 
     static readonly NiceItemsFilename = 'nice_item.json';
 

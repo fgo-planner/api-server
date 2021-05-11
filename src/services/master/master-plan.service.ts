@@ -5,8 +5,7 @@ import { Service } from 'typedi';
 @Service()
 export class MasterPlanService {
 
-    async addPlan(accountId: ObjectId, plan: Omit<MasterPlan, 'accountId' | '_id'>): Promise<MasterPlan> {
-        (plan as MasterPlan).accountId = accountId;
+    async addPlan(plan: Partial<MasterPlan>): Promise<MasterPlan> {
         return MasterPlanModel.create(plan);
     }
 
@@ -32,6 +31,13 @@ export class MasterPlanService {
             { $set: plan },
             { runValidators: true, new: true }
         ).exec();
+    }
+
+    async delete(id: ObjectId): Promise<MasterPlan | null> {
+        if (!id) {
+            throw 'Plan ID is missing or invalid.';
+        }
+        return MasterPlanModel.deleteOne({ _id: id }).exec();
     }
 
     /**

@@ -1,6 +1,7 @@
+import { MasterPlan } from '@fgo-planner/data';
 import { ObjectId } from 'bson';
 import { Response } from 'express';
-import { AccessTokenPayload, AuthenticatedRequest, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
+import { AccessTokenPayload, AuthenticatedRequest, DeleteMapping, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
 import { MasterAccountService, MasterPlanService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, ObjectIdUtils } from 'utils';
@@ -16,10 +17,17 @@ export class MasterPlanController {
 
     @PutMapping()
     async addPlan(req: AuthenticatedRequest, res: Response): Promise<any> {
-        let plan = req.body;
-        const userId = new ObjectId(req.token.id);
+        let plan = req.body as Partial<MasterPlan>;
         try {
-            plan = await this._masterPlanService.addPlan(userId, plan);
+            const accountId = plan.accountId;
+            if (!accountId) {
+                throw 'Property \'accountId\' is required';
+            }
+            const userId = this._getRequestorId(req.token);
+            if (userId && !this._masterAccountService.isOwner(userId, accountId)) {
+                return res.status(401).send(); // TODO Add message
+            }
+            plan = await this._masterPlanService.addPlan(plan);
             res.send(plan);
         } catch (err) {
             res.status(400).send(err);
@@ -64,6 +72,23 @@ export class MasterPlanController {
                 return res.status(401).send(); // TODO Add message
             }
             plan = await this._masterPlanService.update(plan);
+            if (!plan) {
+                return res.status(404).send(`Plan ID ${id} does not exist.`);
+            }
+            res.send(plan);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
+    @DeleteMapping('/:id')
+    async deletePlan(req: AuthenticatedRequest, res: Response): Promise<any> {
+        try {
+            const id = HttpRequestUtils.parseObjectIdFromParams(req.params, 'id');
+            if (!await this._hasAccess(id, req.token)) {
+                return res.status(401).send(); // TODO Add message
+            }
+            const plan = await this._masterPlanService.delete(id);
             if (!plan) {
                 return res.status(404).send(`Plan ID ${id} does not exist.`);
             }

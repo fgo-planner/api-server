@@ -157,14 +157,12 @@ export class AtlasAcademyDataImportService {
          * Convert the servant data into `GameServant` objects.
          */
         try {
-
             const servants = niceServants
                 .map(servant => this._transformServantData(servant, servantEnMap))
                 .filter(servant => servant != null && !skipIds.has(servant._id)) as GameServant[];
-
-                return servants;
+            return servants;
         } catch (e) {
-            console.error(e)
+            console.error(e);
         }
 
         return [];

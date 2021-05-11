@@ -80,7 +80,10 @@ export class UserService {
                 friendId,
                 qp: 0,
                 items: [],
-                servants: []
+                servants: [],
+                costumes: [],
+                bondLevels: {},
+                soundtracks: []
             });
         }
     }

@@ -28,6 +28,35 @@ export class UserController {
         res.status(501).send('This is not implemented yet.');
     }
 
+    @GetMapping('/user-preferences', UserAccessLevel.Authenticated)
+    async getUserPreferences(req: AuthenticatedRequest, res: Response): Promise<any> {
+        const userId = ObjectIdUtils.instantiate(req.token.id);
+        try {
+            const userPrefs = await this._userService.getUserPreferences(userId);
+            if (!userPrefs) {
+                return res.status(404).send(`User preferences could not be found for user ${userId}.`);
+            }
+            res.send(userPrefs);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
+    @PostMapping('/user-preferences', UserAccessLevel.Authenticated)
+    async updateUserPreferences(req: AuthenticatedRequest, res: Response): Promise<any> {
+        let userPrefs = req.body;
+        const userId = ObjectIdUtils.instantiate(req.token.id);
+        try {
+            userPrefs = await this._userService.updateUserPreferences(userId, userPrefs);
+            if (!userPrefs) {
+                return res.status(404).send(`User preferences could not be found for user ${userId}.`);
+            }
+            res.send(userPrefs);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
     @GetMapping('/current-user', UserAccessLevel.Authenticated)
     async getCurrentUser(req: AuthenticatedRequest, res: Response): Promise<any> {
         const userId = ObjectIdUtils.instantiate(req.token.id);

@@ -1,9 +1,11 @@
-import { MasterAccountValidators, UserDocument, UserModel } from '@fgo-planner/data';
+import { MasterAccountValidators, UserDocument, UserModel, UserPreferences } from '@fgo-planner/data';
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'bson';
 import { Nullable } from 'internal';
 import { Inject, Service } from 'typedi';
 import { MasterAccountService } from '../master/master-account.service';
+
+type BasicUserDocument = Pick<UserDocument, '_id' | 'username' | 'email'>;
 
 /** 
  * Handles retrieving and updating users (excluding administrative operations).
@@ -13,15 +15,13 @@ export class UserService {
 
     private static readonly _BcryptStrength = Number(process.env.BCRYPT_STRENGTH) || 4;
 
+    private static readonly _BasicProjection = {
+        username: 1,
+        email: 1
+    };
+
     @Inject()
     private _masterAccountService!: MasterAccountService;
-
-    // TODO Remove this
-    test(id: string, status: boolean) {
-        UserModel.setAdminStatus(id, status, (err, doc) => {
-            console.log(doc);
-        });
-    }
 
     async findById(id: ObjectId): Promise<UserDocument | null> {
         if (!id) {
@@ -30,19 +30,11 @@ export class UserService {
         return UserModel.findById(id).exec();
     }
 
-    async findByIdBasic(id: ObjectId): Promise<UserDocument | null> {
+    async findByIdBasic(id: ObjectId): Promise<BasicUserDocument | null> {
         if (!id) {
             throw 'User ID is missing or invalid.';
         }
-        const projection = {
-            _id: 0,
-            hash: 0,
-            admin: 0,
-            enabled: 0,
-            createdAt: 0,
-            updatedAt: 0
-        };
-        return UserModel.findById(id, projection).exec();
+        return UserModel.findById(id, UserService._BasicProjection).exec();
     }
 
     // TODO Create DTO for parameters if it gets too big.
@@ -103,6 +95,25 @@ export class UserService {
             return false;
         }
         return UserModel.exists({ email });
+    }
+
+    async getUserPreferences(userId: ObjectId): Promise<UserPreferences | null> {
+        return UserModel.getUserPreferences(userId);
+    }
+
+    async updateUserPreferences(userId: ObjectId, userPrefs: Partial<UserPreferences>): Promise<UserPreferences | null> {
+        const updateObject: Record<string, any> = {};
+        for (const [key, value] of Object.entries(userPrefs)) {
+            updateObject[`userPrefs.${key}`] = value;
+        }
+        
+        const user = await UserModel.findOneAndUpdate(
+            { _id: userId },
+            { $set: updateObject },
+            { runValidators: true, new: true }
+        ).exec();
+
+        return user && user.userPrefs;
     }
 
     private _passwordIsValid(password: string): boolean {

@@ -1,9 +1,10 @@
-import { GameItem, GameServant } from '@fgo-planner/data';
+import { GameItem, GameServant, GameSoundtrack } from '@fgo-planner/data';
 import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
 import { Logger } from 'internal';
 import { Inject, Service } from 'typedi';
 import { GameItemService } from '../../game-item.service';
 import { GameServantService } from '../../game-servant.service';
+import { GameSoundtrackService } from '../../game-soundtrack.service';
 import { AtlasAcademyDataImportService } from './atlas-academy/atlas-academy-data-import.service';
 
 @Service()
@@ -14,6 +15,9 @@ export class GameDataImportService {
 
     @Inject()
     private _gameServantService!: GameServantService;
+
+    @Inject()
+    private _gameSoundtrackService!: GameSoundtrackService;
 
     @Inject()
     private _atlasAcademyDataImportService!: AtlasAcademyDataImportService;
@@ -42,6 +46,17 @@ export class GameDataImportService {
             logger.setEnd();
             result.logs = logger;
             resultSet.items = result;
+        }
+        if (options.soundtracks?.import) {
+            const logger: Logger = new Logger();
+            logger.setStart();
+            const existingAction = options.soundtracks.onExisting || GameDataImportExistingAction.Skip;
+            const skipIdSet = await this._getSoundtrackIdsToSkip(existingAction);
+            const soundtracks = await this._atlasAcademyDataImportService.getSoundtracks(skipIdSet, logger);
+            const result = await this._processSoundtracks(soundtracks, existingAction, logger);
+            logger.setEnd();
+            result.logs = logger;
+            resultSet.soundtracks = result;
         }
         return resultSet;
     }
@@ -197,7 +212,7 @@ export class GameDataImportService {
                 } else {
                     exists = await this._processItemSkip(item);
                     if (exists) {
-                        logger.info(`Servant (collectionNo=${item._id}) was skipped.`);
+                        logger.info(`Item (id=${item._id}) was skipped.`);
                         continue;
                     }
                 }
@@ -253,6 +268,110 @@ export class GameDataImportService {
         } else {
             existing.uses = item.uses; // TODO Push instead of replace
             await this._gameItemService.update(existing);
+        }
+        return !!existing;
+    }
+
+    //#endregion
+
+
+    //#region Item methods
+
+    /**
+     * Generates a set of soundtrack IDs that should be skipped based on the
+     * provided `GameDataImportExistingAction` option. For the `Override` and
+     * `Append` options, this method will return an empty set. For the `Skip`
+     * options, this method will return the set of unique item IDs that are current
+     * on the database.
+     */
+    private async _getSoundtrackIdsToSkip(existingAction: GameDataImportExistingAction): Promise<Set<number>> {
+        const result = new Set<number>();
+        if (existingAction !== GameDataImportExistingAction.Skip) {
+            return result;
+        }
+        const ids = await this._gameSoundtrackService.findAllIds();
+        for (const id of ids) {
+            result.add(id);
+        }
+        return result;
+    }
+
+    /**
+     * Writes the imported soundtrack to the database according to the options.
+     */
+    private async _processSoundtracks(
+        soundtracks: GameSoundtrack[],
+        existingAction: GameDataImportExistingAction,
+        logger: Logger
+    ): Promise<GameDataImportResult> {
+
+        let updated = 0, created = 0, errors = 0;
+        for (const soundtrack of soundtracks) {
+            logger.info(`Processing soundtrack id=${soundtrack._id}.`);
+            try {
+                let exists: boolean;
+                if (existingAction === GameDataImportExistingAction.Override) {
+                    exists = await this._processSoundtrackOverride(soundtrack);
+                } else if (existingAction === GameDataImportExistingAction.Append) {
+                    exists = await this._processSoundtrackAppend(soundtrack);
+                } else {
+                    exists = await this._processSoundtrackSkip(soundtrack);
+                    if (exists) {
+                        logger.info(`Soundtrack (id=${soundtrack._id}) was skipped.`);
+                        continue;
+                    }
+                }
+                if (exists) {
+                    logger.info(`Soundtrack (id=${soundtrack._id}) was updated.`);
+                    updated++;
+                } else {
+                    logger.info(`Soundtrack (id=${soundtrack._id}) was created.`);
+                    created++;
+                }
+            } catch (err) {
+                logger.error(err);
+                errors++;
+            }
+        }
+        return { updated, created, errors };
+    }
+
+    /**
+     * Writes the imported soundtrack to the database if it does not already exist in the
+     * database.
+     */
+    private async _processSoundtrackSkip(soundtrack: GameSoundtrack): Promise<boolean> {
+        const exists = await this._gameSoundtrackService.existsById(soundtrack._id);
+        if (!exists) {
+            await this._gameSoundtrackService.create(soundtrack);
+        }
+        return exists;
+    }
+
+    /**
+     * Writes the imported soundtrack to the database, overriding existing
+     * soundtrack data if it is already in the database.
+     */
+    private async _processSoundtrackOverride(soundtrack: GameSoundtrack): Promise<boolean> {
+        const exists = await this._gameSoundtrackService.existsById(soundtrack._id);
+        if (!exists) {
+            await this._gameSoundtrackService.create(soundtrack);
+        } else {
+            await this._gameSoundtrackService.update(soundtrack);
+        }
+        return exists;
+    }
+
+    /**
+     * Writes the imported soundtrack to the database, appending to existing
+     * soundtrack data if it is already in the database.
+     */
+    private async _processSoundtrackAppend(soundtrack: GameSoundtrack): Promise<boolean> {
+        const existing = await this._gameSoundtrackService.findById(soundtrack._id);
+        if (!existing) {
+            await this._gameSoundtrackService.create(soundtrack);
+        } else {
+            await this._gameSoundtrackService.update(existing);
         }
         return !!existing;
     }

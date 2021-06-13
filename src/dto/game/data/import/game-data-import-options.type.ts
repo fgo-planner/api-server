@@ -1,12 +1,12 @@
 import { GameDataImportExistingAction } from './game-data-import-existing-action.enum';
 
+type GameDataImportOption = {
+    import?: boolean;
+    onExisting?: GameDataImportExistingAction;
+};
+
 export type GameDataImportOptions = {
-    items?: {
-        import?: boolean;
-        onExisting?: GameDataImportExistingAction;
-    };
-    servants?: {
-        import?: boolean;
-        onExisting?: GameDataImportExistingAction;
-    };
+    items?: GameDataImportOption;
+    servants?: GameDataImportOption;
+    soundtracks?: GameDataImportOption;
 };

@@ -2,6 +2,7 @@ export * from './game/data/import/game-data-import.service';
 export * from './game/game-event.service';
 export * from './game/game-item.service';
 export * from './game/game-servant.service';
+export * from './game/game-soundtrack.service';
 export * from './master/master-account.service';
 export * from './master/master-plan.service';
 export * from './user/authentication.service';

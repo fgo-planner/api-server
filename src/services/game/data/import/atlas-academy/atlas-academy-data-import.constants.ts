@@ -17,10 +17,14 @@ export class AtlasAcademyDataImportConstants {
 
     static readonly ItemPath = 'item';
 
-    static readonly BasicServantsFilename = 'basic_servant_lang_en.json';
+    static readonly NiceServantsEnglishFilename = 'nice_servant_lore_lang_en.json';
 
     static readonly NiceServantsFilename = 'nice_servant_lore.json';
 
+    static readonly NiceItemsEnglishFilename = 'nice_item_lang_en.json';
+
     static readonly NiceItemsFilename = 'nice_item.json';
+
+    static readonly NiceBgmEnglishFilename = 'nice_bgm_lang_en.json';
 
 }

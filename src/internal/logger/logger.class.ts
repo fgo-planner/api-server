@@ -6,16 +6,16 @@ export class Logger {
     private readonly _messages: LoggerMessage[] = [];
 
     private _start?: Date;
-    get start() {
+    get start(): Date | undefined {
         return this._start;
     }
 
     private _end?: Date;
-    get end() {
+    get end(): Date | undefined {
         return this._end;
     }
 
-    get name() {
+    get name(): string | undefined {
         return this._name;
     }
 
@@ -23,31 +23,31 @@ export class Logger {
 
     }
 
-    setStart(date?: Date) {
+    setStart(date?: Date): Date | undefined {
         if (!date) {
             date = new Date();
         }
         return this._start = date;
     }
 
-    setEnd(date?: Date) {
+    setEnd(date?: Date): Date | undefined {
         if (!date) {
             date = new Date();
         }
         return this._end = date;
     }
 
-    info(message: any): void {
+    info(message: string | unknown): void {
         console.log(message);
         this._log(LoggerMessageLevel.Info, message);
     }
 
-    warn(message: any): void {
+    warn(message: string | unknown): void {
         console.warn(message);
         this._log(LoggerMessageLevel.Warn, message);
     }
 
-    error(message: any): void {
+    error(message: string | unknown): void {
         console.error(message);
         this._log(LoggerMessageLevel.Error, message);
     }
@@ -57,7 +57,7 @@ export class Logger {
         this._messages.push({ level, timestamp, message });
     }
 
-    toJSON() {
+    toJSON(): string {
         const object: any = {};
         if (this._name != null) {
             object.name = this._name;

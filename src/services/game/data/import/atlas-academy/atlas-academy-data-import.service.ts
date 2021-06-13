@@ -1,4 +1,4 @@
-import { GameItem, GameItemBackground, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity } from '@fgo-planner/data';
+import { GameItem, GameItemBackground, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity, GameSoundtrack } from '@fgo-planner/data';
 import { GameServantCostume } from '@fgo-planner/data/lib/types/game/servant/game-servant-costume.type';
 import axios from 'axios';
 import { Logger } from 'internal';
@@ -6,7 +6,9 @@ import { Service } from 'typedi';
 import { AtlasAcademyAttribute } from './atlas-academy-attribute.type';
 import { AtlasAcademyBasicServant } from './atlas-academy-basic-servant.type';
 import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
+import { AtlasAcademyNiceBgmEntity } from './atlas-academy-nice-bgm-entity.type';
 import { AtlasAcademyNiceGender } from './atlas-academy-nice-gender.type';
+import { AtlasAcademyNiceItemAmount } from './atlas-academy-nice-item-amount.type';
 import { AtlasAcademyNiceItemBGType } from './atlas-academy-nice-item-bg-type.type';
 import { AtlasAcademyNiceItemType } from './atlas-academy-nice-item-type.type';
 import { AtlasAcademyNiceItemUse } from './atlas-academy-nice-item-use.type';
@@ -126,31 +128,22 @@ export class AtlasAcademyDataImportService {
      */
     async getServants(skipIds: Set<number>, logger?: Logger): Promise<GameServant[]> {
         /*
-         * Retrieve 'nice' JP servant data with lore.
+         * Retrieve 'nice' JP servant data with lore and English names.
          */
         const niceServants = await this._getNiceServants('JP', logger);
 
         /*
          * Retrieve 'nice' NA servant data with lore an convert it into a lookup map.
-         * This map will be used to look up English strings.
+         * This servant data will be used as the source for additional English strings
+         * (costume names, etc).
+         * 
+         * This is needed because as of 6/13/2021, the JP servant data with English
+         * names does not include English costume names.
          */
         const niceServantsNa  = await this._getNiceServants('NA', logger);
-        const servantEnMap: Record<number, ServantEnData> = {};
+        const servantEngMap: Record<number, ServantEnData> = {};
         for (const servant of niceServantsNa) {
-            servantEnMap[servant.collectionNo] = servant;
-        }
-
-        /*
-         * Retrieve rest of servants' data with English names from 'basic' JP servant
-         * data and add it to them to the lookup map.
-         */
-        const basicServants = await this._getBasicServants(logger);
-        for (const servant of basicServants) {
-            if (servantEnMap[servant.collectionNo]) {
-                // Do not add if the servant is already in the map.
-                continue;
-            }
-            servantEnMap[servant.collectionNo] = servant;
+            servantEngMap[servant.collectionNo] = servant;
         }
         
         /*
@@ -158,7 +151,7 @@ export class AtlasAcademyDataImportService {
          */
         try {
             const servants = niceServants
-                .map(servant => this._transformServantData(servant, servantEnMap))
+                .map(servant => this._transformServantData(servant, servantEngMap, logger))
                 .filter(servant => servant != null && !skipIds.has(servant._id)) as GameServant[];
             return servants;
         } catch (e) {
@@ -170,23 +163,11 @@ export class AtlasAcademyDataImportService {
 
     /**
      * Retrieves the pre-generated nice servant data with lore from the Atlas
-     * Academy API.
+     * Academy API. Always retrieves the data with English names.
      */
     private async _getNiceServants(region: 'NA' | 'JP', logger?: Logger): Promise<AtlasAcademyNiceServant[]> {
-        const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${Constants.NiceServantsFilename}`;
-        logger?.info(`Calling ${url}`);
-        const response = await axios.get(url);
-        // TODO Handle errors
-        return response.data;
-    }
-
-    /**
-     * Retrieves the pre-generated basic servant data from the Atlas Academy API.
-     * This method will always retrieve the JP region data with English language
-     * names.
-     */
-    private async _getBasicServants(logger?: Logger): Promise<AtlasAcademyBasicServant[]> {
-        const url = `${Constants.BaseUrl}/${Constants.ExportPath}/JP/${Constants.BasicServantsFilename}`;
+        const filename = region === 'NA' ? Constants.NiceServantsFilename : Constants.NiceServantsEnglishFilename;
+        const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${filename}`;
         logger?.info(`Calling ${url}`);
         const response = await axios.get(url);
         // TODO Handle errors
@@ -198,7 +179,7 @@ export class AtlasAcademyDataImportService {
      */
     private _transformServantData(
         servant: AtlasAcademyNiceServant,
-        servantEnMap: Record<number, ServantEnData>,
+        servantEngMap: Record<number, ServantEnData>,
         logger?: Logger
     ): GameServant | null {
 
@@ -230,24 +211,22 @@ export class AtlasAcademyDataImportService {
         const costumes: Record<number, GameServantCostume> = {};
         if (servant.profile) {
             const costumeEntries = Object.entries(servant.profile.costume);
-            for (const costumeEntry of costumeEntries) {
-                const id = Number(costumeEntry[0]); // Costume IDs should always be numbers.
-                const costume = costumeEntry[1];
+            for (const [id, costume] of costumeEntries) {
+                const costumeId = Number(id); // Costume IDs should always be numbers.
                 let materials: GameServantEnhancement;
                 /*
                  * Some costumes do not require materials (ie. Mash's idol costume). For these
                  * costumes, the map will not contain an entry for the costume's ID.
                  */
-                const costumeMaterials = servant.costumeMaterials[id];
+                const costumeMaterials = servant.costumeMaterials[costumeId];
                 if (!costumeMaterials) {
                     materials = { materials: [], qp: 0 };
                 } else {
                     materials = this._transformEnhancementMaterials(costumeMaterials);
                 }
-                costumes[id] = {
+                costumes[costumeId] = {
                     collectionNo: costume.costumeCollectionNo,
                     name: costume.name,
-                    nameJp: costume.name,
                     materials
                 };
             }
@@ -256,7 +235,6 @@ export class AtlasAcademyDataImportService {
         const result: GameServant = {
             _id: servant.id,
             name: servant.name,
-            nameJp: servant.name,
             collectionNo: servant.collectionNo,
             class: AtlasAcademyDataImportService._ServantClassMap[servant.className],
             rarity: servant.rarity as GameServantRarity,
@@ -278,7 +256,7 @@ export class AtlasAcademyDataImportService {
             }
         };
 
-        this._populateServantEnglishStrings(result, servantEnMap, logger);
+        this._populateServantEnglishStrings(result, servantEngMap, logger);
 
         return result;
     }
@@ -288,12 +266,7 @@ export class AtlasAcademyDataImportService {
      * `GameServantEnhancement` object.
      */
     private _transformEnhancementMaterials(material: AtlasAcademyNiceLvlUpMaterial): GameServantEnhancement {
-        const items = material.items.map(item => {
-            return {
-                itemId: item.item.id,
-                quantity: item.amount
-            };
-        });
+        const items = material.items.map(this._transformItemAmountData);
         return {
             materials: items,
             qp: material.qp
@@ -321,9 +294,9 @@ export class AtlasAcademyDataImportService {
      * Populate the given servant with their English strings using the given lookup
      * map. If the name is not present in the map, the Japanese names will be retained.
      */
-    private _populateServantEnglishStrings(servant: GameServant, servantEnMap: Record<number, ServantEnData>, logger?: Logger): void {
+    private _populateServantEnglishStrings(servant: GameServant, servantEngMap: Record<number, ServantEnData>, logger?: Logger): void {
 
-        const servantEnData = servantEnMap[servant.collectionNo];
+        const servantEnData = servantEngMap[servant.collectionNo];
         if (!servantEnData) {
             logger?.warn(
                 `English strings not available for servant (collectionNo=${servant.collectionNo}).
@@ -338,13 +311,12 @@ export class AtlasAcademyDataImportService {
         // Populate English costume names if available.
         const costumeEnDataMap = servantEnData.profile?.costume;
         if (costumeEnDataMap) {
-            for (const costumeEntry of Object.entries(servant.costumes)) {
-                const id = Number(costumeEntry[0]);
-                const costumeEnData = costumeEnDataMap[id];
+            const costumeEntries = Object.entries(servant.costumes);
+            for (const [id, costume] of costumeEntries) {
+                const costumeEnData = costumeEnDataMap[Number(id)];
                 if (!costumeEnData) {
                     continue;
                 }
-                const costume = costumeEntry[1];
                 costume.name = costumeEnData.name;
             }
         }
@@ -368,7 +340,11 @@ export class AtlasAcademyDataImportService {
         const jpItems = await this._getNiceItems('JP', logger);
 
         /*
-         * Retrieve NA item data and convert it into name lookup map.
+         * Retrieve NA item data and convert it into name lookup map. This item data
+         * will be used as the source for additional English strings (descriptions).
+         * 
+         * This is needed because as of 6/13/2021, the JP item data with English names
+         * does not include English descriptions.
          */
         const naItems = await this._getNiceItems('NA', logger);
         const englishStrings: Record<number, AtlasAcademyNiceItem> = {};
@@ -377,10 +353,10 @@ export class AtlasAcademyDataImportService {
         }
 
         /*
-         * Convert the JP item data into `GameServant` objects.
+         * Convert the JP item data into `GameItem` objects.
          */
         const items = jpItems
-            .map(item => this._transformItemData(item, englishStrings))
+            .map(item => this._transformItemData(item, englishStrings, logger))
             .filter(item => item != null && !skipIds.has(item._id)) as GameItem[];
 
         return items;
@@ -388,9 +364,11 @@ export class AtlasAcademyDataImportService {
 
     /**
      * Retrieves the pre-generated nice item data from the Atlas Academy API.
+     * Always retrieves the data with English names.
      */
     private async _getNiceItems(region: 'NA' | 'JP', logger?: Logger): Promise<AtlasAcademyNiceItem[]> {
-        const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${Constants.NiceItemsFilename}`;
+        const filename = region === 'NA' ? Constants.NiceItemsFilename : Constants.NiceItemsEnglishFilename;
+        const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${filename}`;
         logger?.info(`Calling ${url}`);
         const response = await axios.get(url);
         // TODO Handle errors
@@ -411,7 +389,6 @@ export class AtlasAcademyDataImportService {
         const result: GameItem = {
             _id: item.id,
             name: item.name,
-            nameJp: item.name,
             description: item.detail,
             background,
             uses
@@ -463,10 +440,79 @@ export class AtlasAcademyDataImportService {
         // Remove 'Quest Clear Reward' from QP name.
         if (item._id === 5) {
             item.name = 'Quantum Particles';
-            item.nameJp = 'QP';
         }
     }
 
     //#endregion
+
+
+    //#region Soundtrack import methods
+
+    /**
+     * Retrieves BGM data from the Atlas Academy API and converts it into a list of
+     * `GameSoundtrack` objects.
+     * 
+     * @param skipIds The set of IDs to omit from the result.
+     */
+    async getSoundtracks(skipIds: Set<number>, logger?: Logger): Promise<GameSoundtrack[]> {
+        /*
+         * Retrieve JP BGM data with English names.
+         */
+        const jpBgm = await this._getBgm(logger);
+
+        /*
+         * Convert the JP item data into `GameItem` objects.
+         */
+        const soundtracks = jpBgm
+            .map(this._transformBgmData.bind(this))
+            .filter(item => item != null && !skipIds.has(item._id)) as GameItem[];
+
+        return soundtracks;
+    }
+
+    /**
+     * Retrieves the pre-generated nice BGM data from the Atlas Academy API. Always
+     * retrieves the JP data with English names.
+     */
+    private async _getBgm(logger?: Logger): Promise<AtlasAcademyNiceBgmEntity[]> {
+        const url = `${Constants.BaseUrl}/${Constants.ExportPath}/JP/${Constants.NiceBgmEnglishFilename}`;
+        logger?.info(`Calling ${url}`);
+        const response = await axios.get(url);
+        // TODO Handle errors
+        return response.data;
+    }
+
+    private _transformBgmData(bgm: AtlasAcademyNiceBgmEntity): GameSoundtrack | null {
+        if (bgm.notReleased) {
+            return null;
+        }
+        let material = undefined;
+        if (bgm.shop) {
+            material = this._transformItemAmountData(bgm.shop.cost);
+        }
+        const result: GameSoundtrack = {
+            _id: bgm.id,
+            name: bgm.name,
+            material,
+            audioUrl: bgm.audioAsset,
+            thumbnailUrl: bgm.logo
+        };
+        return result;
+    }
+
+    //#endregion
+
+
+    //#region Common methods
+
+    private _transformItemAmountData({ item, amount }: AtlasAcademyNiceItemAmount): { itemId: number, quantity: number } {
+        return {
+            itemId: item.id,
+            quantity: amount
+        };
+    }
+
+    //#endregion
+
 
 }

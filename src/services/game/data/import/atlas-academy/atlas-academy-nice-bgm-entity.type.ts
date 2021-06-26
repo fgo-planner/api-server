@@ -13,6 +13,8 @@ export type AtlasAcademyNiceBgmEntity = {
 
     audioAsset?: string;
 
+    priority: number;
+
     detail: string;
 
     notReleased: boolean;

@@ -1,4 +1,4 @@
-import { GameItem, GameItemBackground, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity, GameSoundtrack } from '@fgo-planner/data';
+import { GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity, GameSoundtrack } from '@fgo-planner/data';
 import { GameServantCostume } from '@fgo-planner/data/lib/types/game/servant/game-servant-costume.type';
 import axios from 'axios';
 import { Logger } from 'internal';
@@ -465,7 +465,7 @@ export class AtlasAcademyDataImportService {
          */
         const soundtracks = jpBgm
             .map(this._transformBgmData.bind(this))
-            .filter(item => item != null && !skipIds.has(item._id)) as GameItem[];
+            .filter(item => item != null && !skipIds.has(item._id)) as GameSoundtrack[];
 
         return soundtracks;
     }
@@ -493,6 +493,7 @@ export class AtlasAcademyDataImportService {
         const result: GameSoundtrack = {
             _id: bgm.id,
             name: bgm.name,
+            priority: bgm.priority,
             material,
             audioUrl: bgm.audioAsset,
             thumbnailUrl: bgm.logo
@@ -505,7 +506,7 @@ export class AtlasAcademyDataImportService {
 
     //#region Common methods
 
-    private _transformItemAmountData({ item, amount }: AtlasAcademyNiceItemAmount): { itemId: number, quantity: number } {
+    private _transformItemAmountData({ item, amount }: AtlasAcademyNiceItemAmount): GameItemQuantity {
         return {
             itemId: item.id,
             quantity: amount

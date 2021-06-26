@@ -1,4 +1,4 @@
-import { GameDataImportController, GameEventController, GameItemController, GameServantController, LoginController, MasterAccountController, MasterPlanController, TestController, UserController } from 'controllers';
+import { GameDataImportController, GameEventController, GameItemController, GameServantController, GameSoundtrackController, LoginController, MasterAccountController, MasterPlanController, TestController, UserController } from 'controllers';
 import { Application, Router } from 'express';
 import { Dictionary, RequestHandler } from 'express-serve-static-core';
 import { Class, ControllerMetadata, ControllerMetadataKey, RouteMetadata, RouteMetadataMapKey, UserAccessLevel } from 'internal';
@@ -17,6 +17,7 @@ const Controllers: Class<any>[] = [
     GameEventController,
     GameItemController,
     GameServantController,
+    GameSoundtrackController,
     TestController
 ];
 
@@ -100,7 +101,7 @@ const registerControllers = (prefix: string, controllers: Class<any>[], ...handl
     }
 };
 
-export default (app: Application) => {
+export default (app: Application): void => {
     registerControllers(ResourceApiPrefix, Controllers);
     app.use(router);
 };

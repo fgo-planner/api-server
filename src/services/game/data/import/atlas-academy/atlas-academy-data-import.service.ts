@@ -1,4 +1,4 @@
-import { GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity, GameSoundtrack } from '@fgo-planner/data';
+import { GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity, GameServantSkillMaterials, GameSoundtrack } from '@fgo-planner/data';
 import { GameServantCostume } from '@fgo-planner/data/lib/types/game/servant/game-servant-costume.type';
 import axios from 'axios';
 import { Logger } from 'internal';
@@ -202,11 +202,9 @@ export class AtlasAcademyDataImportService {
             }
         }
 
-        const skillMaterials: any = {};
-        for (let i = 1; i <= Constants.SkillLevelCount; i++) {
-            const skillMaterial = servant.skillMaterials[i as SkillMaterialKey];
-            skillMaterials[i] = this._transformEnhancementMaterials(skillMaterial);
-        }
+        const skillMaterials = this._transformSkillMaterials(servant.skillMaterials);
+        
+        const appendSkillMaterials = this._transformSkillMaterials(servant.appendSkillMaterials);
 
         const costumes: Record<number, GameServantCostume> = {};
         if (servant.profile) {
@@ -249,6 +247,7 @@ export class AtlasAcademyDataImportService {
             growthCurve: this._convertGrowthCurve(servant.growthCurve),
             ascensionMaterials,
             skillMaterials,
+            appendSkillMaterials,
             costumes,
             metadata: {
                 displayName: servant.name,
@@ -258,6 +257,15 @@ export class AtlasAcademyDataImportService {
 
         this._populateServantEnglishStrings(result, servantEngMap, logger);
 
+        return result;
+    }
+
+    private _transformSkillMaterials(skillMaterials: Record<SkillMaterialKey, AtlasAcademyNiceLvlUpMaterial>): GameServantSkillMaterials {
+        const result = {} as any;
+        for (let i = 1; i <= Constants.SkillLevelCount; i++) {
+            const skillMaterial = skillMaterials[i as SkillMaterialKey];
+            result[i] = this._transformEnhancementMaterials(skillMaterial);
+        }
         return result;
     }
 

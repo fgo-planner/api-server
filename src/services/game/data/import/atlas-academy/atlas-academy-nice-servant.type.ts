@@ -23,6 +23,7 @@ export type AtlasAcademyNiceServant = AtlasAcademyBasicServant & {
     growthCurve: number;
     ascensionMaterials: Record<AscensionMaterialKey, AtlasAcademyNiceLvlUpMaterial>;
     skillMaterials: Record<SkillMaterialKey, AtlasAcademyNiceLvlUpMaterial>;
+    appendSkillMaterials: Record<SkillMaterialKey, AtlasAcademyNiceLvlUpMaterial>;
     costumeMaterials: Record<number, AtlasAcademyNiceLvlUpMaterial>;
     profile?: AtlasAcademyNiceServantProfile;
 };

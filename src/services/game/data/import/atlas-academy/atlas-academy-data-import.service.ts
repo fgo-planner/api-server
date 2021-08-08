@@ -1,5 +1,4 @@
-import { GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity, GameServantSkillMaterials, GameSoundtrack } from '@fgo-planner/data';
-import { GameServantCostume } from '@fgo-planner/data/lib/types/game/servant/game-servant-costume.type';
+import { GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantCostume, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity, GameServantSkillMaterials, GameSoundtrack } from '@fgo-planner/data';
 import axios from 'axios';
 import { Logger } from 'internal';
 import { Service } from 'typedi';

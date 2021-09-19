@@ -5,6 +5,6 @@ export * from './game-servant.controller';
 export * from './game-soundtrack.controller';
 export * from './login.controller';
 export * from './master-account.controller';
-export * from './master-plan.controller';
+export * from './planner.controller';
 export * from './test.controller';
 export * from './user.controller';

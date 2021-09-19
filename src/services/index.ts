@@ -4,6 +4,7 @@ export * from './game/game-item.service';
 export * from './game/game-servant.service';
 export * from './game/game-soundtrack.service';
 export * from './master/master-account.service';
-export * from './master/master-plan.service';
+export * from './planner/plan-group.service';
+export * from './planner/plan.service';
 export * from './user/authentication.service';
 export * from './user/user.service';

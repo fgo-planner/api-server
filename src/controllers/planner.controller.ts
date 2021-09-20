@@ -127,11 +127,8 @@ export class PlanController {
             if (!await this._hasAccess(id, req.token)) {
                 return res.status(401).send(); // TODO Add message
             }
-            const plan = await this._planService.delete(id);
-            if (!plan) {
-                return res.status(404).send(`Plan ID ${id} does not exist.`);
-            }
-            res.send(plan);
+            const result = await this._planService.delete(id);
+            res.send(result);
         } catch (err) {
             res.status(400).send(err);
         }
@@ -144,11 +141,8 @@ export class PlanController {
             if (!await this._hasAccess(id, req.token)) {
                 return res.status(401).send(); // TODO Add message
             }
-            const planGroup = await this._planGroupService.delete(id);
-            if (!planGroup) {
-                return res.status(404).send(`Plan group ID ${id} does not exist.`);
-            }
-            res.send(planGroup);
+            const result = await this._planGroupService.delete(id);
+            res.send(result);
         } catch (err) {
             res.status(400).send(err);
         }

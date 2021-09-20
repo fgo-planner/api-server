@@ -73,11 +73,8 @@ export class MasterAccountController {
             if (!await this._hasAccess(id, req.token)) {
                 return res.status(401).send(); // TODO Add message
             }
-            const account = await this._masterAccountService.delete(id);
-            if (!account) {
-                return res.status(404).send(`Account ID ${id} does not exist.`);
-            }
-            res.send(account);
+            const result = await this._masterAccountService.delete(id);
+            res.send(result);
         } catch (err) {
             res.status(400).send(err);
         }

@@ -34,11 +34,12 @@ export class MasterAccountService {
         ).exec();
     }
 
-    async delete(id: ObjectId): Promise<MasterAccount | null> {
+    async delete(id: ObjectId): Promise<boolean> {
         if (!id) {
             throw 'Account ID is missing or invalid.';
         }
-        return MasterAccountModel.deleteOne({ _id: id }).exec();
+        const result = await MasterAccountModel.deleteOne({ _id: id }).exec();
+        return !!result.deletedCount;
     }
 
     /**

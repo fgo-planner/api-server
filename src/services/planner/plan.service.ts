@@ -33,11 +33,12 @@ export class PlanService {
         ).exec();
     }
 
-    async delete(id: ObjectId): Promise<Plan | null> {
+    async delete(id: ObjectId): Promise<boolean> {
         if (!id) {
             throw 'Plan ID is missing or invalid.';
         }
-        return PlanModel.deleteOne({ _id: id }).exec();
+        const result = await PlanModel.deleteOne({ _id: id }).exec();
+        return !!result.deletedCount;
     }
 
     /**

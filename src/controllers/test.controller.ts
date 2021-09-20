@@ -6,7 +6,7 @@ import { ObjectId } from 'bson';
 export class TestController {
 
     @GetMapping()
-    testObjectId(req: Request, res: Response) {
+    testObjectId(req: Request, res: Response): void {
         try {
             const data = new ObjectId(undefined);
             res.send(data);
@@ -16,9 +16,12 @@ export class TestController {
     }
 
     @GetMapping('/file-upload', UserAccessLevel.Admin)
-    test(req: Request, res: Response) {
-        const fileContents = req.file.buffer.toString();
+    test(req: Request, res: Response): void {
+        const fileContents = req.file?.buffer.toString();
         try {
+            if (!fileContents) {
+                throw 'No file!';
+            }
             const data = JSON.parse(fileContents);
             res.send(data);
         } catch (err) {

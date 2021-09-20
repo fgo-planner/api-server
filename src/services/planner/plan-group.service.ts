@@ -36,13 +36,16 @@ export class PlanGroupService {
         ).exec();
     }
 
-    async delete(id: ObjectId): Promise<PlanGroup | null> {
+    async delete(id: ObjectId): Promise<boolean> {
         if (!id) {
             throw 'Plan group ID is missing or invalid.';
         }
-        const group = await PlanGroupModel.deleteOne({ _id: id }).exec();
+        const result = await PlanGroupModel.deleteOne({ _id: id }).exec();
+        if (!result.deletedCount) {
+            return false;
+        }
         await this._planService.removeFromGroup(id);
-        return group;
+        return true;
     }
 
     /**

@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Backend API server for the FGO Planner project.",
   "scripts": {
+    "postinstall": "cd node_modules/@fgo-planner/types && npm run build-ts && cd ../data && npm run build-ts",
     "start": "npm run serve",
     "build": "npm run build-ts && npm run lint",
     "serve": "node dist/server.js",

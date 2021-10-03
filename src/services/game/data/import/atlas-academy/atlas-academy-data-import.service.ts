@@ -1,6 +1,6 @@
 import { GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantCostume, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity, GameServantSkillMaterials, GameSoundtrack } from '@fgo-planner/data';
 import axios from 'axios';
-import { Logger } from 'internal';
+import { Logger, ReadonlyRecord } from 'internal';
 import { Service } from 'typedi';
 import { AtlasAcademyAttribute } from './atlas-academy-attribute.type';
 import { AtlasAcademyBasicServant } from './atlas-academy-basic-servant.type';
@@ -48,9 +48,10 @@ export class AtlasAcademyDataImportService {
         'beastIIIR': GameServantClass.BeastIIIR,
         'beastIIIL': GameServantClass.BeastIIIL,
         'beastUnknown': GameServantClass.Unknown,
+        'pretender': GameServantClass.Pretender,
         'unknown': GameServantClass.Unknown,
         'ALL': GameServantClass.Unknown // TODO Implement 'All' class
-    } as { readonly [key in AtlasAcademySvtClass]: GameServantClass };
+    } as ReadonlyRecord<AtlasAcademySvtClass, GameServantClass>;
 
     /**
      * Maps the `AtlasAcademyNiceGender` values to the `GameServantGender` enum
@@ -60,7 +61,7 @@ export class AtlasAcademyDataImportService {
         'male': GameServantGender.Male,
         'female': GameServantGender.Female,
         'unknown': GameServantGender.None
-    } as { readonly [key in AtlasAcademyNiceGender]: GameServantGender };
+    } as ReadonlyRecord<AtlasAcademyNiceGender, GameServantGender>;
 
     /**
      * Maps the `AtlasAcademyAttribute` values to the `GameServantAttribute` enum
@@ -72,7 +73,7 @@ export class AtlasAcademyDataImportService {
         'earth': GameServantAttribute.Earth,
         'star': GameServantAttribute.Star,
         'beast': GameServantAttribute.Beast
-    } as { readonly [key in AtlasAcademyAttribute]: GameServantAttribute };
+    } as ReadonlyRecord<AtlasAcademyAttribute, GameServantAttribute>;
 
     /**
      * Maps the `AtlasAcademyNiceItemBGType` values to the `GameItemBackground`
@@ -84,7 +85,7 @@ export class AtlasAcademyDataImportService {
         'silver': GameItemBackground.Silver,
         'gold': GameItemBackground.Gold,
         'questClearQPReward': GameItemBackground.QPReward
-    } as { readonly [key in AtlasAcademyNiceItemBGType]: GameItemBackground };
+    } as ReadonlyRecord<AtlasAcademyNiceItemBGType, GameItemBackground>;
 
     /**
      * Maps the `AtlasAcademyNiceItemUse` values to the `GameItemUsage`
@@ -94,7 +95,7 @@ export class AtlasAcademyDataImportService {
         'skill': GameItemUsage.Skill,
         'ascension': GameItemUsage.Ascension,
         'costume': GameItemUsage.Costume
-    } as { readonly [key in AtlasAcademyNiceItemUse]: GameItemUsage };
+    } as ReadonlyRecord<AtlasAcademyNiceItemUse, GameItemUsage>;
 
     //#endregion
 

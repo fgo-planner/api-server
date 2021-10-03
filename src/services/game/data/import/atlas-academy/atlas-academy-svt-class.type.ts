@@ -24,4 +24,5 @@ export type AtlasAcademySvtClass =
     'beastIIIL' |
     'beastUnknown' |
     'unknown' |
+    'pretender' |
     'ALL';

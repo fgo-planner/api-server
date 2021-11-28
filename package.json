@@ -2,6 +2,9 @@
   "name": "fgo-planner-api-server",
   "version": "0.0.1",
   "description": "Backend API server for the FGO Planner project.",
+  "engines": {
+    "node": ">=14.10.0"
+  },
   "scripts": {
     "postinstall": "cd node_modules/@fgo-planner/types && npm run build-ts && cd ../data && npm run build-ts",
     "start": "npm run serve",
@@ -29,9 +32,11 @@
   "homepage": "https://github.com/alvinquach/fgo-planner-api-server#readme",
   "dependencies": {
     "@fgo-planner/data": "file:local_modules/data",
+    "@types/cookie-parser": "^1.4.2",
     "axios": "^0.24.0",
     "bcryptjs": "^2.4.3",
     "bson": "^4.6.0",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",

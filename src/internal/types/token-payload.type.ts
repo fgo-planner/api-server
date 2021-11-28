@@ -1,7 +1,24 @@
 // Contains type definitions for JWT token payloads.
 
-export type AccessTokenPayload = {
+import { JwtPayload } from 'jsonwebtoken';
+
+/**
+ * Access token payload.
+ */
+export type AccessTokenPayload = JwtPayload & {
+    /**
+     * The user's ID.
+     */
     id: string;
+    /**
+     * Whether the user has admin privilege.
+     */
     admin?: boolean;
-    iat?: number;
+};
+
+/**
+ * Refresh token payload.
+ */
+export type RefreshTokenPayload = JwtPayload & {
+    // TODO Implement this
 };

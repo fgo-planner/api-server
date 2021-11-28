@@ -4,63 +4,142 @@ import { NextFunction, Request, Response } from 'express';
 import { AccessTokenPayload, AuthenticatedRequest } from 'internal';
 import jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
+import { RandomUtils } from 'utils';
+
+type LoginCredentials = {
+    username: string;
+    password: string;
+};
+
+type AccessTokens = {
+    token: string;
+    redundantToken?: string;
+};
 
 @Service()
 export class AuthenticationService {
 
     private static readonly _BearerTokenPrefix = 'Bearer ';
 
-    // This cannot be static because it reads from .env file.
+    private static readonly _SignatureAlgorithm = 'HS256';
+
+    /**
+     * Name of the cookie access token.
+     */
+    static readonly AccessTokenCookieName = 'fgoplanner_accesstoken';
+
+    /**
+     * Accessor for retrieving the JWT secret.
+     */
     private get _jwtSecret(): string {
         const secret = process.env.JWT_SECRET;
         if (!secret) {
-            console.error('JWT secret was not defined in .env file.');
+            console.error('JWT secret was not configured for this environment.');
+            return '';
         }
-        return secret ?? '';
+        return secret;
     }
 
-    /**
-     * Verifies provided user credentials, and generates and returns a JWT access
-     * token if the credentials are valid. If the credentials were not valid, then
-     * null is returned.
-     * 
-     * @param adminOnly (optional, default = false) Only generate the access token
-     *                  if the user is an admin. Otherwise, return null.
-     */
-    async generateAccessToken(username: string, password: string, adminOnly = false) {
 
-        // Username and password must be provided.
+    //#region Token production methods
+
+    /**
+     * Verifies provided user credentials, and generates and returns JWT access
+     * tokens if the credentials are valid. If the credentials were not valid, then
+     * null is returned.
+     *
+     * @param includeRedundantToken Whether to generate a additional token with same
+     * payload (minus timestamps) that can be used as a cookie token, etc.
+     *
+     * @param adminOnly (optional, default = false) Only generate the access token
+     * if the user is an admin. Otherwise, return null.
+     */
+    async generateAccessToken(
+        { username, password }: LoginCredentials,
+        includeRedundantToken: boolean,
+        adminOnly = false
+    ): Promise<AccessTokens | null> {
+
+        /*
+         * Username and password must be provided.
+         */
         if (!username || !password) {
             return null;
         }
 
-        // Find the user by the provided username.
-        const user = await UserModel.findOne({ username: username }).exec();
-
-        // If the user was not found, then return null.
+        /*
+         * Find the user by the provided username. Return null if the user could not be
+         * found.
+         */
+        const user = await UserModel.findOne({ username }).exec();
         if (!user) {
             return null;
         }
 
-        // If the adminOnly parameter was true, but the user is not an admin, then return null.
+        /*
+         * If the adminOnly parameter was true, but the user is not an admin, then
+         * return null.
+         */
         if (adminOnly && !user.admin) {
             return null;
         }
 
-        // If the hash compare failed, then return null.
-        if (!(await bcrypt.compare(password, user.hash ?? ''))) {
+        /*
+         * Validate password against the hash and return null if it failed.
+         */
+        const passwordValid = await bcrypt.compare(password, user.hash ?? '');
+        if (!passwordValid) {
             return null;
         }
 
-        // Create JWT body payload.
+        /**
+         * The JWT body payload.
+         */
         const payload: AccessTokenPayload = {
             id: user._id,
             admin: user.admin
         };
-
-        const token = jwt.sign(payload, this._jwtSecret, { algorithm: 'HS512' });
-        return `${AuthenticationService._BearerTokenPrefix}${token}`;
+        try {
+            return this._generateAccessTokens(payload, includeRedundantToken);
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
     }
+
+    private _generateAccessTokens(tokenPayload: AccessTokenPayload, includeRedundantToken: boolean): AccessTokens {
+
+        /**
+         * A randomly generated identification string that is included in both the main
+         * and redundant tokens to verify that they were generated at the same time.
+         */
+        let jwtid;
+
+        let redundantToken;
+
+        if (includeRedundantToken) {
+            jwtid = RandomUtils.randomString(10); // TODO Un-hardcode the length
+            redundantToken = jwt.sign(tokenPayload, this._jwtSecret, {
+                algorithm: AuthenticationService._SignatureAlgorithm,
+                jwtid,
+                noTimestamp: true
+            });
+            // redundantToken = `${AuthenticationService._BearerTokenPrefix}${redundantToken}`;
+        }
+
+        let token = jwt.sign(tokenPayload, this._jwtSecret, {
+            algorithm: AuthenticationService._SignatureAlgorithm,
+            jwtid
+        });
+        token = `${AuthenticationService._BearerTokenPrefix}${token}`;
+
+        return { token, redundantToken };
+    }
+
+    //#endregion
+
+
+    //#region Token consumption methods
 
     /**
      * Middleware function for extracting access token payload if it is present in
@@ -70,17 +149,18 @@ export class AuthenticationService {
      * If the access token is missing or invalid, then the `req.token` field will
      * not be modified. This function will not send an error back to the client.
      */
-    parseAccessToken(req: Request, res: Response, next: NextFunction) {
+    parseAccessToken(req: Request, res: Response, next: NextFunction): void {
         // OPTIONS requests are skipped.
         if (req.method !== 'OPTIONS') {
             const payload = this._parseAccessTokenFromRequest(req);
+            // TODO Validate against redundant token
             if (payload) {
                 (req as AuthenticatedRequest).token = payload;
             }
         }
         next();
     }
-    
+
     /**
      * Middleware function for authenticating a request based on the attached
      * access token. The payload form the access token will be stored in the
@@ -90,43 +170,59 @@ export class AuthenticationService {
      * If the access token is missing or invalid, then an Unauthorized error will
      * be sent back to the client.
      */
-    authenticateAccessToken(req: Request, res: Response, next: NextFunction) {
-        // Skip check on OPTIONS requests.
+    authenticateAccessToken(req: Request, res: Response, next: NextFunction): any {
+        /*
+         * Skip authentication check for OPTIONS requests.
+         */
         if (req.method === 'OPTIONS') {
-            next();
-            return;
-        } 
-        
-        const payload = this._parseAccessTokenFromRequest(req);
-        if (payload) {
-            (req as AuthenticatedRequest).token = payload;
-            next();
-        } else {
-            res.status(401).send('Unauthorized');
+            return next();
         }
+
+        const payload = this._parseAccessTokenFromRequest(req);
+        if (!payload) {
+            return res.status(401).send('Unauthorized');
+        }
+
+        /*
+         * If the token payload contains a jti claim, then it was generate with a
+         * redundant token. Check the cookies for the redundant token and verify it.
+         */
+        if (payload.jti) {
+            const redundantToken = req.cookies[AuthenticationService.AccessTokenCookieName];
+            const redundantPayload = this._parseAccessToken(redundantToken);
+            if (!redundantPayload || redundantPayload.jti !== payload.jti) {
+                return res.status(401).send('Unauthorized');
+            }
+        }
+
+        (req as AuthenticatedRequest).token = payload;
+        next();
     }
 
     /**
      * Middleware function for check if the requestor is an admin user. 
      * `authenticateAccessToken` must be called before this function.
      */
-    authenticateAdminUser(req: Request & { token?: AccessTokenPayload }, res: Response, next: NextFunction) {
+    authenticateAdminUser(req: Request & { token?: AccessTokenPayload }, res: Response, next: NextFunction): void {
         if (req.token && req.token.admin) {
-            next();
-        } else {
-            res.status(403).send('Forbidden');
+            return next();
         }
+        res.status(403).send('Forbidden');
     }
 
     private _parseAccessTokenFromRequest(req: Request): AccessTokenPayload | null {
-        let bearer = req.headers.authorization;
-        if (!bearer) {
+        const token = req.headers.authorization;
+        return this._parseAccessToken(token);
+    }
+
+    private _parseAccessToken(token: string | undefined): AccessTokenPayload | null {
+        if (!token) {
             return null;
         }
-        if (bearer.indexOf(AuthenticationService._BearerTokenPrefix) === 0) {
-            bearer = bearer.substring(AuthenticationService._BearerTokenPrefix.length);
+        if (token.indexOf(AuthenticationService._BearerTokenPrefix) === 0) {
+            token = token.substring(AuthenticationService._BearerTokenPrefix.length);
         }
-        return this._parseToken(bearer);
+        return this._parseToken(token);
     }
 
     private _parseToken<T>(token: string): T | null {
@@ -136,5 +232,7 @@ export class AuthenticationService {
             return null;
         }
     }
+
+    //#endregion
 
 }

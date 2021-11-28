@@ -28,16 +28,30 @@ export class AuthenticationService {
      */
     static readonly AccessTokenCookieName = 'fgoplanner_accesstoken';
 
-    /**
-     * Accessor for retrieving the JWT secret.
-     */
+    private __jwtSecret?: string;
     private get _jwtSecret(): string {
-        const secret = process.env.JWT_SECRET;
-        if (!secret) {
-            console.error('JWT secret was not configured for this environment.');
-            return '';
+        if (this.__jwtSecret !== undefined) {
+            return this.__jwtSecret;
         }
-        return secret;
+        this.__jwtSecret = process.env.JWT_SECRET;
+        if (!this.__jwtSecret) {
+            console.error('JWT secret was not configured for this environment.');
+            this.__jwtSecret = '';
+        }
+        return this.__jwtSecret;
+    }
+
+    private __jwtSecretRedundant?: string;
+    private get _jwtSecretRedundant(): string {
+        if (this.__jwtSecretRedundant !== undefined) {
+            return this.__jwtSecretRedundant;
+        }
+        this.__jwtSecretRedundant = process.env.JWT_SECRET;
+        if (!this.__jwtSecretRedundant) {
+            console.error('Redundant JWT secret was not configured for this environment.');
+            this.__jwtSecretRedundant = '';
+        }
+        return this.__jwtSecretRedundant;
     }
 
 
@@ -119,7 +133,7 @@ export class AuthenticationService {
 
         if (includeRedundantToken) {
             jwtid = RandomUtils.randomString(10); // TODO Un-hardcode the length
-            redundantToken = jwt.sign(tokenPayload, this._jwtSecret, {
+            redundantToken = jwt.sign(tokenPayload, this._jwtSecretRedundant, {
                 algorithm: AuthenticationService._SignatureAlgorithm,
                 jwtid,
                 noTimestamp: true
@@ -152,7 +166,7 @@ export class AuthenticationService {
     parseAccessToken(req: Request, res: Response, next: NextFunction): void {
         // OPTIONS requests are skipped.
         if (req.method !== 'OPTIONS') {
-            const payload = this._parseAccessTokenFromRequest(req);
+            const payload = this._parseTokenFromRequestHeaders(req);
             // TODO Validate against redundant token
             if (payload) {
                 (req as AuthenticatedRequest).token = payload;
@@ -178,7 +192,7 @@ export class AuthenticationService {
             return next();
         }
 
-        const payload = this._parseAccessTokenFromRequest(req);
+        const payload = this._parseTokenFromRequestHeaders(req);
         if (!payload) {
             return res.status(401).send('Unauthorized');
         }
@@ -189,7 +203,7 @@ export class AuthenticationService {
          */
         if (payload.jti) {
             const redundantToken = req.cookies[AuthenticationService.AccessTokenCookieName];
-            const redundantPayload = this._parseAccessToken(redundantToken);
+            const redundantPayload = this._parseAccessToken(redundantToken, this._jwtSecretRedundant);
             if (!redundantPayload || redundantPayload.jti !== payload.jti) {
                 return res.status(401).send('Unauthorized');
             }
@@ -210,24 +224,24 @@ export class AuthenticationService {
         res.status(403).send('Forbidden');
     }
 
-    private _parseAccessTokenFromRequest(req: Request): AccessTokenPayload | null {
+    private _parseTokenFromRequestHeaders(req: Request): AccessTokenPayload | null {
         const token = req.headers.authorization;
-        return this._parseAccessToken(token);
+        return this._parseAccessToken(token, this._jwtSecret);
     }
 
-    private _parseAccessToken(token: string | undefined): AccessTokenPayload | null {
+    private _parseAccessToken(token: string | undefined, secret: string): AccessTokenPayload | null {
         if (!token) {
             return null;
         }
         if (token.indexOf(AuthenticationService._BearerTokenPrefix) === 0) {
             token = token.substring(AuthenticationService._BearerTokenPrefix.length);
         }
-        return this._parseToken(token);
+        return this._parseToken(token, secret);
     }
 
-    private _parseToken<T>(token: string): T | null {
+    private _parseToken<T>(token: string, secret: string): T | null {
         try {
-            return jwt.verify(token, this._jwtSecret) as any;
+            return jwt.verify(token, secret) as any;
         } catch {
             return null;
         }

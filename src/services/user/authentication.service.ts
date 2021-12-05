@@ -123,28 +123,32 @@ export class AuthenticationService {
 
     private _generateAccessTokens(tokenPayload: AccessTokenPayload, includeRedundantToken: boolean): AccessTokens {
 
-        /**
-         * A randomly generated identification string that is included in both the main
-         * and redundant tokens to verify that they were generated at the same time.
-         */
-        let jwtid;
-
-        let redundantToken;
+        let token, redundantToken;
 
         if (includeRedundantToken) {
-            jwtid = RandomUtils.randomString(10); // TODO Un-hardcode the length
+            /**
+             * A randomly generated identification string that is included in both the main
+             * and redundant tokens to verify that they were generated at the same time.
+             */
+            const jwtid = RandomUtils.randomString(10); // TODO Un-hardcode the length
+
+            token = jwt.sign(tokenPayload, this._jwtSecret, {
+                algorithm: AuthenticationService._SignatureAlgorithm,
+                jwtid
+            });
+
             redundantToken = jwt.sign(tokenPayload, this._jwtSecretRedundant, {
                 algorithm: AuthenticationService._SignatureAlgorithm,
                 jwtid,
                 noTimestamp: true
             });
-            // redundantToken = `${AuthenticationService._BearerTokenPrefix}${redundantToken}`;
+        } else {
+            token = jwt.sign(tokenPayload, this._jwtSecret, {
+                algorithm: AuthenticationService._SignatureAlgorithm
+            });
         }
-
-        let token = jwt.sign(tokenPayload, this._jwtSecret, {
-            algorithm: AuthenticationService._SignatureAlgorithm,
-            jwtid
-        });
+        
+        // redundantToken = `${AuthenticationService._BearerTokenPrefix}${redundantToken}`;
         token = `${AuthenticationService._BearerTokenPrefix}${token}`;
 
         return { token, redundantToken };

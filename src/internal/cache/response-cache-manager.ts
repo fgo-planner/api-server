@@ -32,11 +32,9 @@ export class ResponseCacheManager {
     /**
      * Instantiate the cached response middleware handlers for the given metadata.
      */
-    instantiateCachedResponseHandlers(metadata: CachedResponseMetadata): CachedResponseHandlers {
-        // TODO Implement expiresIn
-        const { key, subKey, expiresIn } = metadata;
+    instantiateCachedResponseHandlers({ key, subKey, expiresIn }: CachedResponseMetadata): CachedResponseHandlers {
 
-        const send = (req: Request, res: Response, next: NextFunction): void => {
+        const send = (_: Request, res: Response, next: NextFunction): void => {
             const subCacheMap = this._CacheMap.get(key);
             if (!subCacheMap) {
                 return next();
@@ -55,7 +53,7 @@ export class ResponseCacheManager {
             res.send(value);
         };
 
-        const record = (req: Request, res: Response): void => {
+        const record = (_: Request, res: Response): void => {
             const { responseBody } = res.locals;
             if (responseBody) {
                 // console.log('Caching response of type', typeof responseBody);

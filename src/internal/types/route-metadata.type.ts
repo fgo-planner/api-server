@@ -2,7 +2,7 @@ import { RequestMethod, UserAccessLevel } from 'internal';
 import { Nullable } from './generics/nullable.type';
 
 /**
- * Maps a route to a method in a controller.
+ * Maps a route to an endpoint method in a controller.
  */
 export type RouteMetadata = {
 

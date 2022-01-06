@@ -1,14 +1,18 @@
 
 import { RequestMethod, RouteMetadata, UserAccessLevel } from 'internal';
+import { MetadataKey } from '../metadata-key.constants';
 
 type Decorator = (target: any, propertyKey: string) => void;
 
-export const RouteMetadataMapKey = 'routes';
+type RequestMappingParams = {
+    path: string,
+    accessLevel?: UserAccessLevel
+};
 
 /**
  * Helper function for parsing `RequestMapping` input parameters.
  */
-const parseInputs = (param1?: string | UserAccessLevel, param2?: UserAccessLevel) => {
+const parseInputs = (param1?: string | UserAccessLevel, param2?: UserAccessLevel): RequestMappingParams => {
     let path = '';
     let accessLevel = undefined;
     if (typeof param1 === 'string') {
@@ -82,12 +86,12 @@ export function RequestMapping(method: RequestMethod, param1?: string | UserAcce
     return (target: any, propertyKey: string) => {
         // Add route map to controller metadata if its not already there.
         // TODO Verify that the class is decorated with `RestController`.
-        if (!Reflect.hasMetadata(RouteMetadataMapKey, target.constructor)) {
-            Reflect.defineMetadata(RouteMetadataMapKey, {}, target.constructor);
+        if (!Reflect.hasMetadata(MetadataKey.RequestMapping, target.constructor)) {
+            Reflect.defineMetadata(MetadataKey.RequestMapping, {}, target.constructor);
         }
 
         // Register the route metadata to the map.
-        const routes: Record<string, RouteMetadata> = Reflect.getMetadata(RouteMetadataMapKey, target.constructor);
+        const routes: Record<string, RouteMetadata> = Reflect.getMetadata(MetadataKey.RequestMapping, target.constructor);
         routes[propertyKey] = {
             path,
             method,
@@ -169,7 +173,7 @@ export function PostMapping(path: string, accessLevel: UserAccessLevel): Decorat
 /**
  * `PostMapping` function implementation.
  */
-export function PostMapping(param1?: string | UserAccessLevel, param2?: UserAccessLevel) {
+export function PostMapping(param1?: string | UserAccessLevel, param2?: UserAccessLevel): Decorator {
     const { path, accessLevel } = parseInputs(param1, param2);
     if (!accessLevel) {
         return RequestMapping(RequestMethod.POST, path);
@@ -209,7 +213,7 @@ export function PutMapping(path: string, accessLevel: UserAccessLevel): Decorato
 /**
  * `PutMapping` function implementation.
  */
-export function PutMapping(param1?: string | UserAccessLevel, param2?: UserAccessLevel) {
+export function PutMapping(param1?: string | UserAccessLevel, param2?: UserAccessLevel): Decorator {
     const { path, accessLevel } = parseInputs(param1, param2);
     if (!accessLevel) {
         return RequestMapping(RequestMethod.PUT, path);
@@ -249,7 +253,7 @@ export function DeleteMapping(path: string, accessLevel: UserAccessLevel): Decor
 /**
  * `DeleteMapping` function implementation.
  */
-export function DeleteMapping(param1?: string | UserAccessLevel, param2?: UserAccessLevel) {
+export function DeleteMapping(param1?: string | UserAccessLevel, param2?: UserAccessLevel): Decorator {
     const { path, accessLevel } = parseInputs(param1, param2);
     if (!accessLevel) {
         return RequestMapping(RequestMethod.DELETE, path);

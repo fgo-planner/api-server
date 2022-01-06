@@ -1,14 +1,18 @@
 import { UserAccessLevel } from 'internal';
 import { Service } from 'typedi';
+import { MetadataKey } from '../metadata-key.constants';
 
 type Decorator = (target: any) => void;
 
-export const ControllerMetadataKey = 'controller';
+type RestControllerParams = {
+    prefix: string,
+    defaultAccessLevel: UserAccessLevel
+};
 
 /**
  * Helper function for parsing `RestController` input parameters.
  */
-const parseInputs = (param1?: string | UserAccessLevel, param2?: UserAccessLevel) => {
+const parseInputs = (param1?: string | UserAccessLevel, param2?: UserAccessLevel): RestControllerParams => {
     let prefix = '';
     let defaultAccessLevel = UserAccessLevel.Admin;
     if (typeof param1 === 'string') {
@@ -70,15 +74,13 @@ export function RestController(prefix: string, defaultAccessLevel: UserAccessLev
 /**
  * `RestController` function implementation.
  */
-export function RestController(param1?: string | UserAccessLevel, param2?: UserAccessLevel) {
+export function RestController(param1?: string | UserAccessLevel, param2?: UserAccessLevel): Decorator {
     const params = parseInputs(param1, param2);
 
     return (target: any) => {
-        Reflect.defineMetadata(ControllerMetadataKey, params, target);
+        Reflect.defineMetadata(MetadataKey.RestController, params, target);
 
         // Register the RestController as a typedi Service.
         Service()(target);
     };
 }
-
-

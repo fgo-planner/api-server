@@ -1,4 +1,5 @@
 
+export * from './decorators/metadata-key.constants';
 export * from './decorators/rest/request-mapping.decorator';
 export * from './decorators/rest/rest-controller.decorator';
 export * from './enum/request-method.enum';

@@ -1,7 +1,7 @@
 import { AuthenticationController, GameDataImportController, GameEventController, GameItemController, GameServantController, GameSoundtrackController, MasterAccountController, PlanController, TestController, UserController } from 'controllers';
 import { Application, Router } from 'express';
 import { Dictionary, RequestHandler } from 'express-serve-static-core';
-import { Class, ControllerMetadata, ControllerMetadataKey, RouteMetadata, RouteMetadataMapKey, UserAccessLevel } from 'internal';
+import { Class, ControllerMetadata, MetadataKey, RouteMetadata, UserAccessLevel } from 'internal';
 import { AuthenticationService } from 'services';
 import Container from 'typedi';
 
@@ -28,25 +28,33 @@ const authService = Container.get(AuthenticationService);
 const parseAccessToken = authService.parseAccessToken.bind(authService);
 const authenticateAccessToken = authService.authenticateAccessToken.bind(authService);
 const authenticateAdminUser = authService.authenticateAdminUser.bind(authService);
- 
+
 /**
  * Registers a controller endpoint with the router.
+ * 
  * @param instance The controller instance.
- * @param prefix The path prefix as defined by the controller.
- * @param route The route info.
+ * @param prefix The path prefix as defined at the controller level.
+ * @param controllerAccessLevel The access level as defined at the controller
+ * level. This will be used if access level is not defined at the route level.
+ * @param route The route metadata.
  */
-const registerRoute = (instance: any, prefix: string, defaultAccessLevel: UserAccessLevel, route: RouteMetadata,
-    ...handlers: RequestHandler<Dictionary<string>>[]) => {
+const registerRoute = (
+    instance: any,
+    prefix: string,
+    controllerAccessLevel: UserAccessLevel,
+    route: RouteMetadata,
+    ...handlers: RequestHandler<Dictionary<string>>[]
+): void => {
 
     const controllerName = instance.constructor.name;
-    
+
     /*
      * Add authentication middleware based on route access level.
      * Level 0 -> parseAccessToken
      * Level 1 -> authenticateAccessToken
      * Level 2 -> authenticateAccessToken and authenticateAdminUser
      */
-    const accessLevel = route.accessLevel || defaultAccessLevel;
+    const accessLevel = route.accessLevel || controllerAccessLevel;
     if (accessLevel >= UserAccessLevel.Authenticated) {
         handlers.push(authenticateAccessToken);
         if (accessLevel >= UserAccessLevel.Admin) {
@@ -59,7 +67,7 @@ const registerRoute = (instance: any, prefix: string, defaultAccessLevel: UserAc
     // Get handler from controller and append to list of handlers.
     const handlerName = route.handlerName;
     const handler = instance[handlerName];
-    if (typeof(handler) !== 'function') {
+    if (typeof handler !== 'function') {
         console.error(`Could not register route: ${controllerName}.${handlerName} is not a function.`);
         return;
     }
@@ -78,14 +86,18 @@ const registerRoute = (instance: any, prefix: string, defaultAccessLevel: UserAc
  * Registers the endpoints of a controller with the router.
  * @param controller The controller class.
  */
-const registerController = (prefix: string, controller: Class<any>, ...handlers: RequestHandler<Dictionary<string>>[]) => {
+const registerController = (
+    prefix: string,
+    controller: Class<any>,
+    ...handlers: RequestHandler<Dictionary<string>>[]
+): void => {
     const instance = Container.get(controller);
-    const controllerMetadata: ControllerMetadata = Reflect.getOwnMetadata(ControllerMetadataKey, controller);
+    const controllerMetadata: ControllerMetadata = Reflect.getOwnMetadata(MetadataKey.RestController, controller);
     if (controllerMetadata === undefined) {
         console.error(`Could not register controller: ${controller.name} is not a controller.`);
         return;
     }
-    const routes: {[key: string]: RouteMetadata} = Reflect.getMetadata(RouteMetadataMapKey, controller);
+    const routes: Record<string, RouteMetadata> = Reflect.getMetadata(MetadataKey.RequestMapping, controller);
     for (const key of Object.keys(routes)) {
         const route = routes[key];
         registerRoute(instance, prefix + controllerMetadata.prefix, controllerMetadata.defaultAccessLevel, route, ...handlers);
@@ -95,7 +107,11 @@ const registerController = (prefix: string, controller: Class<any>, ...handlers:
 /**
  * Registers a list of controllers to the router.
  */
-const registerControllers = (prefix: string, controllers: Class<any>[], ...handlers: RequestHandler<Dictionary<string>>[]) => {
+const registerControllers = (
+    prefix: string,
+    controllers: Class<any>[],
+    ...handlers: RequestHandler<Dictionary<string>>[]
+): void => {
     for (const controller of controllers) {
         registerController(prefix, controller, ...handlers);
     }

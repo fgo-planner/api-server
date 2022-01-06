@@ -111,16 +111,16 @@ const registerRoute = (
  */
 const registerController = (
     prefix: string,
-    controller: Class<any>,
+    controllerClass: Class<any>,
     ...handlers: RequestHandler<Dictionary<string>>[]
 ): void => {
-    const controllerInstance = Container.get(controller);
-    const controllerMetadata: ControllerMetadata = Reflect.getOwnMetadata(MetadataKey.RestController, controller);
+    const controllerInstance = Container.get(controllerClass);
+    const controllerMetadata: ControllerMetadata = Reflect.getOwnMetadata(MetadataKey.RestController, controllerClass);
     if (controllerMetadata === undefined) {
-        console.error(`Could not register controller: ${controller.name} is not a controller.`);
+        console.error(`Could not register controller: ${controllerClass.name} is not a controller.`);
         return;
     }
-    const routeMetadataMap: Record<string, RouteMetadata> = Reflect.getMetadata(MetadataKey.RequestMapping, controller);
+    const routeMetadataMap: Record<string, RouteMetadata> = Reflect.getMetadata(MetadataKey.RequestMapping, controllerClass);
     for (const routeMetadata of Object.values(routeMetadataMap)) {
         registerRoute(
             controllerInstance,
@@ -140,8 +140,8 @@ const registerControllers = (
     controllers: Class<any>[],
     ...handlers: RequestHandler<Dictionary<string>>[]
 ): void => {
-    for (const controller of controllers) {
-        registerController(prefix, controller, ...handlers);
+    for (const controllerClass of controllers) {
+        registerController(prefix, controllerClass, ...handlers);
     }
 };
 

@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { CachedResponse, GetMapping, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
 import { GameSoundtrackService } from 'services';
 import { Inject } from 'typedi';
@@ -23,17 +23,10 @@ export class GameSoundtrackController {
 
     @GetMapping()
     @CachedResponse(ResponseCacheKey.GameSoundtrack)
-    async getSoundtracks(req: Request, res: Response, next: NextFunction): Promise<any> {
+    async getSoundtracks(req: Request, res: Response): Promise<any> {
         try {
-            let soundtracks;
-            if (req.query.ids) {
-                const ids = HttpRequestUtils.parseIntegerList(req.query.ids);
-                soundtracks = await this._gameSoundtrackService.findByIds(ids);
-            } else {
-                soundtracks = await this._gameSoundtrackService.findAll();
-            }
-            res.locals.responseBody = soundtracks;
-            next(); // Call next middleware to cache and send the response.
+            const soundtracks = await this._gameSoundtrackService.findAll();
+            res.send(soundtracks);
         } catch (err) {
             res.status(400).send(err);
         }

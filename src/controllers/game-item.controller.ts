@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { CachedResponse, GetMapping, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
 import { GameItemService } from 'services';
 import { Inject } from 'typedi';
@@ -23,17 +23,10 @@ export class GameItemController {
 
     @GetMapping()
     @CachedResponse(ResponseCacheKey.GameItem)
-    async getItems(req: Request, res: Response, next: NextFunction): Promise<any> {
+    async getItems(req: Request, res: Response): Promise<any> {
         try {
-            let items;
-            if (req.query.ids) {
-                const ids = HttpRequestUtils.parseIntegerList(req.query.ids);
-                items = await this._gameItemService.findByIds(ids);
-            } else {
-                items = await this._gameItemService.findAll();
-            }
-            res.locals.responseBody = items;
-            next(); // Call next middleware to cache and send the response.
+            const items = await this._gameItemService.findAll();
+            res.send(items);
         } catch (err) {
             res.status(400).send(err);
         }

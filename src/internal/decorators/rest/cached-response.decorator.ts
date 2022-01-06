@@ -27,41 +27,24 @@ const parseInputs = (param1: CacheKey, param2?: CacheKey | number, param3?: numb
 };
 
 /**
- * Decorator for indicating that the response returned by the route handler
- * method will be cached.
- *
- * Middleware functions will be added before and after this handler method
- * during route registration. This handler method will be skipped during calls
- * to the endpoint if a cached value present. Otherwise, the method is
- * responsible for placing the response body in the `res.locals.responseBody`
- * field and then calling the `next` function, which will then cache and send
- * the response.
+ * Decorator for indicating that the response returned by the route will be
+ * cached, and the cached data will be returned for all subsequent requests to
+ * the endpoint if available.
  */
 export function CachedResponse(key: CacheKey): Decorator;
 
 /**
- * Decorator for indicating that the response returned by the route handler
- * method will be cached.
- *
- * Middleware functions will be added before and after this handler method
- * during route registration. This handler method will be skipped during calls
- * to the endpoint if a cached value present. Otherwise, the method is
- * responsible for placing the response body in the `res.locals.responseBody`
- * field and then calling the `next` function, which will then cache and send
- * the response.
+ * Decorator for indicating that the response returned by the route will be
+ * cached, and the cached data will be returned for all subsequent requests to
+ * the endpoint if available.
  */
 export function CachedResponse(key: CacheKey, subKey: CacheKey): Decorator;
 
 /**
- * Decorator for indicating that the response returned by the route handler
- * method will be cached for a specified amount of time before expiring.
- *
- * Middleware functions will be added before and after this handler method
- * during route registration. This handler method will be skipped during calls
- * to the endpoint if a cached value present. Otherwise, the method is
- * responsible for placing the response body in the `res.locals.responseBody`
- * field and then calling the `next` function, which will then cache and send
- * the response.
+ * Decorator for indicating that the response returned by the route will be
+ * cached for a specified amount of time before expiring. The cached data will
+ * be returned for all subsequent requests to the endpoint if it is still
+ * available and has not expired yet.
  *
  * @param expiresIn How long the cached value will be valid for before expiring
  * (in milliseconds).

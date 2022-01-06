@@ -73,10 +73,9 @@ const registerRoute = (
     // Add cached response handling for the route if applicable.
     const cacheMetadataMap: Record<string, CachedResponseMetadata> = Reflect.getMetadata(MetadataKey.CachedResponse, controllerClass);
     const cacheMetadata = cacheMetadataMap?.[handlerName];
-    let cachedResponseHandlers;
     if (cacheMetadata) {
-        cachedResponseHandlers = responseCacheManager.instantiateCachedResponseHandlers(cacheMetadata);
-        handlers.push(cachedResponseHandlers.send);
+        const cachedResponseHandler = responseCacheManager.getCachedResponseHandler(cacheMetadata);
+        handlers.push(cachedResponseHandler);
     }
 
     // Get endpoint handler from controller and append to list of handlers.
@@ -87,11 +86,6 @@ const registerRoute = (
     }
     handlers.push(endpointHandler.bind(controllerInstance));
 
-    // Append cache recorder to end of handlers if present.
-    if (cachedResponseHandlers) {
-        handlers.push(cachedResponseHandlers.record);
-    }
-
     // Construct path for the route mapping.
     const path = prefix + (routeMetadata.path || '');
 
@@ -101,7 +95,7 @@ const registerRoute = (
     // Print route to console.
     console.log(
         `Registered ${(method as string).toUpperCase()} method at '${path}' using handler ${controllerName}.${handlerName}` +
-        (cachedResponseHandlers ? ' with cache.' : '.')
+        (cacheMetadata ? ' with cache.' : '.')
     );
 };
 

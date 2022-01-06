@@ -7,19 +7,6 @@ import { ResponseCacheEntry } from './response-cache-entry.class';
 
 type CacheMap = Map<CacheKey, Map<CacheKey | undefined, ResponseCacheEntry>>;
 
-type CachedResponseHandlers = {
-    /**
-     * Sends the cached value if available. Otherwise, calls the next function
-     * (which should be the endpoint handler) instead.
-     */
-    send: RequestHandler<Dictionary<string>>;
-    /**
-     * Records the response body from the `res.locals.responseBody` field into the
-     * cache and invokes `res.send` to send the response with the response body.
-     */
-    record: RequestHandler<Dictionary<string>>;
-};
-
 @Service()
 export class ResponseCacheManager {
 
@@ -30,34 +17,50 @@ export class ResponseCacheManager {
     }
 
     /**
-     * Instantiate the cached response middleware handlers for the given metadata.
+     * Instantiate the middleware handler using given metadata for a route decorated
+     * with the `CachedResponse` decorator.
+     *
+     * The returned handler is responsible for retrieving and sending the cached
+     * value if possible. When a cached value is not available, then it will
+     * override the `res.send` method so that it can obtain and cache the response
+     * value when it is invoked by the endpoint handler.
      */
-    instantiateCachedResponseHandlers({ key, subKey, expiresIn }: CachedResponseMetadata): CachedResponseHandlers {
+    getCachedResponseHandler({ key, subKey, expiresIn }: CachedResponseMetadata): RequestHandler<Dictionary<string>> {
 
-        const send = (_: Request, res: Response, next: NextFunction): void => {
-            const subCacheMap = this._CacheMap.get(key);
-            if (!subCacheMap) {
-                return next();
+        const cachedResponseHandler = (_: Request, res: Response, next: NextFunction): void => {
+            
+            let subCacheMap = this._CacheMap.get(key);
+            
+            if (subCacheMap) {
+                const cachedResponse = subCacheMap.get(subKey);
+                if (cachedResponse) {
+                    if (cachedResponse.isExpired()) {
+                        /*
+                         * Delete the cached value if it is expired.
+                         */
+                        subCacheMap.delete(subKey);
+                    } else {
+                        /**
+                         * Send the cached value. The next function is not called.
+                         */
+                        res.setHeader('content-type', 'application/json'); // TODO Un-hardcode this.
+                        res.send(cachedResponse.value);
+                        return;
+                    }
+                }
             }
-            const cachedResponse = subCacheMap.get(subKey);
-            if (!cachedResponse) {
-                return next();
-            }
-            if (cachedResponse.isExpired()) {
-                subCacheMap.delete(subKey);
-                return next();
-            }
-            const { value, responseType } = cachedResponse;
-            // console.log('Sending cached response...');
-            res.setHeader('content-type', responseType);
-            res.send(value);
-        };
 
-        const record = (_: Request, res: Response): void => {
-            const { responseBody } = res.locals;
-            if (responseBody) {
-                // console.log('Caching response of type', typeof responseBody);
-                let subCacheMap = this._CacheMap.get(key);
+            /**
+             * The original `res.send` function.
+             */
+            const send = res.send;
+
+            /*
+             * Override the default `res.send` function so that we can listen in and cache
+             * the returned value when it is called in the next function.
+             */
+            res.send = (...args): Response => {
+                const responseBody = args[0];
                 if (!subCacheMap) {
                     this._CacheMap.set(key, subCacheMap = new Map());
                 }
@@ -70,16 +73,19 @@ export class ResponseCacheManager {
                     responseType = 'application/json';
                 }
                 subCacheMap.set(subKey, new ResponseCacheEntry(cachedValue, responseType, expiresIn));
-                // TODO Check if response is already sent by previous function(s).
-                res.send(responseBody);
-            } else {
-                // TODO Check if response is already sent by previous function(s).
-                // TODO Maybe send error instead?
-                res.send(null);
-            }
+                /*
+                 * Call the original `res.send` function using the same parameters.
+                 */
+                return send.apply(res, args);
+            };
+
+            /*
+             * Call the next function.
+             */
+            next();
         };
 
-        return { send, record };
+        return cachedResponseHandler;
     }
 
 }

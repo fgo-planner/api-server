@@ -3,8 +3,9 @@ import { Dictionary, RequestHandler } from 'express-serve-static-core';
 import { Service } from 'typedi';
 import { CacheKey } from '../types/cache-key.type';
 import { CachedResponseMetadata } from '../types/cached-response-metadata.type';
+import { ResponseCacheEntry } from './response-cache-entry.class';
 
-type CacheMap = Map<CacheKey, Map<CacheKey | undefined, any>>;
+type CacheMap = Map<CacheKey, Map<CacheKey | undefined, ResponseCacheEntry>>;
 
 type CachedResponseHandlers = {
     /**
@@ -36,14 +37,22 @@ export class ResponseCacheManager {
         const { key, subKey, expiresIn } = metadata;
 
         const send = (req: Request, res: Response, next: NextFunction): void => {
-            const cachedResponse = this._CacheMap.get(key)?.get(subKey);
-            if (cachedResponse) {
-                // console.log('Sending cached response...');
-                res.setHeader('content-type', 'application/json'); // TODO Make this info part of the metadata
-                res.send(cachedResponse);
-            } else {
-                next();
+            const subCacheMap = this._CacheMap.get(key);
+            if (!subCacheMap) {
+                return next();
             }
+            const cachedResponse = subCacheMap.get(subKey);
+            if (!cachedResponse) {
+                return next();
+            }
+            if (cachedResponse.isExpired()) {
+                subCacheMap.delete(subKey);
+                return next();
+            }
+            const { value, responseType } = cachedResponse;
+            // console.log('Sending cached response...');
+            res.setHeader('content-type', responseType);
+            res.send(value);
         };
 
         const record = (req: Request, res: Response): void => {
@@ -54,7 +63,15 @@ export class ResponseCacheManager {
                 if (!subCacheMap) {
                     this._CacheMap.set(key, subCacheMap = new Map());
                 }
-                subCacheMap.set(subKey, JSON.stringify(responseBody));
+                let cachedValue, responseType;
+                if (typeof responseBody === 'string') {
+                    cachedValue = responseBody;
+                    responseType = 'text/plain';
+                } else {
+                    cachedValue = JSON.stringify(responseBody);
+                    responseType = 'application/json';
+                }
+                subCacheMap.set(subKey, new ResponseCacheEntry(cachedValue, responseType, expiresIn));
                 // TODO Check if response is already sent by previous function(s).
                 res.send(responseBody);
             } else {

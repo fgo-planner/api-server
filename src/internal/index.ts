@@ -10,7 +10,6 @@ export * from './enum/user-access-level.enum';
 export * from './logger/logger-message-level.enum';
 export * from './logger/logger.class';
 export * from './types/authenticated-request.type';
-export * from './types/cache-key.type';
 export * from './types/cached-response-metadata.type';
 export * from './types/controller-metadata.type';
 export * from './types/generics/class.type';

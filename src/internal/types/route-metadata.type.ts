@@ -1,4 +1,5 @@
-import { RequestMethod, UserAccessLevel } from 'internal';
+import { RequestMethod } from '../enum/request-method.enum';
+import { UserAccessLevel } from '../enum/user-access-level.enum';
 import { Nullable } from './generics/nullable.type';
 
 /**

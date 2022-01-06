@@ -1,4 +1,4 @@
-import { UserAccessLevel } from 'internal';
+import { UserAccessLevel } from '../enum/user-access-level.enum';
 
 export type ControllerMetadata = {
 

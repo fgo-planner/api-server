@@ -1,5 +1,7 @@
 
-import { RequestMethod, RouteMetadata, UserAccessLevel } from 'internal';
+import { RequestMethod } from '../../enum/request-method.enum';
+import { UserAccessLevel } from '../../enum/user-access-level.enum';
+import { RouteMetadata } from '../../types/route-metadata.type';
 import { MetadataKey } from '../metadata-key.constants';
 
 type Decorator = (target: any, propertyKey: string) => void;

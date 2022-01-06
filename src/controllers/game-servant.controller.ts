@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
+import { NextFunction, Request, Response } from 'express';
+import { CachedResponse, GetMapping, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
 import { GameServantService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, PaginationUtils } from 'utils';
@@ -9,9 +9,6 @@ export class GameServantController {
 
     @Inject()
     private _gameServantService!: GameServantService;
-
-    // TODO Implement auto expire
-    private _gameServantsCachedResponse?: string;
 
     @PutMapping(UserAccessLevel.Admin)
     async createServant(req: Request, res: Response): Promise<any> {
@@ -25,20 +22,18 @@ export class GameServantController {
     }
 
     @GetMapping()
-    async getServants(req: Request, res: Response): Promise<any> {
+    @CachedResponse(ResponseCacheKey.GameServant)
+    async getServants(req: Request, res: Response, next: NextFunction): Promise<any> {
         try {
+            let servants;
             if (req.query.ids) {
                 const ids = HttpRequestUtils.parseIntegerList(req.query.ids);
-                const servants = await this._gameServantService.findByIds(ids);
-                res.send(servants);
+                servants = await this._gameServantService.findByIds(ids);
             } else {
-                if (!this._gameServantsCachedResponse) {
-                    const servants = await this._gameServantService.findAll();
-                    this._gameServantsCachedResponse = JSON.stringify(servants);
-                }
-                res.setHeader('content-type', 'application/json'); // TODO un-hardcode this
-                res.send(this._gameServantsCachedResponse);
+                servants = await this._gameServantService.findAll();
             }
+            res.locals.responseBody = servants;
+            next(); // Call next middleware to cache and send the response.
         } catch (err) {
             res.status(400).send(err);
         }

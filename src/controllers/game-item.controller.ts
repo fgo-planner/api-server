@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
+import { NextFunction, Request, Response } from 'express';
+import { CachedResponse, GetMapping, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
 import { GameItemService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, PaginationUtils } from 'utils';
@@ -9,9 +9,6 @@ export class GameItemController {
 
     @Inject()
     private _gameItemService!: GameItemService;
-
-    // TODO Implement auto expire
-    private _gameItemsCachedResponse?: string;
 
     @PutMapping(UserAccessLevel.Admin)
     async createItem(req: Request, res: Response): Promise<any> {
@@ -25,20 +22,18 @@ export class GameItemController {
     }
 
     @GetMapping()
-    async getItems(req: Request, res: Response): Promise<any> {
+    @CachedResponse(ResponseCacheKey.GameItem)
+    async getItems(req: Request, res: Response, next: NextFunction): Promise<any> {
         try {
+            let items;
             if (req.query.ids) {
                 const ids = HttpRequestUtils.parseIntegerList(req.query.ids);
-                const items = await this._gameItemService.findByIds(ids);
-                res.send(items);
+                items = await this._gameItemService.findByIds(ids);
             } else {
-                if (!this._gameItemsCachedResponse) {
-                    const items = await this._gameItemService.findAll();
-                    this._gameItemsCachedResponse = JSON.stringify(items);
-                }
-                res.setHeader('content-type', 'application/json'); // TODO un-hardcode this
-                res.send(this._gameItemsCachedResponse);
+                items = await this._gameItemService.findAll();
             }
+            res.locals.responseBody = items;
+            next(); // Call next middleware to cache and send the response.
         } catch (err) {
             res.status(400).send(err);
         }

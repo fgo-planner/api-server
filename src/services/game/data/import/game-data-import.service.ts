@@ -1,6 +1,6 @@
 import { GameItem, GameServant, GameSoundtrack } from '@fgo-planner/data';
 import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
-import { Logger } from 'internal';
+import { Logger, ResponseCacheKey, ResponseCacheManager } from 'internal';
 import { Inject, Service } from 'typedi';
 import { GameItemService } from '../../game-item.service';
 import { GameServantService } from '../../game-servant.service';
@@ -9,6 +9,9 @@ import { AtlasAcademyDataImportService } from './atlas-academy/atlas-academy-dat
 
 @Service()
 export class GameDataImportService {
+
+    @Inject()
+    private _responseCacheManager!: ResponseCacheManager;
 
     @Inject()
     private _gameItemService!: GameItemService;
@@ -121,6 +124,9 @@ export class GameDataImportService {
                 errors++;
             }
         }
+        if (updated || created) {
+            this._responseCacheManager.invalidateCache(ResponseCacheKey.GameServant);
+        }
         return { updated, created, errors };
     }
 
@@ -228,6 +234,9 @@ export class GameDataImportService {
                 errors++;
             }
         }
+        if (updated || created) {
+            this._responseCacheManager.invalidateCache(ResponseCacheKey.GameItem);
+        }
         return { updated, created, errors };
     }
 
@@ -332,6 +341,9 @@ export class GameDataImportService {
                 logger.error(err);
                 errors++;
             }
+        }
+        if (updated || created) {
+            this._responseCacheManager.invalidateCache(ResponseCacheKey.GameSoundtrack);
         }
         return { updated, created, errors };
     }

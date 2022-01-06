@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
+import { NextFunction, Request, Response } from 'express';
+import { CachedResponse, GetMapping, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
 import { GameSoundtrackService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, PaginationUtils } from 'utils';
@@ -9,9 +9,6 @@ export class GameSoundtrackController {
 
     @Inject()
     private _gameSoundtrackService!: GameSoundtrackService;
-
-    // TODO Implement auto expire
-    private _gameSoundtracksCachedResponse?: string;
 
     @PutMapping(UserAccessLevel.Admin)
     async createSoundtrack(req: Request, res: Response): Promise<any> {
@@ -25,20 +22,18 @@ export class GameSoundtrackController {
     }
 
     @GetMapping()
-    async getSoundtracks(req: Request, res: Response): Promise<any> {
+    @CachedResponse(ResponseCacheKey.GameSoundtrack)
+    async getSoundtracks(req: Request, res: Response, next: NextFunction): Promise<any> {
         try {
+            let soundtracks;
             if (req.query.ids) {
                 const ids = HttpRequestUtils.parseIntegerList(req.query.ids);
-                const soundtracks = await this._gameSoundtrackService.findByIds(ids);
-                res.send(soundtracks);
+                soundtracks = await this._gameSoundtrackService.findByIds(ids);
             } else {
-                if (!this._gameSoundtracksCachedResponse) {
-                    const soundtracks = await this._gameSoundtrackService.findAll();
-                    this._gameSoundtracksCachedResponse = JSON.stringify(soundtracks);
-                }
-                res.setHeader('content-type', 'application/json'); // TODO un-hardcode this
-                res.send(this._gameSoundtracksCachedResponse);
+                soundtracks = await this._gameSoundtrackService.findAll();
             }
+            res.locals.responseBody = soundtracks;
+            next(); // Call next middleware to cache and send the response.
         } catch (err) {
             res.status(400).send(err);
         }

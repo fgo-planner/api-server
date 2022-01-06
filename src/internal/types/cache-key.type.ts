@@ -1,1 +1,1 @@
-export type CacheKey = string | number | symbol;
+export type CacheKey = string | symbol;

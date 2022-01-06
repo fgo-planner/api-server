@@ -9,6 +9,6 @@ export type CachedResponseMetadata = {
 
     subKey?: CacheKey;
 
-    expiration?: number;
+    expiresIn?: number;
 
 };

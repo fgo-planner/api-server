@@ -32,8 +32,8 @@ export class ResponseCacheManager {
      * Instantiate the cached response middleware handlers for the given metadata.
      */
     instantiateCachedResponseHandlers(metadata: CachedResponseMetadata): CachedResponseHandlers {
-        // TODO Implement expiration
-        const { key, subKey, expiration } = metadata;
+        // TODO Implement expiresIn
+        const { key, subKey, expiresIn } = metadata;
 
         const send = (req: Request, res: Response, next: NextFunction): void => {
             const cachedResponse = this._CacheMap.get(key)?.get(subKey);

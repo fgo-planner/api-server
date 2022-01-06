@@ -28,9 +28,9 @@ export class ResponseCacheManager {
     getCachedResponseHandler({ key, subKey, expiresIn }: CachedResponseMetadata): RequestHandler<Dictionary<string>> {
 
         const cachedResponseHandler = (_: Request, res: Response, next: NextFunction): void => {
-            
+
             let subCacheMap = this._CacheMap.get(key);
-            
+
             if (subCacheMap) {
                 const cachedResponse = subCacheMap.get(subKey);
                 if (cachedResponse) {
@@ -61,18 +61,23 @@ export class ResponseCacheManager {
              */
             res.send = (...args): Response => {
                 const responseBody = args[0];
-                if (!subCacheMap) {
-                    this._CacheMap.set(key, subCacheMap = new Map());
+                /*
+                 * Only cache the value if the response status is 200.
+                 */
+                if (res.statusCode === 200) {
+                    if (!subCacheMap) {
+                        this._CacheMap.set(key, subCacheMap = new Map());
+                    }
+                    let cachedValue, responseType;
+                    if (typeof responseBody === 'string') {
+                        cachedValue = responseBody;
+                        responseType = 'text/plain';
+                    } else {
+                        cachedValue = JSON.stringify(responseBody);
+                        responseType = 'application/json';
+                    }
+                    subCacheMap.set(subKey, new ResponseCacheEntry(cachedValue, responseType, expiresIn));
                 }
-                let cachedValue, responseType;
-                if (typeof responseBody === 'string') {
-                    cachedValue = responseBody;
-                    responseType = 'text/plain';
-                } else {
-                    cachedValue = JSON.stringify(responseBody);
-                    responseType = 'application/json';
-                }
-                subCacheMap.set(subKey, new ResponseCacheEntry(cachedValue, responseType, expiresIn));
                 /*
                  * Call the original `res.send` function using the same parameters.
                  */

@@ -3,11 +3,16 @@ FROM node:14.10.0
 # Create app directory
 WORKDIR /app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-RUN npm install
+# Copy local_modules. This must be done before `npm install` because it needs
+# to be built during the `postinstall` script.
+ADD local_modules ./local_modules
+
+# Install app dependencies. The `--unsafe-perm` option is required in order for
+# the `postinstall` script to run when building the Docker image.
+RUN npm install --unsafe-perm
 
 # Bundle app source
 COPY . .

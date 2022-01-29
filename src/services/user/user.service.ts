@@ -70,8 +70,11 @@ export class UserService {
         if (friendId) {
             await this._masterAccountService.addAccount(user._id, {
                 friendId,
-                qp: 0,
-                items: [],
+                resources: {
+                    items: [],
+                    embers: {},
+                    qp: 0
+                },
                 servants: [],
                 costumes: [],
                 bondLevels: {},

@@ -7,4 +7,4 @@ docker rm $(docker stop $(docker ps -a -q --filter ancestor=fgo-planner-api-serv
 docker image rm fgo-planner-api-server
 
 # Build new image.
-docker build . -t fgo-planner-api-server
+docker build . --no-cache -t fgo-planner-api-server

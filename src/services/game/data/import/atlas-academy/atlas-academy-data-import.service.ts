@@ -1,6 +1,6 @@
 import { GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantCostume, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity, GameServantSkillMaterials, GameSoundtrack } from '@fgo-planner/data';
 import axios from 'axios';
-import { Logger, ReadonlyRecord } from 'internal';
+import { GameDataImportLogger, ReadonlyRecord } from 'internal';
 import { Service } from 'typedi';
 import { AtlasAcademyAttribute } from './atlas-academy-attribute.type';
 import { AtlasAcademyBasicServant } from './atlas-academy-basic-servant.type';
@@ -126,7 +126,7 @@ export class AtlasAcademyDataImportService {
      * 
      * @param skipIds The set of IDs to omit from the result.
      */
-    async getServants(skipIds: Set<number>, logger?: Logger): Promise<GameServant[]> {
+    async getServants(logger?: GameDataImportLogger): Promise<GameServant[]> {
         /*
          * Retrieve 'nice' JP servant data with lore and English names.
          */
@@ -140,19 +140,19 @@ export class AtlasAcademyDataImportService {
          * This is needed because as of 6/13/2021, the JP servant data with English
          * names does not include English costume names.
          */
-        const niceServantsNa  = await this._getNiceServants('NA', logger);
+        const niceServantsNa = await this._getNiceServants('NA', logger);
         const servantEngMap: Record<number, ServantEnData> = {};
         for (const servant of niceServantsNa) {
             servantEngMap[servant.collectionNo] = servant;
         }
-        
+
         /*
          * Convert the servant data into `GameServant` objects.
          */
         try {
             const servants = niceServants
                 .map(servant => this._transformServantData(servant, servantEngMap, logger))
-                .filter(servant => servant != null && !skipIds.has(servant._id)) as GameServant[];
+                .filter(servant => servant != null) as Array<GameServant>;
             return servants;
         } catch (e) {
             console.error(e);
@@ -165,7 +165,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice servant data with lore from the Atlas
      * Academy API. Always retrieves the data with English names.
      */
-    private async _getNiceServants(region: 'NA' | 'JP', logger?: Logger): Promise<AtlasAcademyNiceServant[]> {
+    private async _getNiceServants(region: 'NA' | 'JP', logger?: GameDataImportLogger): Promise<AtlasAcademyNiceServant[]> {
         const filename = region === 'NA' ? Constants.NiceServantsFilename : Constants.NiceServantsEnglishFilename;
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${filename}`;
         logger?.info(`Calling ${url}`);
@@ -180,16 +180,22 @@ export class AtlasAcademyDataImportService {
     private _transformServantData(
         servant: AtlasAcademyNiceServant,
         servantEngMap: Record<number, ServantEnData>,
-        logger?: Logger
+        logger?: GameDataImportLogger
     ): GameServant | null {
 
-        // Currently only normal servants (and Mash) are supported.
+        /*
+         * Currently only normal servants (and Mash) are supported.
+         */
         if (servant.type !== 'normal' && servant.type !== 'heroine') {
             return null;
         }
 
+        logger?.info(servant.id, `Processing servant collectionNo=${servant.collectionNo}`);
+
         let ascensionMaterials: any;
-        // Mash does not have any ascension materials to import.
+        /*
+         * Mash does not have any ascension materials to import.
+         */
         if (servant.type !== 'heroine') {
             ascensionMaterials = {};
             for (let i = 0; i < Constants.AscensionLevelCount; i++) {
@@ -203,7 +209,7 @@ export class AtlasAcademyDataImportService {
         }
 
         const skillMaterials = this._transformSkillMaterials(servant.skillMaterials);
-        
+
         const appendSkillMaterials = this._transformSkillMaterials(servant.appendSkillMaterials);
 
         const costumes: Record<number, GameServantCostume> = {};
@@ -257,6 +263,7 @@ export class AtlasAcademyDataImportService {
 
         this._populateServantEnglishStrings(result, servantEngMap, logger);
 
+        logger?.info(servant.id, 'Servant processed');
         return result;
     }
 
@@ -302,21 +309,24 @@ export class AtlasAcademyDataImportService {
      * Populate the given servant with their English strings using the given lookup
      * map. If the name is not present in the map, the Japanese names will be retained.
      */
-    private _populateServantEnglishStrings(servant: GameServant, servantEngMap: Record<number, ServantEnData>, logger?: Logger): void {
-
+    private _populateServantEnglishStrings(
+        servant: GameServant,
+        servantEngMap: Record<number, ServantEnData>,
+        logger?: GameDataImportLogger
+    ): void {
         const servantEnData = servantEngMap[servant.collectionNo];
         if (!servantEnData) {
-            logger?.warn(
-                `English strings not available for servant (collectionNo=${servant.collectionNo}).
-                English string population will be skipped.`
-            );
+            logger?.warn(servant._id, 'English strings not available for servant. English string population will be skipped.');
             return;
         }
-        // Populate English names
+        /*
+         * Populate English names
+         */
         servant.name = servantEnData.name;
         servant.metadata.displayName = servantEnData.name;
-
-        // Populate English costume names if available.
+        /*
+         * Populate English costume names if available.
+         */
         const costumeEnDataMap = servantEnData.profile?.costume;
         if (costumeEnDataMap) {
             const costumeEntries = Object.entries(servant.costumes);
@@ -341,7 +351,7 @@ export class AtlasAcademyDataImportService {
      * 
      * @param skipIds The set of IDs to omit from the result.
      */
-    async getItems(skipIds: Set<number>, logger?: Logger): Promise<GameItem[]> {
+    async getItems(logger?: GameDataImportLogger): Promise<GameItem[]> {
         /*
          * Retrieve JP item data.
          */
@@ -365,7 +375,7 @@ export class AtlasAcademyDataImportService {
          */
         const items = jpItems
             .map(item => this._transformItemData(item, englishStrings, logger))
-            .filter(item => item != null && !skipIds.has(item._id)) as GameItem[];
+            .filter(item => item != null) as Array<GameItem>;
 
         return items;
     }
@@ -374,7 +384,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice item data from the Atlas Academy API.
      * Always retrieves the data with English names.
      */
-    private async _getNiceItems(region: 'NA' | 'JP', logger?: Logger): Promise<AtlasAcademyNiceItem[]> {
+    private async _getNiceItems(region: 'NA' | 'JP', logger?: GameDataImportLogger): Promise<AtlasAcademyNiceItem[]> {
         const filename = region === 'NA' ? Constants.NiceItemsFilename : Constants.NiceItemsEnglishFilename;
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${filename}`;
         logger?.info(`Calling ${url}`);
@@ -386,12 +396,15 @@ export class AtlasAcademyDataImportService {
     private _transformItemData(
         item: AtlasAcademyNiceItem,
         englishStrings: Record<number, AtlasAcademyNiceItem>,
-        logger?: Logger
+        logger?: GameDataImportLogger
     ): GameItem | null {
-
+        
         if (!this._shouldImportItem(item)) {
             return null;
         }
+
+        logger?.info(item.id, 'Processing item');
+
         const background = AtlasAcademyDataImportService._ItemBackgroundMap[item.background];
         const uses = item.uses.map(use => AtlasAcademyDataImportService._ItemUsageMap[use]);
         const result: GameItem = {
@@ -403,6 +416,8 @@ export class AtlasAcademyDataImportService {
         };
         this._populateItemEnglishStrings(result, englishStrings, logger);
         this._additionalTransforms(result);
+
+        logger?.info(item.id, 'Item processed');
         return result;
     }
 
@@ -425,7 +440,7 @@ export class AtlasAcademyDataImportService {
     private _populateItemEnglishStrings(
         item: GameItem,
         englishStrings: Record<number, AtlasAcademyNiceItem>,
-        logger?: Logger
+        logger?: GameDataImportLogger
     ): void {
 
         const strings = englishStrings[item._id];
@@ -462,7 +477,7 @@ export class AtlasAcademyDataImportService {
      * 
      * @param skipIds The set of IDs to omit from the result.
      */
-    async getSoundtracks(skipIds: Set<number>, logger?: Logger): Promise<GameSoundtrack[]> {
+    async getSoundtracks(logger?: GameDataImportLogger): Promise<GameSoundtrack[]> {
         /*
          * Retrieve JP BGM data with English names.
          */
@@ -472,8 +487,8 @@ export class AtlasAcademyDataImportService {
          * Convert the JP item data into `GameItem` objects.
          */
         const soundtracks = jpBgm
-            .map(this._transformBgmData.bind(this))
-            .filter(item => item != null && !skipIds.has(item._id)) as GameSoundtrack[];
+            .map(bgm => this._transformBgmData(bgm, logger))
+            .filter(bgm => bgm != null) as Array<GameSoundtrack>;
 
         return soundtracks;
     }
@@ -482,7 +497,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice BGM data from the Atlas Academy API. Always
      * retrieves the JP data with English names.
      */
-    private async _getBgm(logger?: Logger): Promise<AtlasAcademyNiceBgmEntity[]> {
+    private async _getBgm(logger?: GameDataImportLogger): Promise<AtlasAcademyNiceBgmEntity[]> {
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/JP/${Constants.NiceBgmEnglishFilename}`;
         logger?.info(`Calling ${url}`);
         const response = await axios.get(url);
@@ -490,10 +505,17 @@ export class AtlasAcademyDataImportService {
         return response.data;
     }
 
-    private _transformBgmData(bgm: AtlasAcademyNiceBgmEntity): GameSoundtrack | null {
+    private _transformBgmData(
+        bgm: AtlasAcademyNiceBgmEntity,
+        logger?: GameDataImportLogger
+    ): GameSoundtrack | null {
+
         if (bgm.notReleased) {
             return null;
         }
+
+        logger?.info(bgm.id, 'Processing soundtrack');
+
         let material = undefined;
         if (bgm.shop) {
             material = this._transformItemAmountData(bgm.shop.cost);
@@ -506,6 +528,8 @@ export class AtlasAcademyDataImportService {
             audioUrl: bgm.audioAsset,
             thumbnailUrl: bgm.logo
         };
+
+        logger?.info(bgm.id, 'Soundtrack processed');
         return result;
     }
 

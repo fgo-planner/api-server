@@ -5,4 +5,4 @@ export type GameDataImportResult = {
     created: number;
     errors: number;
     logs?: Logger;
-}
+};

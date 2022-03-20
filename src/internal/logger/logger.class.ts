@@ -3,14 +3,14 @@ import { LoggerMessage } from './logger-message.type';
 
 export class Logger {
 
-    private readonly _messages: LoggerMessage[] = [];
+    protected readonly _messages: LoggerMessage[] = [];
 
-    private _start?: Date;
+    protected _start?: Date;
     get start(): Date | undefined {
         return this._start;
     }
 
-    private _end?: Date;
+    protected _end?: Date;
     get end(): Date | undefined {
         return this._end;
     }
@@ -19,7 +19,7 @@ export class Logger {
         return this._name;
     }
 
-    constructor(private _name?: string) {
+    constructor(protected _name?: string) {
 
     }
 
@@ -52,7 +52,7 @@ export class Logger {
         this._log(LoggerMessageLevel.Error, message);
     }
 
-    private _log(level: LoggerMessageLevel, message: any) {
+    protected _log(level: LoggerMessageLevel, message: any) {
         const timestamp = new Date();
         this._messages.push({ level, timestamp, message });
     }
@@ -69,7 +69,7 @@ export class Logger {
             object.end = this._end;
         }
         object.messages = this._messages;
-        return object;
+        return object.toJSON();
     }
 
 }

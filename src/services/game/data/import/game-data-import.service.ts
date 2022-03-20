@@ -1,11 +1,17 @@
-import { GameItem, GameServant, GameSoundtrack } from '@fgo-planner/data';
+import { GameItem, GameItemModel, GameServant, GameServantModel, GameSoundtrack, GameSoundtrackModel } from '@fgo-planner/data';
 import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
-import { Logger, ResponseCacheKey, ResponseCacheManager } from 'internal';
+import { GameDataImportLogger, ResponseCacheKey, ResponseCacheManager } from 'internal';
 import { Inject, Service } from 'typedi';
 import { GameItemService } from '../../game-item.service';
 import { GameServantService } from '../../game-servant.service';
 import { GameSoundtrackService } from '../../game-soundtrack.service';
 import { AtlasAcademyDataImportService } from './atlas-academy/atlas-academy-data-import.service';
+
+type BulkWriteQuery = {
+    insertOne: object
+} | {
+    updateOne: object
+};
 
 @Service()
 export class GameDataImportService {
@@ -29,34 +35,31 @@ export class GameDataImportService {
         const resultSet: GameDataImportResultSet = {};
         // TODO Ensure entities are sorted before writing to database.
         if (options.servants?.import) {
-            const logger: Logger = new Logger();
+            const logger: GameDataImportLogger = new GameDataImportLogger();
             logger.setStart();
             const existingAction = options.servants.onExisting || GameDataImportExistingAction.Skip;
-            const skipIds = await this._getServantIdsToSkip(existingAction);
-            const servants = await this._atlasAcademyDataImportService.getServants(skipIds, logger);
-            const result = await this._processServants(servants, existingAction, logger);
+            const servants = await this._atlasAcademyDataImportService.getServants(logger);
+            const result = await this._writeServants(servants, existingAction, logger);
             logger.setEnd();
             result.logs = logger;
             resultSet.servants = result;
         }
         if (options.items?.import) {
-            const logger: Logger = new Logger();
+            const logger: GameDataImportLogger = new GameDataImportLogger();
             logger.setStart();
             const existingAction = options.items.onExisting || GameDataImportExistingAction.Skip;
-            const skipIdSet = await this._getItemsIdsToSkip(existingAction);
-            const items = await this._atlasAcademyDataImportService.getItems(skipIdSet, logger);
-            const result = await this._processItems(items, existingAction, logger);
+            const items = await this._atlasAcademyDataImportService.getItems(logger);
+            const result = await this._writeItems(items, existingAction, logger);
             logger.setEnd();
             result.logs = logger;
             resultSet.items = result;
         }
         if (options.soundtracks?.import) {
-            const logger: Logger = new Logger();
+            const logger: GameDataImportLogger = new GameDataImportLogger();
             logger.setStart();
             const existingAction = options.soundtracks.onExisting || GameDataImportExistingAction.Skip;
-            const skipIdSet = await this._getSoundtrackIdsToSkip(existingAction);
-            const soundtracks = await this._atlasAcademyDataImportService.getSoundtracks(skipIdSet, logger);
-            const result = await this._processSoundtracks(soundtracks, existingAction, logger);
+            const soundtracks = await this._atlasAcademyDataImportService.getSoundtracks(logger);
+            const result = await this._writeSoundtracks(soundtracks, existingAction, logger);
             logger.setEnd();
             result.logs = logger;
             resultSet.soundtracks = result;
@@ -67,62 +70,42 @@ export class GameDataImportService {
     //#region Servant methods
 
     /**
-     * Generates a set of servant IDs that should be skipped based on the provided
-     * `GameDataImportExistingAction` option. For the `Override` and `Append`
-     * options, this method will return an empty set. For the `Skip` options, this
-     * method will return the set of unique servant IDs that are current on the
-     * database.
-     */
-    private async _getServantIdsToSkip(existingAction: GameDataImportExistingAction): Promise<Set<number>> {
-        const result = new Set<number>();
-        if (existingAction !== GameDataImportExistingAction.Skip) {
-            return result;
-        }
-        const ids = await this._gameServantService.findAllIds();
-        for (const id of ids) {
-            result.add(id);
-        }
-        return result;
-    }
-
-    /**
      * Writes the imported servants to the database according to the options.
      * Assumes that there are no conflicts with unique fields such as
      * `collectionNo`.
      */
-    private async _processServants(
-        servants: GameServant[],
+    private async _writeServants(
+        servants: Array<GameServant>,
         existingAction: GameDataImportExistingAction,
-        logger: Logger
+        logger: GameDataImportLogger
     ): Promise<GameDataImportResult> {
-
-        let updated = 0, created = 0, errors = 0;
+        /**
+         * The queries for the bulk write operation.
+         */
+        const writeQueries: BulkWriteQuery[] = [];
+        /**
+         * Create a bulk write query for each servant an adds it to the query array.
+         */
         for (const servant of servants) {
-            logger.info(`Processing servant collectionNo=${servant.collectionNo}.`);
-            try {
-                let exists: boolean;
-                if (existingAction === GameDataImportExistingAction.Override) {
-                    exists = await this._processServantOverride(servant);
-                } else if (existingAction === GameDataImportExistingAction.Append) {
-                    exists = await this._processServantAppend(servant);
-                } else {
-                    exists = await this._processServantSkip(servant);
-                    if (exists) {
-                        logger.info(`Servant (collectionNo=${servant.collectionNo}) was skipped.`);
-                        continue;
-                    }
-                }
-                if (exists) {
-                    logger.info(`Servant (collectionNo=${servant.collectionNo}) was updated.`);
-                    updated++;
-                } else {
-                    logger.info(`Servant (collectionNo=${servant.collectionNo}) was created.`);
-                    created++;
-                }
-            } catch (err) {
-                logger.error(err);
-                errors++;
+            const writeQuery = await this._createServantWriteQuery(servant, existingAction, logger);
+            if (writeQuery === null) {
+                continue;
             }
+            writeQueries.push(writeQuery);
+        }
+        let updated: number, created: number, errors: number;
+        try {
+            // TODO Move this to service layer
+            const writeResult = await GameServantModel.bulkWrite(writeQueries, {ordered: false});
+            updated = writeResult.modifiedCount;
+            created = writeResult.insertedCount;
+            errors = writeQueries.length - updated - created;
+        } catch (err) {
+            logger.error(err);
+            // FIXME These values are probably inaccurate due to possibility of partial writes.
+            updated = 0;
+            created = 0;
+            errors = writeQueries.length;
         }
         if (updated || created) {
             this._responseCacheManager.invalidateCache(ResponseCacheKey.GameServant);
@@ -131,46 +114,122 @@ export class GameDataImportService {
     }
 
     /**
-     * Writes the imported servant to the database if it does not already exist in
-     * the database.
+     * Generates a database bulkWrite query for the imported servant. 
      */
-    private async _processServantSkip(servant: GameServant): Promise<boolean> {
-        const exists = await this._gameServantService.existsById(servant._id);
-        if (!exists) {
-            await this._gameServantService.create(servant);
-        }
-        return exists;
-    }
-
-    /**
-     * Writes the imported servant to the database, overriding existing servant
-     * data if it is already in the database. Assumes that there are no conflicts
-     * with unique fields such as `collectionNo`.
-     */
-    private async _processServantOverride(servant: GameServant): Promise<boolean> {
-        const exists = await this._gameServantService.existsById(servant._id);
-        if (!exists) {
-            await this._gameServantService.create(servant);
+    private async _createServantWriteQuery(
+        servant: GameServant,
+        existingAction: GameDataImportExistingAction,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery | null> {
+        if (existingAction === GameDataImportExistingAction.Override) {
+            return await this._createServantWriteForOverrideAction(servant, logger);
+        } else if (existingAction === GameDataImportExistingAction.Append) {
+            return await this._createServantWriteForAppendAction(servant, logger);
         } else {
-            await this._gameServantService.update(servant);
+            return await this._createServantWriteForSkipAction(servant, logger);
         }
-        return exists;
     }
 
     /**
-     * Writes the imported servant to the database, appending to existing servant
-     * data if it is already in the database. Assumes that there are no conflicts
-     * with unique fields such as `collectionNo`.
+     * Creates a write query for the imported servant if it does not already exist
+     * in the database.
      */
-    private async _processServantAppend(servant: GameServant): Promise<boolean> {
+    private async _createServantWriteForSkipAction(
+        servant: GameServant,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery | null> {
+        const exists = await this._gameServantService.existsById(servant._id);
+        if (!exists) {
+            logger.info(servant._id, 'Servant does not exist yet, will be inserted into the database.');
+            return {
+                insertOne: { document: servant }
+            };
+        }
+        logger.info(servant._id, 'Servant already exists, write operation will be skipped.');
+        return null;
+    }
+
+    /**
+     * Creates a write query for the imported servant. If the servant already
+     * exists, then overrides all the fields in the existing servant with any
+     * non-null and non-undefined fields from the imported servant.
+     */
+    private async _createServantWriteForOverrideAction(
+        servant: GameServant,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery> {
+        // TODO We should change the database method to return a lean document.
         const existing = await this._gameServantService.findById(servant._id);
         if (!existing) {
-            await this._gameServantService.create(servant);
-        } else {
-            // TODO append data to existing copy
-            await this._gameServantService.update(existing);
+            logger.info(servant._id, 'Servant does not exist yet, will be inserted into the database.');
+            return {
+                insertOne: { document: servant }
+            };
         }
-        return !!existing;
+        const update = existing.toObject() as GameServant;
+        for (const [key, value] of Object.entries(servant)) {
+            /*
+             * Exclude metadata
+             */
+            if (key === 'metadata') {
+                continue;
+            }
+            if (value == null) {
+                continue;
+            }
+            (update as any)[key] = value;
+        }
+        logger.info(servant._id, 'Servant already exists, existing data will be overridden.');
+        return {
+            updateOne: {
+                filter: { _id: servant._id },
+                update: { $set: update }
+            }
+        };
+    }
+
+    /**
+     * Creates a write query for the imported servant. If the servant already
+     * exists, then copies any non-null and non-undefined fields from the
+     * imported servant to the existing servant only if they are null or
+     * undefined in the existing servant.
+     */
+    private async _createServantWriteForAppendAction(
+        servant: GameServant,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery> {
+        // TODO We should change the database method to return a lean document.
+        const existing = await this._gameServantService.findById(servant._id);
+        if (!existing) {
+            logger.info(servant._id, 'Servant does not exist yet, will be inserted into the database.');
+            return {
+                insertOne: { document: servant }
+            };
+        }
+        const update = existing.toObject() as GameServant;
+        for (const [key, value] of Object.entries(servant)) {
+            /*
+             * Exclude metadata
+             */
+            if (key === 'metadata') {
+                continue;
+            }
+            if (value == null || (update as any)[key] != null) {
+                continue;
+            }
+            (update as any)[key] = value;
+        }
+        /**
+         * Always update costumes
+         */
+        update.costumes = servant.costumes;
+        logger.info(servant._id, 'Servant already exists, existing data will be updated.');
+        return {
+            updateOne: {
+                filter: { _id: servant._id },
+                update: { $set: update }
+            }
+        };
     }
 
     //#endregion
@@ -179,60 +238,40 @@ export class GameDataImportService {
     //#region Item methods
 
     /**
-     * Generates a set of item IDs that should be skipped based on the provided
-     * `GameDataImportExistingAction` option. For the `Override` and `Append`
-     * options, this method will return an empty set. For the `Skip` options, this
-     * method will return the set of unique item IDs that are current on the
-     * database.
-     */
-    private async _getItemsIdsToSkip(existingAction: GameDataImportExistingAction): Promise<Set<number>> {
-        const result = new Set<number>();
-        if (existingAction !== GameDataImportExistingAction.Skip) {
-            return result;
-        }
-        const ids = await this._gameItemService.findAllIds();
-        for (const id of ids) {
-            result.add(id);
-        }
-        return result;
-    }
-
-    /**
      * Writes the imported items to the database according to the options.
      */
-    private async _processItems(
-        items: GameItem[],
+    private async _writeItems(
+        items: Array<GameItem>,
         existingAction: GameDataImportExistingAction,
-        logger: Logger
+        logger: GameDataImportLogger
     ): Promise<GameDataImportResult> {
-
-        let updated = 0, created = 0, errors = 0;
+        /**
+         * The queries for the bulk write operation.
+         */
+        const writeQueries: BulkWriteQuery[] = [];
+        /**
+         * Create a bulk write query for each item an adds it to the query array.
+         */
         for (const item of items) {
-            logger.info(`Processing item id=${item._id}.`);
-            try {
-                let exists: boolean;
-                if (existingAction === GameDataImportExistingAction.Override) {
-                    exists = await this._processItemOverride(item);
-                } else if (existingAction === GameDataImportExistingAction.Append) {
-                    exists = await this._processItemAppend(item);
-                } else {
-                    exists = await this._processItemSkip(item);
-                    if (exists) {
-                        logger.info(`Item (id=${item._id}) was skipped.`);
-                        continue;
-                    }
-                }
-                if (exists) {
-                    logger.info(`Item (id=${item._id}) was updated.`);
-                    updated++;
-                } else {
-                    logger.info(`Item (id=${item._id}) was created.`);
-                    created++;
-                }
-            } catch (err) {
-                logger.error(err);
-                errors++;
+            const writeQuery = await this._createItemWriteQuery(item, existingAction, logger);
+            if (writeQuery === null) {
+                continue;
             }
+            writeQueries.push(writeQuery);
+        }
+        let updated: number, created: number, errors: number;
+        try {
+            // TODO Move this to service layer
+            const writeResult = await GameItemModel.bulkWrite(writeQueries, { ordered: false });
+            updated = writeResult.modifiedCount;
+            created = writeResult.insertedCount;
+            errors = writeQueries.length - updated - created;
+        } catch (err) {
+            logger.error(err);
+            // FIXME These values are probably inaccurate due to possibility of partial writes.
+            updated = 0;
+            created = 0;
+            errors = writeQueries.length;
         }
         if (updated || created) {
             this._responseCacheManager.invalidateCache(ResponseCacheKey.GameItem);
@@ -241,106 +280,159 @@ export class GameDataImportService {
     }
 
     /**
-     * Writes the imported item to the database if it does not already exist in the
-     * database.
+     * Generates a database bulkWrite query for the imported item. 
      */
-    private async _processItemSkip(item: GameItem): Promise<boolean> {
-        const exists = await this._gameItemService.existsById(item._id);
-        if (!exists) {
-            await this._gameItemService.create(item);
-        }
-        return exists;
-    }
-
-    /**
-     * Writes the imported item to the database, overriding existing item data if
-     * it is already in the database.
-     */
-    private async _processItemOverride(item: GameItem): Promise<boolean> {
-        const exists = await this._gameItemService.existsById(item._id);
-        if (!exists) {
-            await this._gameItemService.create(item);
+    private async _createItemWriteQuery(
+        item: GameItem,
+        existingAction: GameDataImportExistingAction,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery | null> {
+        if (existingAction === GameDataImportExistingAction.Override) {
+            return await this._createItemWriteForOverrideAction(item, logger);
+        } else if (existingAction === GameDataImportExistingAction.Append) {
+            return await this._createItemWriteForAppendAction(item, logger);
         } else {
-            await this._gameItemService.update(item);
+            return await this._createItemWriteForSkipAction(item, logger);
         }
-        return exists;
     }
 
     /**
-     * Writes the imported item to the database, appending to existing item data if
-     * it is already in the database.
+     * Creates a write query for the imported item if it does not already exist in
+     * the database.
      */
-    private async _processItemAppend(item: GameItem): Promise<boolean> {
+    private async _createItemWriteForSkipAction(
+        item: GameItem,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery | null> {
+        const exists = await this._gameItemService.existsById(item._id);
+        if (!exists) {
+            logger.info(item._id, 'Item does not exist yet, will be inserted into the database.');
+            return {
+                insertOne: { document: item }
+            };
+        }
+        logger.info(item._id, 'Item already exists, write operation will be skipped.');
+        return null;
+    }
+
+    /**
+     * Creates a write query for the imported item. If the item already exists, then
+     * overrides all the fields in the existing item with any non-null and
+     * non-undefined fields from the imported item.
+     */
+    private async _createItemWriteForOverrideAction(
+        item: GameItem,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery> {
+        // TODO We should change the database method to return a lean document.
         const existing = await this._gameItemService.findById(item._id);
         if (!existing) {
-            await this._gameItemService.create(item);
-        } else {
-            existing.uses = item.uses; // TODO Push instead of replace
-            await this._gameItemService.update(existing);
+            logger.info(item._id, 'Item does not exist yet, will be inserted into the database.');
+            return {
+                insertOne: { document: item }
+            };
         }
-        return !!existing;
+        const update = existing.toObject() as GameItem;
+        for (const [key, value] of Object.entries(item)) {
+            /*
+             * Exclude metadata
+             */
+            if (key === 'metadata') {
+                continue;
+            }
+            if (value == null) {
+                continue;
+            }
+            (update as any)[key] = value;
+        }
+        logger.info(item._id, 'Item already exists, existing data will be overridden.');
+        return {
+            updateOne: {
+                filter: { _id: item._id },
+                update: { $set: update }
+            }
+        };
+    }
+
+    /**
+     * Creates a write query for the imported item. If the item already exists, then
+     * copies any non-null and non-undefined fields from the imported item to the
+     * existing item only if they are null or undefined in the existing item.
+     */
+    private async _createItemWriteForAppendAction(
+        item: GameItem,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery> {
+        // TODO We should change the database method to return a lean document.
+        const existing = await this._gameItemService.findById(item._id);
+        if (!existing) {
+            logger.info(item._id, 'Item does not exist yet, will be inserted into the database.');
+            return {
+                insertOne: { document: item }
+            };
+        }
+        const update = existing.toObject() as GameItem;
+        for (const [key, value] of Object.entries(item)) {
+            /*
+             * Exclude metadata
+             */
+            if (key === 'metadata') {
+                continue;
+            }
+            if (value == null || (update as any)[key] != null) {
+                continue;
+            }
+            (update as any)[key] = value;
+        }
+        logger.info(item._id, 'Item already exists, existing data will be updated.');
+        return {
+            updateOne: {
+                filter: { _id: item._id },
+                update: { $set: update }
+            }
+        };
     }
 
     //#endregion
 
 
-    //#region Item methods
+    //#region Soundtrack methods
 
     /**
-     * Generates a set of soundtrack IDs that should be skipped based on the
-     * provided `GameDataImportExistingAction` option. For the `Override` and
-     * `Append` options, this method will return an empty set. For the `Skip`
-     * options, this method will return the set of unique item IDs that are current
-     * on the database.
+     * Writes the imported soundtracks to the database according to the options.
      */
-    private async _getSoundtrackIdsToSkip(existingAction: GameDataImportExistingAction): Promise<Set<number>> {
-        const result = new Set<number>();
-        if (existingAction !== GameDataImportExistingAction.Skip) {
-            return result;
-        }
-        const ids = await this._gameSoundtrackService.findAllIds();
-        for (const id of ids) {
-            result.add(id);
-        }
-        return result;
-    }
-
-    /**
-     * Writes the imported soundtrack to the database according to the options.
-     */
-    private async _processSoundtracks(
-        soundtracks: GameSoundtrack[],
+    private async _writeSoundtracks(
+        soundtracks: Array<GameSoundtrack>,
         existingAction: GameDataImportExistingAction,
-        logger: Logger
+        logger: GameDataImportLogger
     ): Promise<GameDataImportResult> {
-
-        let updated = 0, created = 0, errors = 0;
+        /**
+         * The queries for the bulk write operation.
+         */
+        const writeQueries: BulkWriteQuery[] = [];
+        /**
+         * Create a bulk write query for each soundtrack an adds it to the query array.
+         */
         for (const soundtrack of soundtracks) {
-            logger.info(`Processing soundtrack id=${soundtrack._id}.`);
-            try {
-                let exists: boolean;
-                if (existingAction === GameDataImportExistingAction.Override) {
-                    exists = await this._processSoundtrackOverride(soundtrack);
-                } else if (existingAction === GameDataImportExistingAction.Append) {
-                    exists = await this._processSoundtrackAppend(soundtrack);
-                } else {
-                    exists = await this._processSoundtrackSkip(soundtrack);
-                    if (exists) {
-                        logger.info(`Soundtrack (id=${soundtrack._id}) was skipped.`);
-                        continue;
-                    }
-                }
-                if (exists) {
-                    logger.info(`Soundtrack (id=${soundtrack._id}) was updated.`);
-                    updated++;
-                } else {
-                    logger.info(`Soundtrack (id=${soundtrack._id}) was created.`);
-                    created++;
-                }
-            } catch (err) {
-                logger.error(err);
-                errors++;
+            const writeQuery = await this._createSoundtrackWriteQuery(soundtrack, existingAction, logger);
+            if (writeQuery === null) {
+                continue;
             }
+            writeQueries.push(writeQuery);
+        }
+        let updated: number, created: number, errors: number;
+        try {
+            // TODO Move this to service layer
+            const writeResult = await GameSoundtrackModel.bulkWrite(writeQueries, { ordered: false });
+            updated = writeResult.modifiedCount;
+            created = writeResult.insertedCount;
+            errors = writeQueries.length - updated - created;
+        } catch (err) {
+            logger.error(err);
+            // FIXME These values are probably inaccurate due to possibility of partial writes.
+            updated = 0;
+            created = 0;
+            errors = writeQueries.length;
         }
         if (updated || created) {
             this._responseCacheManager.invalidateCache(ResponseCacheKey.GameSoundtrack);
@@ -349,43 +441,118 @@ export class GameDataImportService {
     }
 
     /**
-     * Writes the imported soundtrack to the database if it does not already exist in the
-     * database.
+     * Generates a database bulkWrite query for the imported soundtrack. 
      */
-    private async _processSoundtrackSkip(soundtrack: GameSoundtrack): Promise<boolean> {
-        const exists = await this._gameSoundtrackService.existsById(soundtrack._id);
-        if (!exists) {
-            await this._gameSoundtrackService.create(soundtrack);
-        }
-        return exists;
-    }
-
-    /**
-     * Writes the imported soundtrack to the database, overriding existing
-     * soundtrack data if it is already in the database.
-     */
-    private async _processSoundtrackOverride(soundtrack: GameSoundtrack): Promise<boolean> {
-        const exists = await this._gameSoundtrackService.existsById(soundtrack._id);
-        if (!exists) {
-            await this._gameSoundtrackService.create(soundtrack);
+    private async _createSoundtrackWriteQuery(
+        soundtrack: GameSoundtrack,
+        existingAction: GameDataImportExistingAction,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery | null> {
+        if (existingAction === GameDataImportExistingAction.Override) {
+            return await this._createSoundtrackWriteForOverrideAction(soundtrack, logger);
+        } else if (existingAction === GameDataImportExistingAction.Append) {
+            return await this._createSoundtrackWriteForAppendAction(soundtrack, logger);
         } else {
-            await this._gameSoundtrackService.update(soundtrack);
+            return await this._createSoundtrackWriteForSkipAction(soundtrack, logger);
         }
-        return exists;
     }
 
     /**
-     * Writes the imported soundtrack to the database, appending to existing
-     * soundtrack data if it is already in the database.
+     * Creates a write query for the imported soundtrack if it does not already
+     * exist in the database.
      */
-    private async _processSoundtrackAppend(soundtrack: GameSoundtrack): Promise<boolean> {
+    private async _createSoundtrackWriteForSkipAction(
+        soundtrack: GameSoundtrack,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery | null> {
+        const exists = await this._gameSoundtrackService.existsById(soundtrack._id);
+        if (!exists) {
+            logger.info(soundtrack._id, 'Soundtrack does not exist yet, will be inserted into the database.');
+            return {
+                insertOne: { document: soundtrack }
+            };
+        }
+        logger.info(soundtrack._id, 'Soundtrack already exists, write operation will be skipped.');
+        return null;
+    }
+
+    /**
+     * Creates a write query for the imported soundtrack. If the soundtrack already
+     * exists, then overrides all the fields in the existing soundtrack with any
+     * non-null and non-undefined fields from the imported soundtrack.
+     */
+    private async _createSoundtrackWriteForOverrideAction(
+        soundtrack: GameSoundtrack,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery> {
+        // TODO We should change the database method to return a lean document.
         const existing = await this._gameSoundtrackService.findById(soundtrack._id);
         if (!existing) {
-            await this._gameSoundtrackService.create(soundtrack);
-        } else {
-            await this._gameSoundtrackService.update(existing);
+            logger.info(soundtrack._id, 'Soundtrack does not exist yet, will be inserted into the database.');
+            return {
+                insertOne: { document: soundtrack }
+            };
         }
-        return !!existing;
+        const update = existing.toObject() as GameSoundtrack;
+        for (const [key, value] of Object.entries(soundtrack)) {
+            /*
+             * Exclude metadata
+             */
+            if (key === 'metadata') {
+                continue;
+            }
+            if (value == null) {
+                continue;
+            }
+            (update as any)[key] = value;
+        }
+        logger.info(soundtrack._id, 'Soundtrack already exists, existing data will be overridden.');
+        return {
+            updateOne: {
+                filter: { _id: soundtrack._id },
+                update: { $set: update }
+            }
+        };
+    }
+
+    /**
+     * Creates a write query for the imported soundtrack. If the soundtrack already
+     * exists, then copies any non-null and non-undefined fields from the imported
+     * soundtrack to the existing soundtrack only if they are null or undefined in
+     * the existing soundtrack.
+     */
+    private async _createSoundtrackWriteForAppendAction(
+        soundtrack: GameSoundtrack,
+        logger: GameDataImportLogger
+    ): Promise<BulkWriteQuery> {
+        // TODO We should change the database method to return a lean document.
+        const existing = await this._gameSoundtrackService.findById(soundtrack._id);
+        if (!existing) {
+            logger.info(soundtrack._id, 'Soundtrack does not exist yet, will be inserted into the database.');
+            return {
+                insertOne: { document: soundtrack }
+            };
+        }
+        const update = existing.toObject() as GameSoundtrack;
+        for (const [key, value] of Object.entries(soundtrack)) {
+            /*
+             * Exclude metadata
+             */
+            if (key === 'metadata') {
+                continue;
+            }
+            if (value == null || (update as any)[key] != null) {
+                continue;
+            }
+            (update as any)[key] = value;
+        }
+        logger.info(soundtrack._id, 'Soundtrack already exists, existing data will be updated.');
+        return {
+            updateOne: {
+                filter: { _id: soundtrack._id },
+                update: { $set: update }
+            }
+        };
     }
 
     //#endregion

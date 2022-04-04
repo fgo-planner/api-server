@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Backend API server for the FGO Planner project.",
   "engines": {
-    "node": ">=14.10.0"
+    "node": ">=16.10.0"
   },
   "scripts": {
     "postinstall": "cd node_modules/@fgo-planner/types && npm run build-ts && cd ../data && npm run build-ts",

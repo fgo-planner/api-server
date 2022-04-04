@@ -1,6 +1,6 @@
 # fgo-servant-planner-server
 ### Requirements
-Node.js 14.10.0 or higher (needed for [Crypto.randomInt](https://nodejs.org/api/crypto.html#cryptorandomintmin-max-callback))
+Node.js 16.10.0 or higher (needed for [Crypto.randomInt](https://nodejs.org/api/crypto.html#cryptorandomintmin-max-callback))
 ### Dev Instructions
 - The submodules must be initiliazed and updated after cloning the repository. This must be done before running `npm install`. This can be done by running the following commands:
     ```

@@ -3,6 +3,7 @@ import { AtlasAcademyBasicServant } from './atlas-academy-basic-servant.type';
 import { AtlasAcademyNiceGender } from './atlas-academy-nice-gender.type';
 import { AtlasAcademyNiceLvlUpMaterial } from './atlas-academy-nice-lvl-up-material.type';
 import { AtlasAcademyNiceServantProfile } from './atlas-academy-nice-servant-profile.type';
+import { AtlasAcademyNiceTd } from './atlas-academy-nice-td.type';
 
 export type AscensionMaterialKey = 0 | 1 | 2 | 3;
 
@@ -25,5 +26,6 @@ export type AtlasAcademyNiceServant = AtlasAcademyBasicServant & {
     skillMaterials: Record<SkillMaterialKey, AtlasAcademyNiceLvlUpMaterial>;
     appendSkillMaterials: Record<SkillMaterialKey, AtlasAcademyNiceLvlUpMaterial>;
     costumeMaterials: Record<number, AtlasAcademyNiceLvlUpMaterial>;
+    noblePhantasms: Array<AtlasAcademyNiceTd>;
     profile?: AtlasAcademyNiceServantProfile;
 };

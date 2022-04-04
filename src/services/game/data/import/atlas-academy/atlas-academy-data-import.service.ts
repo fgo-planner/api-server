@@ -1,4 +1,4 @@
-import { GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantClass, GameServantCostume, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantRarity, GameServantSkillMaterials, GameSoundtrack } from '@fgo-planner/data';
+import { ExternalLink, GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantCardType, GameServantClass, GameServantCostume, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantNoblePhantasm, GameServantNoblePhantasmTarget, GameServantRarity, GameServantSkillMaterials, GameSoundtrack } from '@fgo-planner/data';
 import axios from 'axios';
 import { GameDataImportLogger, ReadonlyRecord } from 'internal';
 import { Service } from 'typedi';
@@ -6,6 +6,8 @@ import { AtlasAcademyAttribute } from './atlas-academy-attribute.type';
 import { AtlasAcademyBasicServant } from './atlas-academy-basic-servant.type';
 import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
 import { AtlasAcademyNiceBgmEntity } from './atlas-academy-nice-bgm-entity.type';
+import { AtlasAcademyNiceCardType } from './atlas-academy-nice-card-type.type';
+import { FunctionType } from './atlas-academy-nice-function.type';
 import { AtlasAcademyNiceGender } from './atlas-academy-nice-gender.type';
 import { AtlasAcademyNiceItemAmount } from './atlas-academy-nice-item-amount.type';
 import { AtlasAcademyNiceItemBGType } from './atlas-academy-nice-item-bg-type.type';
@@ -14,6 +16,7 @@ import { AtlasAcademyNiceItemUse } from './atlas-academy-nice-item-use.type';
 import { AtlasAcademyNiceItem } from './atlas-academy-nice-item.type';
 import { AtlasAcademyNiceLvlUpMaterial } from './atlas-academy-nice-lvl-up-material.type';
 import { AscensionMaterialKey, AtlasAcademyNiceServant, SkillMaterialKey } from './atlas-academy-nice-servant.type';
+import { AtlasAcademyNiceTd } from './atlas-academy-nice-td.type';
 import { AtlasAcademySvtClass } from './atlas-academy-svt-class.type';
 
 type ServantEnData = AtlasAcademyBasicServant & Pick<AtlasAcademyNiceServant, 'profile'>;
@@ -76,6 +79,16 @@ export class AtlasAcademyDataImportService {
     } as ReadonlyRecord<AtlasAcademyAttribute, GameServantAttribute>;
 
     /**
+     * Maps the `AtlasAcademyNiceCardType` values to the `GameServantCardType` enum
+     * values.
+     */
+    private static readonly _ServantCardTypeMap = {
+        'buster': GameServantCardType.Buster,
+        'arts': GameServantCardType.Arts,
+        'quick': GameServantCardType.Quick
+    } as ReadonlyRecord<AtlasAcademyNiceCardType, GameServantCardType>;
+
+    /**
      * Maps the `AtlasAcademyNiceItemBGType` values to the `GameItemBackground`
      * enum values.
      */
@@ -126,7 +139,7 @@ export class AtlasAcademyDataImportService {
      * 
      * @param skipIds The set of IDs to omit from the result.
      */
-    async getServants(logger?: GameDataImportLogger): Promise<GameServant[]> {
+    async getServants(logger?: GameDataImportLogger): Promise<Array<GameServant>> {
         /*
          * Retrieve 'nice' JP servant data with lore and English names.
          */
@@ -165,7 +178,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice servant data with lore from the Atlas
      * Academy API. Always retrieves the data with English names.
      */
-    private async _getNiceServants(region: 'NA' | 'JP', logger?: GameDataImportLogger): Promise<AtlasAcademyNiceServant[]> {
+    private async _getNiceServants(region: 'NA' | 'JP', logger?: GameDataImportLogger): Promise<Array<AtlasAcademyNiceServant>> {
         const filename = region === 'NA' ? Constants.NiceServantsFilename : Constants.NiceServantsEnglishFilename;
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${filename}`;
         logger?.info(`Calling ${url}`);
@@ -236,6 +249,8 @@ export class AtlasAcademyDataImportService {
             }
         }
 
+        const np = this._parseNoblePhantasms(servant.noblePhantasms);
+
         const result: GameServant = {
             _id: servant.id,
             name: servant.name,
@@ -255,9 +270,10 @@ export class AtlasAcademyDataImportService {
             skillMaterials,
             appendSkillMaterials,
             costumes,
+            np,
             metadata: {
                 displayName: servant.name,
-                links: [] as any[]
+                links: [] as Array<ExternalLink>
             }
         };
 
@@ -303,6 +319,79 @@ export class AtlasAcademyDataImportService {
             return GameServantGrowthCurve.SemiReverseS;
         }
         return GameServantGrowthCurve.SemiS;
+    }
+
+
+    /**
+     * Converts an array of Atlas Academy `AtlasAcademyNiceTd` objects into an array
+     * of `GameServantNoblePhantasm` objects.
+     */
+    private _parseNoblePhantasms(
+        noblePhantasms: Array<AtlasAcademyNiceTd>,
+        logger?: GameDataImportLogger
+    ): Array<GameServantNoblePhantasm> {
+        /*
+         * Note that for the GameServantNoblePhantasm array, we only care about unique
+         * combinations of card and target types. Examples:
+         *
+         * - Fairy Knight Lancelot has two noble phantasms: an arts type single target
+         *   and a buster type AOE. She will have two entries in the resulting array.
+         *
+         * - Space Ishtar has switchable noble phantasm card types. She will have three
+         *   entries in the resulting array.
+         *
+         * - Mash has two noble phantasm, but both are support art types. She will only
+         *   have one entry in the resulting array.
+         */
+        const result = [] as Array<GameServantNoblePhantasm>;
+        for (const { card, functions } of noblePhantasms) {
+            const cardType = AtlasAcademyDataImportService._ServantCardTypeMap[card];
+            if (!cardType) {
+                logger?.error(`Unknown card type '${card}' encountered when parsing noble phantasm.`);
+                continue;
+            }
+            let isDamageNp = false;
+            let isAoe = false;
+            for (const { funcType, funcTargetType } of functions) {
+                if (this._isDamagingNp(funcType)) {
+                    isDamageNp = true;
+                    isAoe = funcTargetType === 'enemyAll';
+                    break; // Assume that there is only one 'damageNp' function for each noble phantasm.
+                }
+            }
+            const target = !isDamageNp ? GameServantNoblePhantasmTarget.Support
+                : isAoe ? GameServantNoblePhantasmTarget.All : GameServantNoblePhantasmTarget.One;
+            /*
+             * Check if the combination already exists in the result.
+             */
+            let exists = false;
+            for (const np of result) {
+                if (np.cardType === cardType && np.target === target) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                result.push({ cardType, target });
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Determines if the given function type indicates a damaging noble phantasm.
+     */
+    private _isDamagingNp(funcType: FunctionType): boolean {
+        return funcType === 'damageNp' ||
+            funcType === 'damageNpPierce' ||
+            funcType === 'damageNpIndividual' ||
+            funcType === 'damageNpStateIndividual' ||
+            funcType === 'damageNpCounter' ||
+            funcType === 'damageNpStateIndividualFix' ||
+            funcType === 'damageNpSafe' ||
+            funcType === 'damageNpRare' ||
+            funcType === 'damageNpAndCheckIndividuality' ||
+            funcType === 'damageNpIndividualSum';
     }
 
     /**
@@ -351,7 +440,7 @@ export class AtlasAcademyDataImportService {
      * 
      * @param skipIds The set of IDs to omit from the result.
      */
-    async getItems(logger?: GameDataImportLogger): Promise<GameItem[]> {
+    async getItems(logger?: GameDataImportLogger): Promise<Array<GameItem>> {
         /*
          * Retrieve JP item data.
          */
@@ -384,7 +473,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice item data from the Atlas Academy API.
      * Always retrieves the data with English names.
      */
-    private async _getNiceItems(region: 'NA' | 'JP', logger?: GameDataImportLogger): Promise<AtlasAcademyNiceItem[]> {
+    private async _getNiceItems(region: 'NA' | 'JP', logger?: GameDataImportLogger): Promise<Array<AtlasAcademyNiceItem>> {
         const filename = region === 'NA' ? Constants.NiceItemsFilename : Constants.NiceItemsEnglishFilename;
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${filename}`;
         logger?.info(`Calling ${url}`);
@@ -398,7 +487,7 @@ export class AtlasAcademyDataImportService {
         englishStrings: Record<number, AtlasAcademyNiceItem>,
         logger?: GameDataImportLogger
     ): GameItem | null {
-        
+
         if (!this._shouldImportItem(item)) {
             return null;
         }
@@ -477,7 +566,7 @@ export class AtlasAcademyDataImportService {
      * 
      * @param skipIds The set of IDs to omit from the result.
      */
-    async getSoundtracks(logger?: GameDataImportLogger): Promise<GameSoundtrack[]> {
+    async getSoundtracks(logger?: GameDataImportLogger): Promise<Array<GameSoundtrack>> {
         /*
          * Retrieve JP BGM data with English names.
          */
@@ -497,7 +586,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice BGM data from the Atlas Academy API. Always
      * retrieves the JP data with English names.
      */
-    private async _getBgm(logger?: GameDataImportLogger): Promise<AtlasAcademyNiceBgmEntity[]> {
+    private async _getBgm(logger?: GameDataImportLogger): Promise<Array<AtlasAcademyNiceBgmEntity>> {
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/JP/${Constants.NiceBgmEnglishFilename}`;
         logger?.info(`Calling ${url}`);
         const response = await axios.get(url);

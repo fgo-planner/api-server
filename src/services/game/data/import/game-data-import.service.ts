@@ -220,9 +220,11 @@ export class GameDataImportService {
             (update as any)[key] = value;
         }
         /**
-         * Always update costumes
+         * Always update costumes and noble phantasms
          */
         update.costumes = servant.costumes;
+        update.np = servant.np;
+        
         logger.info(servant._id, 'Servant already exists, existing data will be updated.');
         return {
             updateOne: {
@@ -334,12 +336,6 @@ export class GameDataImportService {
         }
         const update = existing.toObject() as GameItem;
         for (const [key, value] of Object.entries(item)) {
-            /*
-             * Exclude metadata
-             */
-            if (key === 'metadata') {
-                continue;
-            }
             if (value == null) {
                 continue;
             }
@@ -373,12 +369,6 @@ export class GameDataImportService {
         }
         const update = existing.toObject() as GameItem;
         for (const [key, value] of Object.entries(item)) {
-            /*
-             * Exclude metadata
-             */
-            if (key === 'metadata') {
-                continue;
-            }
             if (value == null || (update as any)[key] != null) {
                 continue;
             }
@@ -495,12 +485,6 @@ export class GameDataImportService {
         }
         const update = existing.toObject() as GameSoundtrack;
         for (const [key, value] of Object.entries(soundtrack)) {
-            /*
-             * Exclude metadata
-             */
-            if (key === 'metadata') {
-                continue;
-            }
             if (value == null) {
                 continue;
             }
@@ -535,12 +519,6 @@ export class GameDataImportService {
         }
         const update = existing.toObject() as GameSoundtrack;
         for (const [key, value] of Object.entries(soundtrack)) {
-            /*
-             * Exclude metadata
-             */
-            if (key === 'metadata') {
-                continue;
-            }
             if (value == null || (update as any)[key] != null) {
                 continue;
             }

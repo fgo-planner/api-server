@@ -1,7 +1,7 @@
 import { AuthenticationController, GameDataImportController, GameEventController, GameItemController, GameServantController, GameSoundtrackController, MasterAccountController, PlanController, TestController, UserController } from 'controllers';
 import { Application, Router } from 'express';
 import { Dictionary, RequestHandler } from 'express-serve-static-core';
-import { CachedResponseMetadata, Class, ControllerMetadata, MetadataKey, ResponseCacheManager, RouteMetadata, UserAccessLevel } from 'internal';
+import { CachedResponseMetadata, Class, ControllerMetadata, InvalidateCachedResponseMetadata, MetadataKey, ResponseCacheManager, RouteMetadata, UserAccessLevel } from 'internal';
 import { AuthenticationService } from 'services';
 import Container from 'typedi';
 
@@ -76,6 +76,15 @@ const registerRoute = (
     if (cacheMetadata) {
         const cachedResponseHandler = responseCacheManager.getCachedResponseHandler(cacheMetadata);
         handlers.push(cachedResponseHandler);
+    }
+
+    // Add cached response invalidation handling for the route if applicable.
+    const cacheInvalidationMetadataMap: Record<string, InvalidateCachedResponseMetadata> =
+        Reflect.getMetadata(MetadataKey.InvalidateCachedResponse, controllerClass);
+    const cacheInvalidationMetadata = cacheInvalidationMetadataMap?.[handlerName];
+    if (cacheInvalidationMetadata) {
+        const invalidateCachedResponseHandler = responseCacheManager.getInvalidateCachedResponseHandler(cacheInvalidationMetadata);
+        handlers.push(invalidateCachedResponseHandler);
     }
 
     // Get endpoint handler from controller and append to list of handlers.

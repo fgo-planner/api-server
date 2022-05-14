@@ -4,11 +4,7 @@ import { MetadataKey } from '../metadata-key.constants';
 
 type Decorator = (target: any, propertyKey: string) => void;
 
-type CachedResponseParams = {
-    key: CacheKey;
-    subKey?: CacheKey;
-    expiresIn?: number;
-};
+type CachedResponseParams = CachedResponseMetadata;
 
 /**
  * Helper function for parsing `CachedResponse` input parameters.

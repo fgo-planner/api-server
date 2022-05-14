@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CachedResponse, GetMapping, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
+import { CachedResponse, GetMapping, InvalidateCachedResponse, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
 import { GameSoundtrackService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, PaginationUtils } from 'utils';
@@ -11,6 +11,7 @@ export class GameSoundtrackController {
     private _gameSoundtrackService!: GameSoundtrackService;
 
     @PutMapping(UserAccessLevel.Admin)
+    @InvalidateCachedResponse(ResponseCacheKey.GameSoundtrack, [200])
     async createSoundtrack(req: Request, res: Response): Promise<any> {
         let soundtrack = req.body;
         try {
@@ -58,6 +59,7 @@ export class GameSoundtrackController {
     }
 
     @PostMapping(UserAccessLevel.Admin)
+    @InvalidateCachedResponse(ResponseCacheKey.GameSoundtrack, [200])
     async updateSoundtrack(req: Request, res: Response): Promise<any> {
         let soundtrack = req.body;
         try {
@@ -69,6 +71,12 @@ export class GameSoundtrackController {
         } catch (err) {
             res.status(400).send(err);
         }
+    }
+
+    @PostMapping('/invalidate-cache', UserAccessLevel.Admin)
+    @InvalidateCachedResponse(ResponseCacheKey.GameSoundtrack)
+    invalidateCache(_: Request, res: Response): void {
+        res.send();
     }
 
 }

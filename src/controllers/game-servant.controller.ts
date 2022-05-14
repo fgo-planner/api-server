@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CachedResponse, GetMapping, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
+import { CachedResponse, GetMapping, InvalidateCachedResponse, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
 import { GameServantService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, PaginationUtils } from 'utils';
@@ -11,6 +11,7 @@ export class GameServantController {
     private _gameServantService!: GameServantService;
 
     @PutMapping(UserAccessLevel.Admin)
+    @InvalidateCachedResponse(ResponseCacheKey.GameServant, [200])
     async createServant(req: Request, res: Response): Promise<any> {
         let servant = req.body;
         try {
@@ -58,6 +59,7 @@ export class GameServantController {
     }
 
     @PostMapping(UserAccessLevel.Admin)
+    @InvalidateCachedResponse(ResponseCacheKey.GameServant, [200])
     async updateServant(req: Request, res: Response): Promise<any> {
         let servant = req.body;
         try {
@@ -69,6 +71,12 @@ export class GameServantController {
         } catch (err) {
             res.status(400).send(err);
         }
+    }
+
+    @PostMapping('/invalidate-cache', UserAccessLevel.Admin)
+    @InvalidateCachedResponse(ResponseCacheKey.GameServant)
+    invalidateCache(_: Request, res: Response): void {
+        res.send();
     }
 
 }

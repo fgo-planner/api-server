@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CachedResponse, GetMapping, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
+import { CachedResponse, GetMapping, InvalidateCachedResponse, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
 import { GameItemService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, PaginationUtils } from 'utils';
@@ -11,6 +11,7 @@ export class GameItemController {
     private _gameItemService!: GameItemService;
 
     @PutMapping(UserAccessLevel.Admin)
+    @InvalidateCachedResponse(ResponseCacheKey.GameItem, [200])
     async createItem(req: Request, res: Response): Promise<any> {
         let item = req.body;
         try {
@@ -23,7 +24,7 @@ export class GameItemController {
 
     @GetMapping()
     @CachedResponse(ResponseCacheKey.GameItem)
-    async getItems(req: Request, res: Response): Promise<any> {
+    async getItems(_: Request, res: Response): Promise<any> {
         try {
             const items = await this._gameItemService.findAll();
             res.send(items);
@@ -58,6 +59,7 @@ export class GameItemController {
     }
 
     @PostMapping(UserAccessLevel.Admin)
+    @InvalidateCachedResponse(ResponseCacheKey.GameItem, [200])
     async updateItem(req: Request, res: Response): Promise<any> {
         let item = req.body;
         try {
@@ -69,6 +71,12 @@ export class GameItemController {
         } catch (err) {
             res.status(400).send(err);
         }
+    }
+
+    @PostMapping('/invalidate-cache', UserAccessLevel.Admin)
+    @InvalidateCachedResponse(ResponseCacheKey.GameItem)
+    invalidateCache(_: Request, res: Response): void {
+        res.send();
     }
 
 }

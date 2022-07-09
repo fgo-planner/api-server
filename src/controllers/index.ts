@@ -1,3 +1,4 @@
+export * from './app-info.controller';
 export * from './authentication.controller';
 export * from './game-data-import.controller';
 export * from './game-event.controller';

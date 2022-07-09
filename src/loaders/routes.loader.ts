@@ -1,4 +1,4 @@
-import { AuthenticationController, GameDataImportController, GameEventController, GameItemController, GameServantController, GameSoundtrackController, MasterAccountController, PlanController, TestController, UserController } from 'controllers';
+import { AppInfoController, AuthenticationController, GameDataImportController, GameEventController, GameItemController, GameServantController, GameSoundtrackController, MasterAccountController, PlanController, TestController, UserController } from 'controllers';
 import { Application, Router } from 'express';
 import { Dictionary, RequestHandler } from 'express-serve-static-core';
 import { CachedResponseMetadata, Class, ControllerMetadata, InvalidateCachedResponseMetadata, MetadataKey, ResponseCacheManager, RouteMetadata, UserAccessLevel } from 'internal';
@@ -9,6 +9,7 @@ import Container from 'typedi';
 const ResourceApiPrefix = '/rest';
 
 const Controllers: Class<any>[] = [
+    AppInfoController,
     AuthenticationController,
     UserController,
     MasterAccountController,

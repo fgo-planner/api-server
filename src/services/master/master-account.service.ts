@@ -7,18 +7,24 @@ export class MasterAccountService {
 
     async addAccount(userId: ObjectId, account: Omit<MasterAccount, 'userId' | '_id'>): Promise<MasterAccount> {
         (account as MasterAccount).userId = userId;
-        return MasterAccountModel.create(account);
+        const result = await MasterAccountModel.create(account);
+        return result.toObject();
     }
 
     async findById(id: ObjectId): Promise<MasterAccount | null> {
         if (!id) {
             throw 'Account ID is missing or invalid.';
         }
-        return MasterAccountModel.findById(id).exec();
+        const result = await MasterAccountModel.findById(id);
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
     async findByUserId(userId: ObjectId): Promise<Array<BasicMasterAccount>> {
-        return MasterAccountModel.findByUserId(userId);
+        const result = await MasterAccountModel.findByUserId(userId);
+        return result.map(doc => doc.toObject());
     }
 
     async update(account: Partial<MasterAccount>): Promise<MasterAccount | null> {
@@ -27,18 +33,22 @@ export class MasterAccountService {
         }
         // Do not allow userId to be updated.
         delete account.userId;
-        return MasterAccountModel.findOneAndUpdate(
+        const result = await MasterAccountModel.findOneAndUpdate(
             { _id: account._id },
             { $set: account },
             { runValidators: true, new: true }
-        ).exec();
+        );
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
     async delete(id: ObjectId): Promise<boolean> {
         if (!id) {
             throw 'Account ID is missing or invalid.';
         }
-        const result = await MasterAccountModel.deleteOne({ _id: id }).exec();
+        const result = await MasterAccountModel.deleteOne({ _id: id });
         return !!result.deletedCount;
     }
 

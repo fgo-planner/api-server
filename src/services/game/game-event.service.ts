@@ -10,7 +10,8 @@ export class GameEventService {
 
     async create(event: GameEvent): Promise<GameEvent> {
         // TODO Validation
-        return GameEventModel.create(event);
+        const result = await GameEventModel.create(event);
+        return result.toObject();
     }
 
     async existsById(id: number): Promise<boolean> {
@@ -19,15 +20,20 @@ export class GameEventService {
     }
 
     async findById(id: ObjectId): Promise<GameEvent | null> {
-        return GameEventModel.findById(id).exec();
+        const result = await GameEventModel.findById(id);
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
     async findAll(): Promise<Array<GameEvent>> {
-        return GameEventModel.find().exec();
+        const result = await GameEventModel.find();
+        return result.map(doc => doc.toObject());
     }
 
     async findAllIds(): Promise<Array<number>> {
-        return GameEventModel.distinct('_id').exec();
+        return GameEventModel.distinct('_id');
     }
 
     async findPage(page: Pagination): Promise<{data: Array<GameEvent>; total: number}> {
@@ -36,15 +42,16 @@ export class GameEventService {
         const sort = { [page.sort]: page.direction === 'ASC' ? 1 : -1 } as Record<string, SortOrder>;
         const count = await GameEventModel.find()
             .countDocuments();
-        const data = await GameEventModel.find()
+        const result = await GameEventModel.find()
             .sort(sort)
             .skip(skip)
             .limit(size);
+        const data = result.map(doc => doc.toObject());
         return { data, total: count };
     }
 
     async findByYear(year: number): Promise<Array<GameEvent>> {
-        return GameEventModel.findByYear(year).exec();
+        return GameEventModel.findByYear(year);
     }
 
     async update(event: GameEvent): Promise<GameEvent | null> {
@@ -52,11 +59,15 @@ export class GameEventService {
         if (!id) {
             throw 'Event ID is missing or invalid.';
         }
-        return GameEventModel.findOneAndUpdate(
+        const result = await GameEventModel.findOneAndUpdate(
             { _id: id },
             { $set: event },
             { runValidators: true, new: true }
-        ).exec();
+        );
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
 }

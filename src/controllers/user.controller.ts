@@ -61,7 +61,7 @@ export class UserController {
     async getCurrentUser(req: AuthenticatedRequest, res: Response): Promise<any> {
         const userId = ObjectIdUtils.instantiate(req.token.id);
         try {
-            const user = await this._userService.findByIdBasic(userId);
+            const user = await this._userService.findBasicById(userId);
             res.send(user);
         } catch (err) {
             res.status(400).send(err);

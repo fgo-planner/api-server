@@ -20,14 +20,22 @@ export class UserService {
         if (!id) {
             throw 'User ID is missing or invalid.';
         }
-        return UserModel.findById(id).exec();
+        const result = await UserModel.findById(id);
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
-    async findByIdBasic(id: ObjectId): Promise<BasicUser | null> {
+    async findBasicById(id: ObjectId): Promise<BasicUser | null> {
         if (!id) {
             throw 'User ID is missing or invalid.';
         }
-        return UserModel.findBasicById(id).exec();
+        const result = await UserModel.findBasicById(id);
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
     // TODO Create DTO for parameters if it gets too big.
@@ -107,14 +115,15 @@ export class UserService {
         for (const [key, value] of Object.entries(userPrefs)) {
             updateObject[`userPrefs.${key}`] = value;
         }
-        
-        const user = await UserModel.findOneAndUpdate(
+        const result = await UserModel.findOneAndUpdate(
             { _id: userId },
             { $set: updateObject },
             { runValidators: true, new: true }
-        ).exec();
-
-        return user && user.userPrefs;
+        );
+        if (!result) {
+            return null;
+        }
+        return result.userPrefs;
     }
 
     private _passwordIsValid(password: string): boolean {

@@ -8,7 +8,8 @@ export class GameServantService {
 
     async create(servant: GameServant): Promise<GameServant> {
         // TODO Validation
-        return GameServantModel.create(servant);
+        const result = await GameServantModel.create(servant);
+        return result.toObject();
     }
 
     async existsById(id: number): Promise<boolean> {
@@ -17,29 +18,37 @@ export class GameServantService {
     }
 
     async findById(id: number): Promise<GameServant | null> {
-        return GameServantModel.findById(id).exec();
+        const result = await GameServantModel.findById(id);
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
     async findByCollectionNo(collectionNo: number): Promise<GameServant> {
         if (!collectionNo && collectionNo !== 0) {
             throw 'Collection number is missing or invalid.';
         }
-        return GameServantModel.findByCollectionNo(collectionNo).exec();
+        const result = await GameServantModel.findByCollectionNo(collectionNo);
+        return result.toObject();
     }
 
     async findAll(): Promise<Array<GameServant>> {
-        return GameServantModel.find().exec();
+        const result = await GameServantModel.find();
+        return result.map(doc => doc.toObject());
     }
 
     async findByIds(ids: Array<number>): Promise<Array<GameServant>> {
         if (!ids || !ids.length) {
             return [];
         }
-        return GameServantModel.find({ _id: { $in: ids } }).exec();
+        const result = await GameServantModel.find({ _id: { $in: ids } });
+        return result.map(doc => doc.toObject());
     }
 
     async findAllIds(): Promise<Array<number>> {
-        return GameServantModel.distinct('_id').exec();
+        const result = await GameServantModel.distinct('_id');
+        return result.map(doc => doc.toObject());
     }
 
     async findPage(page: Pagination): Promise<{data: Array<GameServant>; total: number}> {
@@ -48,10 +57,11 @@ export class GameServantService {
         const sort = { [page.sort]: page.direction === 'ASC' ? 1 : -1 } as Record<string, SortOrder>;
         const count = await GameServantModel.find()
             .countDocuments();
-        const data = await GameServantModel.find()
+        const result = await GameServantModel.find()
             .sort(sort)
             .skip(skip)
             .limit(size);
+        const data = result.map(doc => doc.toObject());
         return { data, total: count };
     }
 
@@ -60,11 +70,15 @@ export class GameServantService {
         if (!id && id !== 0) {
             throw 'ID is missing or invalid.';
         }
-        return GameServantModel.findOneAndUpdate(
+        const result = await GameServantModel.findOneAndUpdate(
             { _id: id },
             { $set: servant },
             { runValidators: true, new: true }
-        ).exec();
+        );
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
 }

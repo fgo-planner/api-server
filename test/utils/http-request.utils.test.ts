@@ -13,7 +13,7 @@ describe('HttpRequestUtils.parseIntegerList', () => {
         expect(result.length).toBe(0);
     });
 
-    const TestCases: {[key: string]: number[]} = {
+    const TestCases: {[key: string]: Array<number>} = {
         '123': [123],
         '123,456,789': [123,456,789],
         '123, 456, 789': [123],

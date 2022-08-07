@@ -1,68 +1,84 @@
-import { GameServant, GameServantDocument, GameServantModel } from '@fgo-planner/data';
+import { GameServant, GameServantModel } from '@fgo-planner/data';
 import { Pagination } from 'dto';
+import { SortOrder } from 'mongoose';
 import { Service } from 'typedi';
 
 @Service()
 export class GameServantService {
 
-    async create(servant: GameServant): Promise<GameServantDocument> {
+    async create(servant: GameServant): Promise<GameServant> {
         // TODO Validation
-        return GameServantModel.create(servant);
+        const result = await GameServantModel.create(servant);
+        return result.toObject();
     }
 
     async existsById(id: number): Promise<boolean> {
-        return GameServantModel.exists({ _id: id });
+        const result = await GameServantModel.exists({ _id: id });
+        return !!result;
     }
 
-    async findById(id: number): Promise<GameServantDocument | null> {
-        return GameServantModel.findById(id).exec();
+    async findById(id: number): Promise<GameServant | null> {
+        const result = await GameServantModel.findById(id);
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
-    async findByCollectionNo(collectionNo: number): Promise<GameServantDocument> {
+    async findByCollectionNo(collectionNo: number): Promise<GameServant> {
         if (!collectionNo && collectionNo !== 0) {
             throw 'Collection number is missing or invalid.';
         }
-        return GameServantModel.findByCollectionNo(collectionNo).exec();
+        const result = await GameServantModel.findByCollectionNo(collectionNo);
+        return result.toObject();
     }
 
-    async findAll(): Promise<GameServantDocument[]> {
-        return GameServantModel.find().exec();
+    async findAll(): Promise<Array<GameServant>> {
+        const result = await GameServantModel.find();
+        return result.map(doc => doc.toObject());
     }
 
-    async findByIds(ids: number[]): Promise<GameServantDocument[]> {
+    async findByIds(ids: Array<number>): Promise<Array<GameServant>> {
         if (!ids || !ids.length) {
             return [];
         }
-        return GameServantModel.find({ _id: { $in: ids } }).exec();
+        const result = await GameServantModel.find({ _id: { $in: ids } });
+        return result.map(doc => doc.toObject());
     }
 
-    async findAllIds(): Promise<number[]> {
-        return GameServantModel.distinct('_id').exec();
+    async findAllIds(): Promise<Array<number>> {
+        const result = await GameServantModel.distinct('_id');
+        return result.map(doc => doc.toObject());
     }
 
-    async findPage(page: Pagination): Promise<{data: GameServantDocument[]; total: number}> {
+    async findPage(page: Pagination): Promise<{data: Array<GameServant>; total: number}> {
         const size = page.size;
         const skip = size * (page.page - 1);
-        const sort = { [page.sort]: page.direction === 'ASC' ? 1 : -1 };
+        const sort = { [page.sort]: page.direction === 'ASC' ? 1 : -1 } as Record<string, SortOrder>;
         const count = await GameServantModel.find()
             .countDocuments();
-        const data = await GameServantModel.find()
+        const result = await GameServantModel.find()
             .sort(sort)
             .skip(skip)
             .limit(size);
+        const data = result.map(doc => doc.toObject());
         return { data, total: count };
     }
 
-    async update(servant: GameServant): Promise<GameServantDocument | null> {
+    async update(servant: GameServant): Promise<GameServant | null> {
         const id = Number(servant._id);
         if (!id && id !== 0) {
             throw 'ID is missing or invalid.';
         }
-        return GameServantModel.findOneAndUpdate(
+        const result = await GameServantModel.findOneAndUpdate(
             { _id: id },
             { $set: servant },
             { runValidators: true, new: true }
-        ).exec();
+        );
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
 }

@@ -1,17 +1,16 @@
 import { GameItem, GameItemModel, GameServant, GameServantModel, GameSoundtrack, GameSoundtrackModel } from '@fgo-planner/data';
 import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
 import { GameDataImportLogger, ResponseCacheKey, ResponseCacheManager } from 'internal';
+import { AnyBulkWriteOperation } from 'mongodb';
 import { Inject, Service } from 'typedi';
 import { GameItemService } from '../../game-item.service';
 import { GameServantService } from '../../game-servant.service';
 import { GameSoundtrackService } from '../../game-soundtrack.service';
 import { AtlasAcademyDataImportService } from './atlas-academy/atlas-academy-data-import.service';
 
-type BulkWriteQuery = {
-    insertOne: object
-} | {
-    updateOne: object
-};
+type GameServantBulkWriteQuery = AnyBulkWriteOperation<GameServant>;
+type GameItemBulkWriteQuery = AnyBulkWriteOperation<GameItem>;
+type GameSoundtrackBulkWriteQuery = AnyBulkWriteOperation<GameSoundtrack>;
 
 @Service()
 export class GameDataImportService {
@@ -82,7 +81,7 @@ export class GameDataImportService {
         /**
          * The queries for the bulk write operation.
          */
-        const writeQueries: BulkWriteQuery[] = [];
+        const writeQueries: Array<GameServantBulkWriteQuery> = [];
         /**
          * Create a bulk write query for each servant an adds it to the query array.
          */
@@ -96,7 +95,7 @@ export class GameDataImportService {
         let updated: number, created: number, errors: number;
         try {
             // TODO Move this to service layer
-            const writeResult = await GameServantModel.bulkWrite(writeQueries, {ordered: false});
+            const writeResult = await GameServantModel.bulkWrite(writeQueries, { ordered: false });
             updated = writeResult.modifiedCount;
             created = writeResult.insertedCount;
             errors = writeQueries.length - updated - created;
@@ -120,7 +119,7 @@ export class GameDataImportService {
         servant: GameServant,
         existingAction: GameDataImportExistingAction,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery | null> {
+    ): Promise<GameServantBulkWriteQuery | null> {
         if (existingAction === GameDataImportExistingAction.Override) {
             return await this._createServantWriteForOverrideAction(servant, logger);
         } else if (existingAction === GameDataImportExistingAction.Append) {
@@ -137,7 +136,7 @@ export class GameDataImportService {
     private async _createServantWriteForSkipAction(
         servant: GameServant,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery | null> {
+    ): Promise<GameServantBulkWriteQuery | null> {
         const exists = await this._gameServantService.existsById(servant._id);
         if (!exists) {
             logger.info(servant._id, 'Servant does not exist yet, will be inserted into the database.');
@@ -157,7 +156,7 @@ export class GameDataImportService {
     private async _createServantWriteForOverrideAction(
         servant: GameServant,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery> {
+    ): Promise<GameServantBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameServantService.findById(servant._id);
         if (!existing) {
@@ -166,7 +165,6 @@ export class GameDataImportService {
                 insertOne: { document: servant }
             };
         }
-        const update = existing.toObject() as GameServant;
         for (const [key, value] of Object.entries(servant)) {
             /*
              * Exclude metadata
@@ -177,13 +175,13 @@ export class GameDataImportService {
             if (value == null) {
                 continue;
             }
-            (update as any)[key] = value;
+            (existing as any)[key] = value;
         }
         logger.info(servant._id, 'Servant already exists, existing data will be overridden.');
         return {
             updateOne: {
                 filter: { _id: servant._id },
-                update: { $set: update }
+                update: { $set: existing }
             }
         };
     }
@@ -197,7 +195,7 @@ export class GameDataImportService {
     private async _createServantWriteForAppendAction(
         servant: GameServant,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery> {
+    ): Promise<GameServantBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameServantService.findById(servant._id);
         if (!existing) {
@@ -206,7 +204,6 @@ export class GameDataImportService {
                 insertOne: { document: servant }
             };
         }
-        const update = existing.toObject() as GameServant;
         for (const [key, value] of Object.entries(servant)) {
             /*
              * Exclude metadata
@@ -214,22 +211,22 @@ export class GameDataImportService {
             if (key === 'metadata') {
                 continue;
             }
-            if (value == null || (update as any)[key] != null) {
+            if (value == null || (existing as any)[key] != null) {
                 continue;
             }
-            (update as any)[key] = value;
+            (existing as any)[key] = value;
         }
         /**
          * Always update costumes and noble phantasms
          */
-        update.costumes = servant.costumes;
-        update.np = servant.np;
+        existing.costumes = servant.costumes;
+        existing.np = servant.np;
         
         logger.info(servant._id, 'Servant already exists, existing data will be updated.');
         return {
             updateOne: {
                 filter: { _id: servant._id },
-                update: { $set: update }
+                update: { $set: existing }
             }
         };
     }
@@ -250,7 +247,7 @@ export class GameDataImportService {
         /**
          * The queries for the bulk write operation.
          */
-        const writeQueries: BulkWriteQuery[] = [];
+        const writeQueries: Array<GameItemBulkWriteQuery> = [];
         /**
          * Create a bulk write query for each item an adds it to the query array.
          */
@@ -288,7 +285,7 @@ export class GameDataImportService {
         item: GameItem,
         existingAction: GameDataImportExistingAction,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery | null> {
+    ): Promise<GameItemBulkWriteQuery | null> {
         if (existingAction === GameDataImportExistingAction.Override) {
             return await this._createItemWriteForOverrideAction(item, logger);
         } else if (existingAction === GameDataImportExistingAction.Append) {
@@ -305,7 +302,7 @@ export class GameDataImportService {
     private async _createItemWriteForSkipAction(
         item: GameItem,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery | null> {
+    ): Promise<GameItemBulkWriteQuery | null> {
         const exists = await this._gameItemService.existsById(item._id);
         if (!exists) {
             logger.info(item._id, 'Item does not exist yet, will be inserted into the database.');
@@ -325,7 +322,7 @@ export class GameDataImportService {
     private async _createItemWriteForOverrideAction(
         item: GameItem,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery> {
+    ): Promise<GameItemBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameItemService.findById(item._id);
         if (!existing) {
@@ -334,18 +331,17 @@ export class GameDataImportService {
                 insertOne: { document: item }
             };
         }
-        const update = existing.toObject() as GameItem;
         for (const [key, value] of Object.entries(item)) {
             if (value == null) {
                 continue;
             }
-            (update as any)[key] = value;
+            (existing as any)[key] = value;
         }
         logger.info(item._id, 'Item already exists, existing data will be overridden.');
         return {
             updateOne: {
                 filter: { _id: item._id },
-                update: { $set: update }
+                update: { $set: existing }
             }
         };
     }
@@ -358,7 +354,7 @@ export class GameDataImportService {
     private async _createItemWriteForAppendAction(
         item: GameItem,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery> {
+    ): Promise<GameItemBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameItemService.findById(item._id);
         if (!existing) {
@@ -367,18 +363,17 @@ export class GameDataImportService {
                 insertOne: { document: item }
             };
         }
-        const update = existing.toObject() as GameItem;
         for (const [key, value] of Object.entries(item)) {
-            if (value == null || (update as any)[key] != null) {
+            if (value == null || (existing as any)[key] != null) {
                 continue;
             }
-            (update as any)[key] = value;
+            (existing as any)[key] = value;
         }
         logger.info(item._id, 'Item already exists, existing data will be updated.');
         return {
             updateOne: {
                 filter: { _id: item._id },
-                update: { $set: update }
+                update: { $set: existing }
             }
         };
     }
@@ -399,7 +394,7 @@ export class GameDataImportService {
         /**
          * The queries for the bulk write operation.
          */
-        const writeQueries: BulkWriteQuery[] = [];
+        const writeQueries: Array<GameSoundtrackBulkWriteQuery> = [];
         /**
          * Create a bulk write query for each soundtrack an adds it to the query array.
          */
@@ -437,7 +432,7 @@ export class GameDataImportService {
         soundtrack: GameSoundtrack,
         existingAction: GameDataImportExistingAction,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery | null> {
+    ): Promise<GameSoundtrackBulkWriteQuery | null> {
         if (existingAction === GameDataImportExistingAction.Override) {
             return await this._createSoundtrackWriteForOverrideAction(soundtrack, logger);
         } else if (existingAction === GameDataImportExistingAction.Append) {
@@ -454,7 +449,7 @@ export class GameDataImportService {
     private async _createSoundtrackWriteForSkipAction(
         soundtrack: GameSoundtrack,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery | null> {
+    ): Promise<GameSoundtrackBulkWriteQuery | null> {
         const exists = await this._gameSoundtrackService.existsById(soundtrack._id);
         if (!exists) {
             logger.info(soundtrack._id, 'Soundtrack does not exist yet, will be inserted into the database.');
@@ -474,7 +469,7 @@ export class GameDataImportService {
     private async _createSoundtrackWriteForOverrideAction(
         soundtrack: GameSoundtrack,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery> {
+    ): Promise<GameSoundtrackBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameSoundtrackService.findById(soundtrack._id);
         if (!existing) {
@@ -483,18 +478,17 @@ export class GameDataImportService {
                 insertOne: { document: soundtrack }
             };
         }
-        const update = existing.toObject() as GameSoundtrack;
         for (const [key, value] of Object.entries(soundtrack)) {
             if (value == null) {
                 continue;
             }
-            (update as any)[key] = value;
+            (existing as any)[key] = value;
         }
         logger.info(soundtrack._id, 'Soundtrack already exists, existing data will be overridden.');
         return {
             updateOne: {
                 filter: { _id: soundtrack._id },
-                update: { $set: update }
+                update: { $set: existing }
             }
         };
     }
@@ -508,7 +502,7 @@ export class GameDataImportService {
     private async _createSoundtrackWriteForAppendAction(
         soundtrack: GameSoundtrack,
         logger: GameDataImportLogger
-    ): Promise<BulkWriteQuery> {
+    ): Promise<GameSoundtrackBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameSoundtrackService.findById(soundtrack._id);
         if (!existing) {
@@ -517,18 +511,17 @@ export class GameDataImportService {
                 insertOne: { document: soundtrack }
             };
         }
-        const update = existing.toObject() as GameSoundtrack;
         for (const [key, value] of Object.entries(soundtrack)) {
-            if (value == null || (update as any)[key] != null) {
+            if (value == null || (existing as any)[key] != null) {
                 continue;
             }
-            (update as any)[key] = value;
+            (existing as any)[key] = value;
         }
         logger.info(soundtrack._id, 'Soundtrack already exists, existing data will be updated.');
         return {
             updateOne: {
                 filter: { _id: soundtrack._id },
-                update: { $set: update }
+                update: { $set: existing }
             }
         };
     }

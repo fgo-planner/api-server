@@ -85,7 +85,7 @@ export class AuthenticationService {
          * Find the user by the provided username. Return null if the user could not be
          * found.
          */
-        const user = await UserModel.findOne({ username }).exec();
+        const user = await UserModel.findOne({ username });
         if (!user) {
             return null;
         }
@@ -110,7 +110,7 @@ export class AuthenticationService {
          * The JWT body payload.
          */
         const payload: AccessTokenPayload = {
-            id: user._id,
+            id: user._id.toHexString(),
             admin: user.admin
         };
         try {

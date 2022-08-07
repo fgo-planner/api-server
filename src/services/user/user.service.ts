@@ -1,11 +1,9 @@
-import { MasterAccountValidators, UserDocument, UserModel, UserPreferences } from '@fgo-planner/data';
+import { BasicUser, MasterAccountValidators, User, UserModel, UserPreferences } from '@fgo-planner/data';
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'bson';
 import { Nullable } from 'internal';
 import { Inject, Service } from 'typedi';
 import { MasterAccountService } from '../master/master-account.service';
-
-type BasicUserDocument = Pick<UserDocument, '_id' | 'username' | 'email'>;
 
 /** 
  * Handles retrieving and updating users (excluding administrative operations).
@@ -15,26 +13,29 @@ export class UserService {
 
     private static readonly _BcryptStrength = Number(process.env.BCRYPT_STRENGTH) || 4;
 
-    private static readonly _BasicProjection = {
-        username: 1,
-        email: 1
-    };
-
     @Inject()
     private _masterAccountService!: MasterAccountService;
 
-    async findById(id: ObjectId): Promise<UserDocument | null> {
+    async findById(id: ObjectId): Promise<User | null> {
         if (!id) {
             throw 'User ID is missing or invalid.';
         }
-        return UserModel.findById(id).exec();
+        const result = await UserModel.findById(id);
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
-    async findByIdBasic(id: ObjectId): Promise<BasicUserDocument | null> {
+    async findBasicById(id: ObjectId): Promise<BasicUser | null> {
         if (!id) {
             throw 'User ID is missing or invalid.';
         }
-        return UserModel.findById(id, UserService._BasicProjection).exec();
+        const result = await UserModel.findBasicById(id);
+        if (!result) {
+            return null;
+        }
+        return result.toObject();
     }
 
     // TODO Create DTO for parameters if it gets too big.
@@ -87,7 +88,11 @@ export class UserService {
      * Checks if the username is already in use by another registered user.
      */
     async usernameExists(username: string): Promise<boolean> {
-        return UserModel.exists({ username });
+        if (!username) {
+            return false;
+        }
+        const result = await UserModel.exists({ username });
+        return !!result;
     }
 
     /**
@@ -97,7 +102,8 @@ export class UserService {
         if (!email) {
             return false;
         }
-        return UserModel.exists({ email });
+        const result = await UserModel.exists({ email });
+        return !!result;
     }
 
     async getUserPreferences(userId: ObjectId): Promise<UserPreferences | null> {
@@ -109,14 +115,15 @@ export class UserService {
         for (const [key, value] of Object.entries(userPrefs)) {
             updateObject[`userPrefs.${key}`] = value;
         }
-        
-        const user = await UserModel.findOneAndUpdate(
+        const result = await UserModel.findOneAndUpdate(
             { _id: userId },
             { $set: updateObject },
             { runValidators: true, new: true }
-        ).exec();
-
-        return user && user.userPrefs;
+        );
+        if (!result) {
+            return null;
+        }
+        return result.userPrefs;
     }
 
     private _passwordIsValid(password: string): boolean {

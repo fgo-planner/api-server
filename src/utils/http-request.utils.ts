@@ -13,7 +13,7 @@ export class HttpRequestUtils {
     /**
      * Parses a string of comma delimited integers from request params.
      */
-    static parseIntegerList(query: Query): number[] {
+    static parseIntegerList(query: Query): Array<number> {
         const values = HttpRequestUtils.flattenParamsList(query);
         return values.map(Number).filter(Number.isInteger);
     }

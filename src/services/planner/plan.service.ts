@@ -17,7 +17,7 @@ export class PlanService {
     }
 
     async findByAccountId(accountId: ObjectId): Promise<Array<BasicPlan>> {
-        return PlanModel.findByAccountId(accountId);
+        return PlanModel.findByAccountId(accountId).exec();
     }
 
     async update(plan: Partial<Plan>): Promise<Plan | null> {

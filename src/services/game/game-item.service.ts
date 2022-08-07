@@ -1,5 +1,6 @@
-import { GameItem, GameItemDocument, GameItemModel, GameItemUsage } from '@fgo-planner/data';
+import { GameItem, GameItemModel, GameItemUsage } from '@fgo-planner/data';
 import { Pagination } from 'dto';
+import { SortOrder } from 'mongoose';
 import { Service } from 'typedi';
 
 @Service()
@@ -15,38 +16,39 @@ export class GameItemService {
         updatedAt: 0
     };
 
-    async create(item: GameItem): Promise<GameItemDocument> {
+    async create(item: GameItem): Promise<GameItem> {
         // TODO Validation
         return GameItemModel.create(item);
     }
 
     async existsById(id: number): Promise<boolean> {
-        return GameItemModel.exists({ _id: id });
+        const result = await GameItemModel.exists({ _id: id });
+        return !!result;
     }
 
-    async findById(id: number): Promise<GameItemDocument | null> {
+    async findById(id: number): Promise<GameItem | null> {
         return GameItemModel.findById(id, this._basicProjection).exec();
     }
 
-    async findAll(): Promise<GameItemDocument[]> {
+    async findAll(): Promise<Array<GameItem>> {
         return GameItemModel.find({}, this._basicProjection).exec();
     }
     
-    async findByIds(ids: number[]): Promise<GameItemDocument[]> {
+    async findByIds(ids: Array<number>): Promise<Array<GameItem>> {
         if (!ids || !ids.length) {
             return [];
         }
         return GameItemModel.find({ _id: { $in: ids } }, this._basicProjection).exec();
     }
 
-    async findAllIds(): Promise<number[]> {
+    async findAllIds(): Promise<Array<number>> {
         return GameItemModel.distinct('_id').exec();
     }
 
-    async findPage(page: Pagination): Promise<{data: GameItemDocument[]; total: number}> {
+    async findPage(page: Pagination): Promise<{data: Array<GameItem>; total: number}> {
         const size = page.size;
         const skip = size * (page.page - 1);
-        const sort = { [page.sort]: page.direction === 'ASC' ? 1 : -1 };
+        const sort = { [page.sort]: page.direction === 'ASC' ? 1 : -1 } as Record<string, SortOrder>;
         const count = await GameItemModel.find()
             .countDocuments();
         const data = await GameItemModel.find({}, this._basicProjection)
@@ -56,11 +58,11 @@ export class GameItemService {
         return { data, total: count };
     }
 
-    async findByUsage(usage: GameItemUsage | GameItemUsage[]): Promise<GameItemDocument[]> {
+    async findByUsage(usage: GameItemUsage | GameItemUsage[]): Promise<Array<GameItem>> {
         return GameItemModel.findByUsage(usage).exec();
     }
 
-    async update(item: GameItem): Promise<GameItemDocument | null> {
+    async update(item: GameItem): Promise<GameItem | null> {
         const id = Number(item._id);
         if (!id && id !== 0) {
             throw 'Item ID is missing or invalid.';

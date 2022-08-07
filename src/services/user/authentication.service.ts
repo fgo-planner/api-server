@@ -110,7 +110,7 @@ export class AuthenticationService {
          * The JWT body payload.
          */
         const payload: AccessTokenPayload = {
-            id: user._id,
+            id: user._id.toHexString(),
             admin: user.admin
         };
         try {

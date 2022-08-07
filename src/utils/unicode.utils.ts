@@ -6,7 +6,7 @@ export class UnicodeUtils {
         if (!input) {
             return input;
         }
-        const charCodes: number[] = [];
+        const charCodes: Array<number> = [];
         
         for (let i = 0, length = input.length; i < length; i++) {
             let charCode = input.charCodeAt(i);

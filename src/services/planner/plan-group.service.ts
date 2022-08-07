@@ -1,4 +1,4 @@
-import { MasterAccountModel, PlanGroup, PlanGroupModel } from '@fgo-planner/data';
+import { BasicPlanGroup, MasterAccountModel, PlanGroup, PlanGroupModel } from '@fgo-planner/data';
 import { ObjectId } from 'bson';
 import { PlanService } from 'services';
 import Container, { Service } from 'typedi';
@@ -19,7 +19,7 @@ export class PlanGroupService {
         return PlanGroupModel.findById(id).exec();
     }
 
-    async findByAccountId(accountId: ObjectId): Promise<Partial<PlanGroup>[]> {
+    async findByAccountId(accountId: ObjectId): Promise<Array<BasicPlanGroup>> {
         return PlanGroupModel.findByAccountId(accountId);
     }
 

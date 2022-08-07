@@ -1,4 +1,4 @@
-import { MasterAccount, MasterAccountModel } from '@fgo-planner/data';
+import { BasicMasterAccount, MasterAccount, MasterAccountModel } from '@fgo-planner/data';
 import { ObjectId } from 'bson';
 import { Service } from 'typedi';
 
@@ -17,7 +17,7 @@ export class MasterAccountService {
         return MasterAccountModel.findById(id).exec();
     }
 
-    async findByUserId(userId: ObjectId): Promise<Partial<MasterAccount>[]> {
+    async findByUserId(userId: ObjectId): Promise<Array<BasicMasterAccount>> {
         return MasterAccountModel.findByUserId(userId);
     }
 

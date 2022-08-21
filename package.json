@@ -1,5 +1,5 @@
 {
-  "name": "fgo-planner-api-server",
+  "name": "@fgo-planner/api-server",
   "version": "0.0.1",
   "description": "Backend API server for the FGO Planner project.",
   "engines": {
@@ -21,14 +21,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alvinquach/fgo-planner-api-server.git"
+    "url": "https://github.com/fgo-planner/api-server.git"
   },
   "author": "Alvin Quach",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/alvinquach/fgo-planner-api-server/issues"
+    "url": "https://github.com/fgo-planner/api-server/issues"
   },
-  "homepage": "https://github.com/alvinquach/fgo-planner-api-server#readme",
+  "homepage": "https://github.com/fgo-planner/api-server#readme",
   "dependencies": {
     "@fgo-planner/data": "0.0.1",
     "axios": "^0.25.0",

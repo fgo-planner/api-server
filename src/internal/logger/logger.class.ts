@@ -1,59 +1,15 @@
-import { LoggerMessageLevel } from './logger-message-level.enum';
 import { LoggerMessage } from './logger-message.type';
+import { BaseLogger, LoggerMessageLevel } from '@fgo-planner/transform-external';
 
-export class Logger {
+export class Logger extends BaseLogger {
 
-    protected readonly _messages: LoggerMessage[] = [];
+    private readonly _messages: Array<LoggerMessage> = [];
 
-    protected _start?: Date;
-    get start(): Date | undefined {
-        return this._start;
+    constructor(name?: string) {
+        super(name);
     }
 
-    protected _end?: Date;
-    get end(): Date | undefined {
-        return this._end;
-    }
-
-    get name(): string | undefined {
-        return this._name;
-    }
-
-    constructor(protected _name?: string) {
-
-    }
-
-    setStart(date?: Date): Date | undefined {
-        if (!date) {
-            date = new Date();
-        }
-        return this._start = date;
-    }
-
-    setEnd(date?: Date): Date | undefined {
-        if (!date) {
-            date = new Date();
-        }
-        return this._end = date;
-    }
-
-    info(message: string | unknown): void {
-        console.log(message);
-        this._log(LoggerMessageLevel.Info, message);
-    }
-
-    warn(message: string | unknown): void {
-        console.warn(message);
-        this._log(LoggerMessageLevel.Warn, message);
-    }
-
-    error(message: string | unknown): void {
-        console.error(message);
-        this._log(LoggerMessageLevel.Error, message);
-    }
-
-    protected _log(level: LoggerMessageLevel, message: any) {
-        const timestamp = new Date();
+    protected _append(_id: number | string | symbol | undefined, timestamp: Date, message: unknown, level: LoggerMessageLevel): void {
         this._messages.push({ level, timestamp, message });
     }
 

@@ -1,4 +1,4 @@
-import { BasicPlanGroup, MasterAccountModel, PlanGroup, PlanGroupModel } from '@fgo-planner/data';
+import { BasicPlanGroup, MasterAccountModel, PlanGroup, PlanGroupModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { PlanService } from 'services';
 import Container, { Service } from 'typedi';

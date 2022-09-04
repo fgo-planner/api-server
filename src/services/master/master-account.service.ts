@@ -1,4 +1,4 @@
-import { BasicMasterAccount, MasterAccount, MasterAccountModel } from '@fgo-planner/data';
+import { BasicMasterAccount, MasterAccount, MasterAccountModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Service } from 'typedi';
 

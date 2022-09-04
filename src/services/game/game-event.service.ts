@@ -1,4 +1,4 @@
-import { GameEvent, GameEventModel } from '@fgo-planner/data';
+import { GameEvent, GameEventModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Pagination } from 'dto';
 import { SortOrder } from 'mongoose';

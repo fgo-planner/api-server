@@ -1,4 +1,4 @@
-import { BasicUser, MasterAccountValidators, User, UserModel, UserPreferences } from '@fgo-planner/data';
+import { BasicUser, MasterAccountValidators, User, UserModel, UserPreferences } from '@fgo-planner/data-mongo';
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'bson';
 import { Nullable } from 'internal';

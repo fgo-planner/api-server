@@ -1,4 +1,4 @@
-import { GameItem, GameItemModel, GameServant, GameServantModel, GameSoundtrack, GameSoundtrackModel } from '@fgo-planner/data';
+import { GameItem, GameItemModel, GameServant, GameServantModel, GameSoundtrack, GameSoundtrackModel } from '@fgo-planner/data-mongo';
 import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
 import { GameDataImportLogger, ResponseCacheKey, ResponseCacheManager } from 'internal';
 import { AnyBulkWriteOperation } from 'mongodb';

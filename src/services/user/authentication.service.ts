@@ -1,4 +1,4 @@
-import { UserModel } from '@fgo-planner/data';
+import { UserModel } from '@fgo-planner/data-mongo';
 import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import { AccessTokenPayload, AuthenticatedRequest } from 'internal';

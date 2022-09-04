@@ -1,4 +1,4 @@
-import { GameServant, GameServantModel } from '@fgo-planner/data';
+import { GameServant, GameServantModel } from '@fgo-planner/data-mongo';
 import { Pagination } from 'dto';
 import { SortOrder } from 'mongoose';
 import { Service } from 'typedi';

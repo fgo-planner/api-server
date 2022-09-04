@@ -1,4 +1,4 @@
-import { ExternalLink, GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantCardType, GameServantClass, GameServantCostume, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantNoblePhantasm, GameServantNoblePhantasmTarget, GameServantRarity, GameServantSkillMaterials, GameSoundtrack } from '@fgo-planner/data';
+import { ExternalLink, GameItem, GameItemBackground, GameItemQuantity, GameItemUsage, GameServant, GameServantAttribute, GameServantCardType, GameServantClass, GameServantCostume, GameServantEnhancement, GameServantGender, GameServantGrowthCurve, GameServantNoblePhantasm, GameServantNoblePhantasmTarget, GameServantRarity, GameServantSkillMaterials, GameSoundtrack } from '@fgo-planner/data-mongo';
 import axios from 'axios';
 import { GameDataImportLogger, ReadonlyRecord } from 'internal';
 import { Service } from 'typedi';

@@ -1,4 +1,4 @@
-import { Plan, PlanGroup } from '@fgo-planner/data';
+import { Plan, PlanGroup } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Response } from 'express';
 import { AccessTokenPayload, AuthenticatedRequest, DeleteMapping, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';

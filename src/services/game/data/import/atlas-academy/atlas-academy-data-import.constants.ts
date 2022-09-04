@@ -1,9 +1,5 @@
 export class AtlasAcademyDataImportConstants {
 
-    static readonly AscensionLevelCount = 4;
-
-    static readonly SkillLevelCount = 9;
-
     // TODO Make this configurable.
     static readonly BaseUrl = 'https://api.atlasacademy.io';
 

@@ -1,4 +1,4 @@
-import { LoggerMessageLevel } from './logger-message-level.enum';
+import { LoggerMessageLevel } from '@fgo-planner/transform-external';
 
 export type LoggerMessage = {
 

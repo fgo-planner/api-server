@@ -1,5 +1,5 @@
 import { GameItem, GameServant, GameSoundtrack } from '@fgo-planner/data-mongo';
-import { AtlasAcademyItemsTransformer, AtlasAcademyNiceBgmEntity, AtlasAcademyNiceItem, AtlasAcademyNiceServant, AtlasAcademyServantsTransformer, AtlasAcademySoundtracksTransformer } from '@fgo-planner/transform-external';
+import { AtlasAcademyNiceBgmEntity, AtlasAcademyNiceItem, AtlasAcademyNiceServant, transformNiceBgmEntities, transformNiceItems, transformNiceServants } from '@fgo-planner/transform-external';
 import axios from 'axios';
 import { GameDataImportLogger } from 'internal';
 import { Service } from 'typedi';
@@ -33,7 +33,7 @@ export class AtlasAcademyDataImportService {
          * Convert the servant data into `GameServant` objects.
          */
         try {
-            return AtlasAcademyServantsTransformer.transform(niceServants, niceServantsNa, logger);
+            return transformNiceServants(niceServants, niceServantsNa, logger);
         } catch (e) {
             console.error(e);
         }
@@ -84,7 +84,7 @@ export class AtlasAcademyDataImportService {
          * Convert the JP item data into `GameItem` objects.
          */
         try {
-            return AtlasAcademyItemsTransformer.transform(jpItems, naItems, logger);
+            return transformNiceItems(jpItems, naItems, logger);
         } catch (e) {
             console.error(e);
         }
@@ -127,7 +127,7 @@ export class AtlasAcademyDataImportService {
          * Convert the JP item data into `GameSoundtrack` objects.
          */
         try {
-            return AtlasAcademySoundtracksTransformer.transform(jpBgm, logger);
+            return transformNiceBgmEntities(jpBgm, logger);
         } catch (e) {
             console.error(e);
         }

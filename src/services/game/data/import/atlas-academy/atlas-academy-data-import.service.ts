@@ -1,7 +1,6 @@
 import { GameItem, GameServant, GameSoundtrack } from '@fgo-planner/data-mongo';
-import { AtlasAcademyNiceBgmEntity, AtlasAcademyNiceItem, AtlasAcademyNiceServant, transformNiceBgmEntities, transformNiceItems, transformNiceServants } from '@fgo-planner/transform-external';
+import { AtlasAcademyDataTransformers, AtlasAcademyNiceBgmEntity, AtlasAcademyNiceItem, AtlasAcademyNiceServant, TransformLogger } from '@fgo-planner/transform-core';
 import axios from 'axios';
-import { GameDataImportLogger } from 'internal';
 import { Service } from 'typedi';
 import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
 
@@ -14,7 +13,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves servant data from the Atlas Academy API and converts it into a
      * list of `GameServant` objects.
      */
-    async getServants(logger?: GameDataImportLogger): Promise<Array<GameServant>> {
+    async getServants(logger?: TransformLogger): Promise<Array<GameServant>> {
         /**
          * Retrieve 'nice' JP servant data with lore and English names.
          */
@@ -33,7 +32,7 @@ export class AtlasAcademyDataImportService {
          * Convert the servant data into `GameServant` objects.
          */
         try {
-            return transformNiceServants(niceServants, niceServantsNa, logger);
+            return AtlasAcademyDataTransformers.transformNiceServants(niceServants, niceServantsNa, logger);
         } catch (e) {
             console.error(e);
         }
@@ -44,7 +43,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice servant data with lore from the Atlas
      * Academy API. Always retrieves the data with English names.
      */
-    private async _getNiceServants(region: 'NA' | 'JP', logger?: GameDataImportLogger): Promise<Array<AtlasAcademyNiceServant>> {
+    private async _getNiceServants(region: 'NA' | 'JP', logger?: TransformLogger): Promise<Array<AtlasAcademyNiceServant>> {
         const filename = region === 'NA' ? Constants.NiceServantsFilename : Constants.NiceServantsEnglishFilename;
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${filename}`;
         logger?.info(`Calling ${url}`);
@@ -62,7 +61,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves item data from the Atlas Academy API and converts it into a list
      * of `GameItem` objects.
      */
-    async getItems(logger?: GameDataImportLogger): Promise<Array<GameItem>> {
+    async getItems(logger?: TransformLogger): Promise<Array<GameItem>> {
         /**
          * Retrieve JP item data.
          */
@@ -84,7 +83,7 @@ export class AtlasAcademyDataImportService {
          * Convert the JP item data into `GameItem` objects.
          */
         try {
-            return transformNiceItems(jpItems, naItems, logger);
+            return AtlasAcademyDataTransformers.transformNiceItems(jpItems, naItems, logger);
         } catch (e) {
             console.error(e);
         }
@@ -96,7 +95,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice item data from the Atlas Academy API.
      * Always retrieves the data with English names.
      */
-    private async _getNiceItems(region: 'NA' | 'JP', logger?: GameDataImportLogger): Promise<Array<AtlasAcademyNiceItem>> {
+    private async _getNiceItems(region: 'NA' | 'JP', logger?: TransformLogger): Promise<Array<AtlasAcademyNiceItem>> {
         const filename = region === 'NA' ? Constants.NiceItemsFilename : Constants.NiceItemsEnglishFilename;
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${filename}`;
         logger?.info(`Calling ${url}`);
@@ -116,7 +115,7 @@ export class AtlasAcademyDataImportService {
      * 
      * @param skipIds The set of IDs to omit from the result.
      */
-    async getSoundtracks(logger?: GameDataImportLogger): Promise<Array<GameSoundtrack>> {
+    async getSoundtracks(logger?: TransformLogger): Promise<Array<GameSoundtrack>> {
         /**
          * Retrieve JP BGM data with English names.
          */
@@ -127,7 +126,7 @@ export class AtlasAcademyDataImportService {
          * Convert the JP item data into `GameSoundtrack` objects.
          */
         try {
-            return transformNiceBgmEntities(jpBgm, logger);
+            return AtlasAcademyDataTransformers.transformNiceBgmEntities(jpBgm, logger);
         } catch (e) {
             console.error(e);
         }
@@ -139,7 +138,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice BGM data from the Atlas Academy API. Always
      * retrieves the JP data with English names.
      */
-    private async _getBgm(logger?: GameDataImportLogger): Promise<Array<AtlasAcademyNiceBgmEntity>> {
+    private async _getBgm(logger?: TransformLogger): Promise<Array<AtlasAcademyNiceBgmEntity>> {
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/JP/${Constants.NiceBgmEnglishFilename}`;
         logger?.info(`Calling ${url}`);
         const response = await axios.get(url);

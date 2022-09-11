@@ -1,6 +1,7 @@
 import { GameItem, GameItemModel, GameServant, GameServantModel, GameSoundtrack, GameSoundtrackModel } from '@fgo-planner/data-mongo';
+import { TransformLogger } from '@fgo-planner/transform-core';
 import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
-import { GameDataImportLogger, ResponseCacheKey, ResponseCacheManager } from 'internal';
+import { ResponseCacheKey, ResponseCacheManager } from 'internal';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { Inject, Service } from 'typedi';
 import { GameItemService } from '../../game-item.service';
@@ -34,7 +35,7 @@ export class GameDataImportService {
         const resultSet: GameDataImportResultSet = {};
         // TODO Ensure entities are sorted before writing to database.
         if (options.servants?.import) {
-            const logger: GameDataImportLogger = new GameDataImportLogger();
+            const logger: TransformLogger = new TransformLogger();
             logger.setStart();
             const existingAction = options.servants.onExisting || GameDataImportExistingAction.Skip;
             const servants = await this._atlasAcademyDataImportService.getServants(logger);
@@ -44,7 +45,7 @@ export class GameDataImportService {
             resultSet.servants = result;
         }
         if (options.items?.import) {
-            const logger: GameDataImportLogger = new GameDataImportLogger();
+            const logger: TransformLogger = new TransformLogger();
             logger.setStart();
             const existingAction = options.items.onExisting || GameDataImportExistingAction.Skip;
             const items = await this._atlasAcademyDataImportService.getItems(logger);
@@ -54,7 +55,7 @@ export class GameDataImportService {
             resultSet.items = result;
         }
         if (options.soundtracks?.import) {
-            const logger: GameDataImportLogger = new GameDataImportLogger();
+            const logger: TransformLogger = new TransformLogger();
             logger.setStart();
             const existingAction = options.soundtracks.onExisting || GameDataImportExistingAction.Skip;
             const soundtracks = await this._atlasAcademyDataImportService.getSoundtracks(logger);
@@ -76,7 +77,7 @@ export class GameDataImportService {
     private async _writeServants(
         servants: Array<GameServant>,
         existingAction: GameDataImportExistingAction,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameDataImportResult> {
         /**
          * The queries for the bulk write operation.
@@ -118,7 +119,7 @@ export class GameDataImportService {
     private async _createServantWriteQuery(
         servant: GameServant,
         existingAction: GameDataImportExistingAction,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameServantBulkWriteQuery | null> {
         if (existingAction === GameDataImportExistingAction.Override) {
             return await this._createServantWriteForOverrideAction(servant, logger);
@@ -135,7 +136,7 @@ export class GameDataImportService {
      */
     private async _createServantWriteForSkipAction(
         servant: GameServant,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameServantBulkWriteQuery | null> {
         const exists = await this._gameServantService.existsById(servant._id);
         if (!exists) {
@@ -155,7 +156,7 @@ export class GameDataImportService {
      */
     private async _createServantWriteForOverrideAction(
         servant: GameServant,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameServantBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameServantService.findById(servant._id);
@@ -194,7 +195,7 @@ export class GameDataImportService {
      */
     private async _createServantWriteForAppendAction(
         servant: GameServant,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameServantBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameServantService.findById(servant._id);
@@ -242,7 +243,7 @@ export class GameDataImportService {
     private async _writeItems(
         items: Array<GameItem>,
         existingAction: GameDataImportExistingAction,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameDataImportResult> {
         /**
          * The queries for the bulk write operation.
@@ -284,7 +285,7 @@ export class GameDataImportService {
     private async _createItemWriteQuery(
         item: GameItem,
         existingAction: GameDataImportExistingAction,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameItemBulkWriteQuery | null> {
         if (existingAction === GameDataImportExistingAction.Override) {
             return await this._createItemWriteForOverrideAction(item, logger);
@@ -301,7 +302,7 @@ export class GameDataImportService {
      */
     private async _createItemWriteForSkipAction(
         item: GameItem,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameItemBulkWriteQuery | null> {
         const exists = await this._gameItemService.existsById(item._id);
         if (!exists) {
@@ -321,7 +322,7 @@ export class GameDataImportService {
      */
     private async _createItemWriteForOverrideAction(
         item: GameItem,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameItemBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameItemService.findById(item._id);
@@ -353,7 +354,7 @@ export class GameDataImportService {
      */
     private async _createItemWriteForAppendAction(
         item: GameItem,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameItemBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameItemService.findById(item._id);
@@ -389,7 +390,7 @@ export class GameDataImportService {
     private async _writeSoundtracks(
         soundtracks: Array<GameSoundtrack>,
         existingAction: GameDataImportExistingAction,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameDataImportResult> {
         /**
          * The queries for the bulk write operation.
@@ -431,7 +432,7 @@ export class GameDataImportService {
     private async _createSoundtrackWriteQuery(
         soundtrack: GameSoundtrack,
         existingAction: GameDataImportExistingAction,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameSoundtrackBulkWriteQuery | null> {
         if (existingAction === GameDataImportExistingAction.Override) {
             return await this._createSoundtrackWriteForOverrideAction(soundtrack, logger);
@@ -448,7 +449,7 @@ export class GameDataImportService {
      */
     private async _createSoundtrackWriteForSkipAction(
         soundtrack: GameSoundtrack,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameSoundtrackBulkWriteQuery | null> {
         const exists = await this._gameSoundtrackService.existsById(soundtrack._id);
         if (!exists) {
@@ -468,7 +469,7 @@ export class GameDataImportService {
      */
     private async _createSoundtrackWriteForOverrideAction(
         soundtrack: GameSoundtrack,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameSoundtrackBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameSoundtrackService.findById(soundtrack._id);
@@ -501,7 +502,7 @@ export class GameDataImportService {
      */
     private async _createSoundtrackWriteForAppendAction(
         soundtrack: GameSoundtrack,
-        logger: GameDataImportLogger
+        logger: TransformLogger
     ): Promise<GameSoundtrackBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
         const existing = await this._gameSoundtrackService.findById(soundtrack._id);

@@ -77,6 +77,7 @@ export class UserService {
                     qp: 0
                 },
                 servants: [],
+                lastServantInstanceId: 0,
                 costumes: [],
                 bondLevels: {},
                 soundtracks: []

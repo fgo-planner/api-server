@@ -1,4 +1,4 @@
-import { BasicMasterAccount, MasterAccount, MasterAccountModel } from '@fgo-planner/data-mongo';
+import { BasicMasterAccount, MasterAccount, MasterAccountModel, MasterServantUtils } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Service } from 'typedi';
 
@@ -19,6 +19,16 @@ export class MasterAccountService {
         if (!result) {
             return null;
         }
+
+        /**
+         * Temporary, for backwards compatibility with old data.
+         * 
+         * TODO Remove this.
+         */
+        if (result.lastServantInstanceId == null) {
+            result.lastServantInstanceId = MasterServantUtils.getLastInstanceId(result.servants);
+        }
+
         return result.toObject();
     }
 
@@ -31,13 +41,7 @@ export class MasterAccountService {
         if (!account._id) {
             throw 'Account ID is missing or invalid.';
         }
-        // Do not allow userId to be updated.
-        delete account.userId;
-        const result = await MasterAccountModel.findOneAndUpdate(
-            { _id: account._id },
-            { $set: account },
-            { runValidators: true, new: true }
-        );
+        const result = await MasterAccountModel.partialUpdate(account._id, account);
         if (!result) {
             return null;
         }

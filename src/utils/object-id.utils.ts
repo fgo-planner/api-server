@@ -1,5 +1,5 @@
+import { Nullable } from '@fgo-planner/common-core';
 import { ObjectId } from 'bson';
-import { Nullable } from 'internal';
 
 export class ObjectIdUtils {
 

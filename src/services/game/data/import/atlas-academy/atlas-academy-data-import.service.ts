@@ -1,5 +1,5 @@
 import { GameItem, GameServant, GameSoundtrack } from '@fgo-planner/data-mongo';
-import { AtlasAcademyDataTransformers, AtlasAcademyNiceBgmEntity, AtlasAcademyNiceItem, AtlasAcademyNiceServant, TransformLogger } from '@fgo-planner/transform-core';
+import { AtlasAcademyDataImport, NiceBgmEntity, NiceItem, NiceServant, TransformLogger } from '@fgo-planner/transform-core';
 import axios from 'axios';
 import { Service } from 'typedi';
 import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
@@ -32,7 +32,7 @@ export class AtlasAcademyDataImportService {
          * Convert the servant data into `GameServant` objects.
          */
         try {
-            return AtlasAcademyDataTransformers.transformNiceServants(niceServants, niceServantsNa, logger);
+            return AtlasAcademyDataImport.transformNiceServantsToGameServants(niceServants, niceServantsNa, logger);
         } catch (e) {
             console.error(e);
         }
@@ -43,7 +43,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice servant data with lore from the Atlas
      * Academy API. Always retrieves the data with English names.
      */
-    private async _getNiceServants(region: 'NA' | 'JP', logger?: TransformLogger): Promise<Array<AtlasAcademyNiceServant>> {
+    private async _getNiceServants(region: 'NA' | 'JP', logger?: TransformLogger): Promise<Array<NiceServant>> {
         const filename = region === 'NA' ? Constants.NiceServantsFilename : Constants.NiceServantsEnglishFilename;
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${filename}`;
         logger?.info(`Calling ${url}`);
@@ -74,7 +74,7 @@ export class AtlasAcademyDataImportService {
          */
         /** */
         const naItems = await this._getNiceItems('NA', logger);
-        const englishStrings: Record<number, AtlasAcademyNiceItem> = {};
+        const englishStrings: Record<number, NiceItem> = {};
         for (const item of naItems) {
             englishStrings[item.id] = item;
         }
@@ -83,7 +83,7 @@ export class AtlasAcademyDataImportService {
          * Convert the JP item data into `GameItem` objects.
          */
         try {
-            return AtlasAcademyDataTransformers.transformNiceItems(jpItems, naItems, logger);
+            return AtlasAcademyDataImport.transformNiceItemsToGameItems(jpItems, naItems, logger);
         } catch (e) {
             console.error(e);
         }
@@ -95,7 +95,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice item data from the Atlas Academy API.
      * Always retrieves the data with English names.
      */
-    private async _getNiceItems(region: 'NA' | 'JP', logger?: TransformLogger): Promise<Array<AtlasAcademyNiceItem>> {
+    private async _getNiceItems(region: 'NA' | 'JP', logger?: TransformLogger): Promise<Array<NiceItem>> {
         const filename = region === 'NA' ? Constants.NiceItemsFilename : Constants.NiceItemsEnglishFilename;
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/${region}/${filename}`;
         logger?.info(`Calling ${url}`);
@@ -126,7 +126,7 @@ export class AtlasAcademyDataImportService {
          * Convert the JP item data into `GameSoundtrack` objects.
          */
         try {
-            return AtlasAcademyDataTransformers.transformNiceBgmEntities(jpBgm, logger);
+            return AtlasAcademyDataImport.transformNiceBgmEntitiesToGameSoundtracks(jpBgm, logger);
         } catch (e) {
             console.error(e);
         }
@@ -138,7 +138,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves the pre-generated nice BGM data from the Atlas Academy API. Always
      * retrieves the JP data with English names.
      */
-    private async _getBgm(logger?: TransformLogger): Promise<Array<AtlasAcademyNiceBgmEntity>> {
+    private async _getBgm(logger?: TransformLogger): Promise<Array<NiceBgmEntity>> {
         const url = `${Constants.BaseUrl}/${Constants.ExportPath}/JP/${Constants.NiceBgmEnglishFilename}`;
         logger?.info(`Calling ${url}`);
         const response = await axios.get(url);

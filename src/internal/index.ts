@@ -12,8 +12,6 @@ export * from './types/authenticated-request.type';
 export * from './types/cached-response-metadata.type';
 export * from './types/controller-metadata.type';
 export * from './types/generics/class.type';
-export * from './types/generics/nullable.type';
-export * from './types/generics/readonly-record.type';
 export * from './types/invalidate-cached-response-metadata.type';
 export * from './types/range.type';
 export * from './types/route-metadata.type';

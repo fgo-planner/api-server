@@ -1,4 +1,4 @@
-import { BasicMasterAccount, MasterAccount, MasterAccountModel, MasterServantUtils } from '@fgo-planner/data-mongo';
+import { BasicMasterAccount, MasterAccount, MasterAccountModel, MasterAccountUpdate, MasterServantUtils } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Service } from 'typedi';
 
@@ -37,11 +37,11 @@ export class MasterAccountService {
         return result.map(doc => doc.toObject());
     }
 
-    async update(account: Partial<MasterAccount>): Promise<MasterAccount | null> {
+    async update(account: MasterAccountUpdate): Promise<MasterAccount | null> {
         if (!account._id) {
             throw 'Account ID is missing or invalid.';
         }
-        const result = await MasterAccountModel.partialUpdate(account._id, account);
+        const result = await MasterAccountModel.partialUpdate(account);
         if (!result) {
             return null;
         }

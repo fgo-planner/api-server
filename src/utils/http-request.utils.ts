@@ -1,17 +1,20 @@
+import { Nullable } from '@fgo-planner/common-core';
 import { ObjectId } from 'bson';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ObjectIdUtils } from './object-id.utils';
 
 interface ParsedQs { [key: string]: undefined | Query }
 
-type Query = undefined | string | string[] | ParsedQs | ParsedQs[];
+type Query = Nullable<string | Array<string> | ParsedQs | Array<ParsedQs>>;
 
 export class HttpRequestUtils {
-    
+
     private static readonly _MissingIdErrorMessage = 'Param \'id\' is missing.';
 
     /**
      * Parses a string of comma delimited integers from request params.
+     * 
+     * @deprecated Current not in use
      */
     static parseIntegerList(query: Query): Array<number> {
         const values = HttpRequestUtils.flattenParamsList(query);
@@ -20,8 +23,10 @@ export class HttpRequestUtils {
 
     /**
      * Parses a string of comma delimited values from request params.
+     * 
+     * @deprecated Current not in use
      */
-    static flattenParamsList(query: Query, result: string[] = []): string[] {
+    static flattenParamsList(query: Query, result: Array<string> = []): Array<string> {
         if (!query) {
             return result;
         }
@@ -35,7 +40,7 @@ export class HttpRequestUtils {
         }
         if (Array.isArray(query)) {
             for (const sub of query) {
-                HttpRequestUtils.flattenParamsList(sub, result);
+                this.flattenParamsList(sub, result);
             }
         }
         return result;
@@ -44,7 +49,7 @@ export class HttpRequestUtils {
     static parseNumericalIdFromParams(params: ParamsDictionary, key: string): number {
         const value = params[key];
         if (!value) {
-            throw Error(HttpRequestUtils._MissingIdErrorMessage);
+            throw Error(this._MissingIdErrorMessage);
         }
         const result = Number(value);
         if (isNaN(result)) {
@@ -56,9 +61,9 @@ export class HttpRequestUtils {
     static parseObjectIdFromParams(params: ParamsDictionary, key: string): ObjectId {
         const value = params[key];
         if (!value) {
-            throw Error(HttpRequestUtils._MissingIdErrorMessage);
+            throw Error(this._MissingIdErrorMessage);
         }
         return ObjectIdUtils.instantiate(value);
     }
-    
+
 }

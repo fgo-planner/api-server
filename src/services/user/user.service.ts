@@ -1,7 +1,7 @@
+import { Nullable } from '@fgo-planner/common-core';
 import { BasicUser, MasterAccountValidators, User, UserModel, UserPreferences } from '@fgo-planner/data-mongo';
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'bson';
-import { Nullable } from 'internal';
 import { Inject, Service } from 'typedi';
 import { MasterAccountService } from '../master/master-account.service';
 

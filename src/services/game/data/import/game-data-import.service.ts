@@ -1,4 +1,4 @@
-import { GameItem, GameItemModel, GameServant, GameServantModel, GameSoundtrack, GameSoundtrackModel } from '@fgo-planner/data-mongo';
+import { GameItem, GameItemModel, GameServantMetadata, GameServantModel, GameServantWithMetadata, GameSoundtrack, GameSoundtrackModel } from '@fgo-planner/data-mongo';
 import { TransformLogger } from '@fgo-planner/transform-core';
 import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
 import { ResponseCacheKey, ResponseCacheManager } from 'internal';
@@ -9,7 +9,7 @@ import { GameServantService } from '../../game-servant.service';
 import { GameSoundtrackService } from '../../game-soundtrack.service';
 import { AtlasAcademyDataImportService } from './atlas-academy/atlas-academy-data-import.service';
 
-type GameServantBulkWriteQuery = AnyBulkWriteOperation<GameServant>;
+type GameServantBulkWriteQuery = AnyBulkWriteOperation<GameServantWithMetadata>;
 type GameItemBulkWriteQuery = AnyBulkWriteOperation<GameItem>;
 type GameSoundtrackBulkWriteQuery = AnyBulkWriteOperation<GameSoundtrack>;
 
@@ -75,7 +75,7 @@ export class GameDataImportService {
      * `collectionNo`.
      */
     private async _writeServants(
-        servants: Array<GameServant>,
+        servants: Array<GameServantWithMetadata>,
         existingAction: GameDataImportExistingAction,
         logger: TransformLogger
     ): Promise<GameDataImportResult> {
@@ -117,7 +117,7 @@ export class GameDataImportService {
      * Generates a database bulkWrite query for the imported servant. 
      */
     private async _createServantWriteQuery(
-        servant: GameServant,
+        servant: GameServantWithMetadata,
         existingAction: GameDataImportExistingAction,
         logger: TransformLogger
     ): Promise<GameServantBulkWriteQuery | null> {
@@ -135,7 +135,7 @@ export class GameDataImportService {
      * in the database.
      */
     private async _createServantWriteForSkipAction(
-        servant: GameServant,
+        servant: GameServantWithMetadata,
         logger: TransformLogger
     ): Promise<GameServantBulkWriteQuery | null> {
         const exists = await this._gameServantService.existsById(servant._id);
@@ -155,7 +155,7 @@ export class GameDataImportService {
      * non-null and non-undefined fields from the imported servant.
      */
     private async _createServantWriteForOverrideAction(
-        servant: GameServant,
+        servant: GameServantWithMetadata,
         logger: TransformLogger
     ): Promise<GameServantBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
@@ -167,16 +167,13 @@ export class GameDataImportService {
             };
         }
         for (const [key, value] of Object.entries(servant)) {
-            /*
-             * Exclude metadata
-             */
             if (key === 'metadata') {
+                this._overrideServantMetadata(value as GameServantMetadata, existing.metadata);
+            } else if (value == null) {
                 continue;
+            } else {
+                (existing as any)[key] = value;
             }
-            if (value == null) {
-                continue;
-            }
-            (existing as any)[key] = value;
         }
         logger.info(servant._id, 'Servant already exists, existing data will be overridden.');
         return {
@@ -187,6 +184,18 @@ export class GameDataImportService {
         };
     }
 
+    private _overrideServantMetadata(source: GameServantMetadata, target: GameServantMetadata): void {
+        if (source.fgoManagerName) {
+            target.fgoManagerName = source.fgoManagerName;
+        }
+        if (source.searchTags.length) {
+            target.searchTags = source.searchTags;
+        }
+        if (source.links.length) {
+            target.links = source.links;
+        }
+    }
+
     /**
      * Creates a write query for the imported servant. If the servant already
      * exists, then copies any non-null and non-undefined fields from the
@@ -194,7 +203,7 @@ export class GameDataImportService {
      * undefined in the existing servant.
      */
     private async _createServantWriteForAppendAction(
-        servant: GameServant,
+        servant: GameServantWithMetadata,
         logger: TransformLogger
     ): Promise<GameServantBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
@@ -206,16 +215,13 @@ export class GameDataImportService {
             };
         }
         for (const [key, value] of Object.entries(servant)) {
-            /*
-             * Exclude metadata
-             */
             if (key === 'metadata') {
+                this._appendServantMetadata(value as GameServantMetadata, existing.metadata);
+            } else if (value == null || (existing as any)[key] != null) {
                 continue;
+            } else {
+                (existing as any)[key] = value;
             }
-            if (value == null || (existing as any)[key] != null) {
-                continue;
-            }
-            (existing as any)[key] = value;
         }
         /**
          * Always update costumes and noble phantasms
@@ -230,6 +236,30 @@ export class GameDataImportService {
                 update: { $set: existing }
             }
         };
+    }
+
+    private _appendServantMetadata(source: GameServantMetadata, target: GameServantMetadata): void {
+        if (source.fgoManagerName && !target.fgoManagerName) {
+            target.fgoManagerName = source.fgoManagerName;
+        }
+        if (source.searchTags.length) {
+            const existingTags = target.searchTags.map(searchTag => searchTag.value.toLowerCase());
+            for (const searchTag of source.searchTags) {
+                if (existingTags.includes(searchTag.value.toLowerCase())) {
+                    continue;
+                }
+                target.searchTags.push(searchTag);
+            }
+        }
+        if (source.links.length) {
+            const existingLinks = target.links.map(link => link.label.toLowerCase());
+            for (const link of source.links) {
+                if (existingLinks.includes(link.url.toLowerCase())) {
+                    continue;
+                }
+                target.links.push(link);
+            }
+        }
     }
 
     //#endregion

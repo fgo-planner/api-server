@@ -7,8 +7,6 @@ export type InvalidateCachedResponseMetadata = {
 
     key: CacheKey;
 
-    subKey?: CacheKey;
-
     onStatus?: Array<number>;
 
 };

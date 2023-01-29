@@ -13,8 +13,8 @@ export class ResponseCacheManager {
 
     private readonly _CacheMap: CacheMap = new Map();
 
-    invalidateCache(key: CacheKey, subKey?: CacheKey): void {
-        this._CacheMap.get(key)?.delete(subKey);
+    invalidateCache(key: CacheKey): void {
+        this._CacheMap.get(key)?.clear();
     }
 
     /**
@@ -26,9 +26,17 @@ export class ResponseCacheManager {
      * override the `res.send` method so that it can obtain and cache the response
      * value when it is invoked by the endpoint handler.
      */
-    getCachedResponseHandler({ key, subKey, expiresIn }: CachedResponseMetadata): RequestHandler<Dictionary<string>> {
+    getCachedResponseHandler(metadata: CachedResponseMetadata): RequestHandler<Dictionary<string>> {
 
-        const cachedResponseHandler = (_: Request, res: Response, next: NextFunction): void => {
+        const {
+            key,
+            subKeyFn,
+            expiresIn
+        } = metadata;
+
+        const cachedResponseHandler = (req: Request, res: Response, next: NextFunction): void => {
+
+            const subKey = subKeyFn ? subKeyFn(req) : metadata.subKey;
 
             let subCacheMap = this._CacheMap.get(key);
 
@@ -56,13 +64,13 @@ export class ResponseCacheManager {
              */
             const send = res.send;
 
-            /*
+            /**
              * Override the default `res.send` function so that we can listen in and cache
              * the returned value when it is called in the next function.
              */
             res.send = (...args): Response => {
                 const responseBody = args[0];
-                /*
+                /**
                  * Only cache the value if the response status is 200.
                  */
                 if (res.statusCode === 200) {
@@ -79,13 +87,13 @@ export class ResponseCacheManager {
                     }
                     subCacheMap.set(subKey, new ResponseCacheEntry(cachedValue, responseType, expiresIn));
                 }
-                /*
+                /**
                  * Call the original `res.send` function using the same parameters.
                  */
                 return send.apply(res, args);
             };
 
-            /*
+            /**
              * Call the next function.
              */
             next();
@@ -101,7 +109,12 @@ export class ResponseCacheManager {
      * The returned handler is responsible for invalidating the cached value if it
      * is present.
      */
-    getInvalidateCachedResponseHandler({ key, subKey, onStatus }: InvalidateCachedResponseMetadata): RequestHandler<Dictionary<string>> {
+    getInvalidateCachedResponseHandler(metadata: InvalidateCachedResponseMetadata): RequestHandler<Dictionary<string>> {
+
+        const {
+            key,
+            onStatus
+        } = metadata;
 
         const invalidateCache = this.invalidateCache.bind(this);
 
@@ -117,20 +130,20 @@ export class ResponseCacheManager {
              * the cache invalidation when it is called in the next function.
              */
             res.send = (...args): Response => {
-                /*
+                /**
                  * Only perform the cache invalidation is the response code matches the
                  * configured status codes (or if no specific status codes were configured).
                  */
                 if (!onStatus || onStatus.includes(res.statusCode)) {
-                    invalidateCache(key, subKey);
+                    invalidateCache(key);
                 }
-                /*
+                /**
                  * Call the original `res.send` function using the same parameters.
                  */
                 return send.apply(res, args);
             };
 
-            /*
+            /**
              * Call the next function.
              */
             next();

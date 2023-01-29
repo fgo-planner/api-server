@@ -1,9 +1,13 @@
-export class ResponseCacheKey {
+export const ResponseCacheKey = {
 
-    static readonly GameItem = Symbol('GameItem');
+    GameItem: Symbol('GameItem'),
 
-    static readonly GameServant = Symbol('GameServant');
+    GameServant: Symbol('GameServant'),
 
-    static readonly GameSoundtrack = Symbol('GameSoundtrack');
+    GameServant_ExcludeMetadata: Symbol('GameServant_ExcludeMetadata'),
+    
+    GameServant_IncludeMetadata: Symbol('GameServant_IncludeMetadata'),
 
-}
+    GameSoundtrack: Symbol('GameSoundtrack')
+
+} as const;

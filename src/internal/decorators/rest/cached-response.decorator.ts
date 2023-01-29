@@ -1,6 +1,7 @@
 import { CacheKey } from '../../types/cache-key.type';
 import { CachedResponseMetadata } from '../../types/cached-response-metadata.type';
 import { MetadataKey } from '../metadata-key.constants';
+import { Request } from 'express';
 
 type Decorator = (target: any, propertyKey: string) => void;
 
@@ -9,17 +10,32 @@ type CachedResponseParams = CachedResponseMetadata;
 /**
  * Helper function for parsing `CachedResponse` input parameters.
  */
-const parseInputs = (param1: CacheKey, param2?: CacheKey | number, param3?: number): CachedResponseParams => {
+const parseInputs = (
+    param1: CacheKey,
+    param2?: CacheKey | ((req: Request) => CacheKey) | number,
+    param3?: number
+): CachedResponseParams => {
     const key = param1;
-    let subKey, expiresIn;
+    let subKey, subKeyFn, expiresIn;
     if (typeof param2 === 'number') {
         subKey = undefined;
+        subKeyFn = undefined;
         expiresIn = param2;
+    } else if (typeof param2 === 'function') {
+        subKey = undefined;
+        subKeyFn = param2;
+        expiresIn = param3;
     } else {
         subKey = param2;
+        subKeyFn = undefined;
         expiresIn = param3;
     }
-    return { key, subKey, expiresIn };
+    return {
+        key,
+        subKey,
+        subKeyFn,
+        expiresIn
+    };
 };
 
 /**
@@ -38,6 +54,13 @@ export function CachedResponse(key: CacheKey, subKey: CacheKey): Decorator;
 
 /**
  * Decorator for indicating that the response returned by the route will be
+ * cached, and the cached data will be returned for all subsequent requests to
+ * the endpoint if available.
+ */
+export function CachedResponse(key: CacheKey, subKeyFn: (req: Request) => CacheKey): Decorator;
+
+/**
+ * Decorator for indicating that the response returned by the route will be
  * cached for a specified amount of time before expiring. The cached data will
  * be returned for all subsequent requests to the endpoint if it is still
  * available and has not expired yet.
@@ -50,7 +73,7 @@ export function CachedResponse(key: CacheKey, expiresIn: number): Decorator;
 /**
  * `CachedResponse` function implementation.
  */
-export function CachedResponse(param1: CacheKey, param2?: CacheKey | number, param3?: number): Decorator {
+export function CachedResponse(param1: CacheKey, param2?: CacheKey | ((req: Request) => CacheKey) | number, param3?: number): Decorator {
     const params = parseInputs(param1, param2, param3);
 
     return (target: any, propertyKey: string) => {

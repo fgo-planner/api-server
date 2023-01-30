@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CachedResponse, GetMapping, InvalidateCachedResponse, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
+import { CachedResponse, CacheKey, GetMapping, InvalidateCachedResponse, PostMapping, PutMapping, ResponseCacheKey, RestController, UserAccessLevel } from 'internal';
 import { ParsedQs } from 'qs';
 import { GameServantService } from 'services';
 import { Inject } from 'typedi';
@@ -16,13 +16,18 @@ const metadataRequested = (query: ParsedQs): boolean => {
     return metadataParam.toLowerCase() === 'true';
 };
 
-const getMetadataCacheKey = (req: Request): symbol => {
+const metadataRequestedSubKey = (req: Request): CacheKey => {
     const includeMetadata = metadataRequested(req.query);
     if (includeMetadata) {
         return ResponseCacheKey.GameServant_IncludeMetadata;
     } else {
         return ResponseCacheKey.GameServant_ExcludeMetadata;
     }
+};
+
+const externalLinksSubKey = (req: Request): CacheKey => {
+    const id = HttpRequestUtils.parseNumericalIdFromParams(req.params, 'id');
+    return `${ResponseCacheKey.GameServant_ExternalLinks}_${id}`;
 };
 
 @RestController('/game-servant', UserAccessLevel.Public)
@@ -44,7 +49,7 @@ export class GameServantController {
     }
 
     @GetMapping()
-    @CachedResponse(ResponseCacheKey.GameServant, getMetadataCacheKey)
+    @CachedResponse(ResponseCacheKey.GameServant, metadataRequestedSubKey)
     async getServants(req: Request, res: Response): Promise<any> {
         const includeMetadata = metadataRequested(req.query);
         try {
@@ -78,6 +83,43 @@ export class GameServantController {
                 return res.status(404).send(`Servant ID ${id} could not be found.`);
             }
             res.send(servant);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
+    @GetMapping('/:id/metadata/external-links')
+    @CachedResponse(ResponseCacheKey.GameServant, externalLinksSubKey)
+    async getExternalLinks(req: Request, res: Response): Promise<any> {
+        try {
+            const id = HttpRequestUtils.parseNumericalIdFromParams(req.params, 'id');
+            const links = await this._gameServantService.getExternalLinks(id);
+            if (!links) {
+                return res.status(404).send(`Servant ID ${id} could not be found.`);
+            }
+            res.send(links);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
+    @GetMapping('/metadata/fgo-manager-names')
+    @CachedResponse(ResponseCacheKey.GameServant, ResponseCacheKey.GameServant_FgoManagerNames)
+    async getFgoManagerNamesMap(_: Request, res: Response): Promise<any> {
+        try {
+            const map = await this._gameServantService.getFgoManagerNamesMap();
+            res.send(map);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
+    @GetMapping('/metadata/search-keywords')
+    @CachedResponse(ResponseCacheKey.GameServant, ResponseCacheKey.GameServant_SearchKeywords)
+    async getSearchKeywordsMap(_: Request, res: Response): Promise<any> {
+        try {
+            const map = await this._gameServantService.getSearchKeywordsMap();
+            res.send(map);
         } catch (err) {
             res.status(400).send(err);
         }

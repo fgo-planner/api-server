@@ -9,6 +9,7 @@ export * from './decorators/rest/rest-controller.decorator';
 export * from './enum/request-method.enum';
 export * from './enum/user-access-level.enum';
 export * from './types/authenticated-request.type';
+export * from './types/cache-key.type';
 export * from './types/cached-response-metadata.type';
 export * from './types/controller-metadata.type';
 export * from './types/generics/class.type';

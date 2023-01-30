@@ -14,7 +14,7 @@ type RestControllerParams = {
  */
 const parseInputs = (param1?: string | UserAccessLevel, param2?: UserAccessLevel): RestControllerParams => {
     let prefix = '';
-    let defaultAccessLevel = UserAccessLevel.Admin;
+    let defaultAccessLevel: UserAccessLevel = UserAccessLevel.Admin;
     if (typeof param1 === 'string') {
         prefix = param1;
         if (param2 !== undefined) {

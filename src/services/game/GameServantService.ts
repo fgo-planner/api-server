@@ -92,8 +92,17 @@ export class GameServantService {
         return await GameServantModel.getExternalLinks(id);
     }
 
-    async getFgoManagerNamesMap(): Promise<Record<number, string>> {
-        return await GameServantModel.getFgoManagerNamesMap();
+    async getFgoManagerNamesMap(): Promise<Record<string, number>> {
+        const docs = await GameServantModel.find({}, { 'metadata.fgoManagerName': 1 });
+        const result: Record<string, number> = {};
+        for (const doc of docs) {
+            const fgoManagerName = doc.metadata.fgoManagerName;
+            if (!fgoManagerName) {
+                continue;
+            }
+            result[fgoManagerName] = doc._id;
+        }
+        return result;
     }
 
     async getSearchKeywordsMap(): Promise<Record<number, string>> {

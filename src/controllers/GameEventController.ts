@@ -36,7 +36,7 @@ export class GameEventController {
         try {
             const pagination = PaginationUtils.parse(req.query);
             const page = await this._gameEventService.findPage(pagination);
-            res.send(PaginationUtils.toPage(page.data, page.total, pagination));
+            res.send(page);
         } catch (err) {
             res.status(400).send(err);
         }

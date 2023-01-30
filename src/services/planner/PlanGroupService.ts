@@ -9,24 +9,24 @@ export class PlanGroupService {
     private _planService = Container.get(PlanService);
 
     async addPlanGroup(planGroup: Partial<PlanGroup>): Promise<PlanGroup> {
-        const result = await PlanGroupModel.create(planGroup);
-        return result.toObject();
+        const document = await PlanGroupModel.create(planGroup);
+        return document.toObject();
     }
 
     async findById(id: ObjectId): Promise<PlanGroup | null> {
         if (!id) {
             throw 'Plan group ID is missing or invalid.';
         }
-        const result = await PlanGroupModel.findById(id);
-        if (!result) {
+        const document = await PlanGroupModel.findById(id);
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
     async findByAccountId(accountId: ObjectId): Promise<Array<BasicPlanGroup>> {
-        const result = await PlanGroupModel.findByAccountId(accountId);
-        return result.map(doc => doc.toObject());
+        const documents = await PlanGroupModel.findByAccountId(accountId);
+        return documents.map(document => document.toObject());
     }
 
     async update(planGroup: Partial<PlanGroup>): Promise<PlanGroup | null> {
@@ -35,15 +35,15 @@ export class PlanGroupService {
         }
         // Do not allow accountId to be updated.
         delete planGroup.accountId;
-        const result = await PlanGroupModel.findOneAndUpdate(
+        const document = await PlanGroupModel.findOneAndUpdate(
             { _id: planGroup._id },
             { $set: planGroup },
             { runValidators: true, new: true }
         );
-        if (!result) {
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
     async delete(id: ObjectId): Promise<boolean> {

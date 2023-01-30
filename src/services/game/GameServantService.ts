@@ -12,13 +12,13 @@ export class GameServantService {
 
     async create(servant: GameServantWithMetadata): Promise<GameServantWithMetadata> {
         // TODO Validation
-        const result = await GameServantModel.create(servant);
-        return result.toObject();
+        const document = await GameServantModel.create(servant);
+        return document.toObject();
     }
 
     async existsById(id: number): Promise<boolean> {
-        const result = await GameServantModel.exists({ _id: id });
-        return !!result;
+        const document = await GameServantModel.exists({ _id: id });
+        return !!document;
     }
 
     async findById(id: number, includeMetadata: false): Promise<GameServant | null>;
@@ -26,11 +26,11 @@ export class GameServantService {
     async findById(id: number, includeMetadata?: boolean): Promise<GameServant | GameServantWithMetadata>;
     async findById(id: number, includeMetadata = true): Promise<GameServant | GameServantWithMetadata | null> {
         const projection = this._getMetadataProjection(includeMetadata);
-        const result = await GameServantModel.findById(id, projection);
-        if (!result) {
+        const document = await GameServantModel.findById(id, projection);
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
     async findAll(includeMetadata: false): Promise<Array<GameServant>>;
@@ -38,8 +38,8 @@ export class GameServantService {
     async findAll(includeMetadata?: boolean): Promise<Array<GameServant> | Array<GameServantWithMetadata>>;
     async findAll(includeMetadata = true): Promise<Array<GameServant> | Array<GameServantWithMetadata>> {
         const projection = this._getMetadataProjection(includeMetadata);
-        const result = await GameServantModel.find({}, projection);
-        return result.map(doc => doc.toObject());
+        const documents = await GameServantModel.find({}, projection);
+        return documents.map(document => document.toObject());
     }
 
     async findByIds(ids: Array<number>, includeMetadata: false): Promise<Array<GameServant>>;
@@ -50,13 +50,13 @@ export class GameServantService {
             return [];
         }
         const projection = this._getMetadataProjection(includeMetadata);
-        const result = await GameServantModel.find({ _id: { $in: ids } }, projection);
-        return result.map(doc => doc.toObject());
+        const documents = await GameServantModel.find({ _id: { $in: ids } }, projection);
+        return documents.map(document => document.toObject());
     }
 
     async findAllIds(): Promise<Array<number>> {
-        const result = await GameServantModel.distinct('_id');
-        return result.map(doc => doc.toObject());
+        const documents = await GameServantModel.distinct('_id');
+        return documents.map(document => document.toObject());
     }
 
     async findPage(pagination: Pagination, includeMetadata: false): Promise<Page<GameServant>>;
@@ -78,12 +78,12 @@ export class GameServantService {
         const sort: Record<string, SortOrder> = { [sortBy]: direction === 'ASC' ? 1 : -1 };
 
         const projection = this._getMetadataProjection(includeMetadata);
-        const result = await GameServantModel.find({}, projection)
+        const documents = await GameServantModel.find({}, projection)
             .sort(sort)
             .skip(skip)
             .limit(size);
 
-        const data = result.map(doc => doc.toObject());
+        const data = documents.map(document => document.toObject());
 
         return PaginationUtils.toPage(data, count, page, size);
     }
@@ -93,22 +93,22 @@ export class GameServantService {
     }
 
     async getFgoManagerNamesMap(): Promise<Record<string, number>> {
-        const docs = await GameServantModel.find({}, { 'metadata.fgoManagerName': 1 });
+        const documents = await GameServantModel.find({}, { 'metadata.fgoManagerName': 1 });
         const result: Record<string, number> = {};
-        for (const doc of docs) {
-            const fgoManagerName = doc.metadata.fgoManagerName;
+        for (const document of documents) {
+            const fgoManagerName = document.metadata.fgoManagerName;
             if (!fgoManagerName) {
                 continue;
             }
-            result[fgoManagerName] = doc._id;
+            result[fgoManagerName] = document._id;
         }
         return result;
     }
 
     async getSearchKeywordsMap(): Promise<Record<number, string>> {
-        const result = await GameServantModel.find({}, { 'metadata.searchTags': 1 });
+        const documents = await GameServantModel.find({}, { 'metadata.searchTags': 1 });
         return CollectionUtils.mapIterableToObject(
-            result.map(doc => doc.toObject()),
+            documents,
             this._getIdFunction,
             this._generateSearchKeywords
         );
@@ -119,15 +119,15 @@ export class GameServantService {
         if (!id && id !== 0) {
             throw 'ID is missing or invalid.';
         }
-        const result = await GameServantModel.findOneAndUpdate(
+        const document = await GameServantModel.findOneAndUpdate(
             { _id: id },
             { $set: servant },
             { runValidators: true, new: true }
         );
-        if (!result) {
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
     private _getMetadataProjection(includeMetadata: boolean): ProjectionType<GameServantWithMetadata> | undefined {

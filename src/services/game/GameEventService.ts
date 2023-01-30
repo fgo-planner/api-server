@@ -1,53 +1,64 @@
 import { GameEvent, GameEventModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
-import { Pagination } from 'dto';
+import { Page, Pagination } from 'dto';
 import { SortOrder } from 'mongoose';
 import { Service } from 'typedi';
-import { ObjectIdUtils } from 'utils';
+import { ObjectIdUtils, PaginationUtils } from 'utils';
 
 @Service()
 export class GameEventService {
 
     async create(event: GameEvent): Promise<GameEvent> {
         // TODO Validation
-        const result = await GameEventModel.create(event);
-        return result.toObject();
+        const document = await GameEventModel.create(event);
+        return document.toObject();
     }
 
     async existsById(id: number): Promise<boolean> {
-        const result = await GameEventModel.exists({ _id: id });
-        return !!result;
+        const document = await GameEventModel.exists({ _id: id });
+        return !!document;
     }
 
     async findById(id: ObjectId): Promise<GameEvent | null> {
-        const result = await GameEventModel.findById(id);
-        if (!result) {
+        const document = await GameEventModel.findById(id);
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
     async findAll(): Promise<Array<GameEvent>> {
-        const result = await GameEventModel.find();
-        return result.map(doc => doc.toObject());
+        const documents = await GameEventModel.find();
+        return documents.map(document => document.toObject());
     }
 
     async findAllIds(): Promise<Array<number>> {
         return GameEventModel.distinct('_id');
     }
 
-    async findPage(page: Pagination): Promise<{data: Array<GameEvent>; total: number}> {
-        const size = page.size;
-        const skip = size * (page.page - 1);
-        const sort = { [page.sort]: page.direction === 'ASC' ? 1 : -1 } as Record<string, SortOrder>;
+    async findPage(pagination: Pagination): Promise<Page<GameEvent>> {
+
         const count = await GameEventModel.find()
             .countDocuments();
-        const result = await GameEventModel.find()
+
+        const {
+            size,
+            page,
+            sort: sortBy,
+            direction
+        } = pagination;
+
+        const skip = size * (page - 1);
+        const sort: Record<string, SortOrder> = { [sortBy]: direction === 'ASC' ? 1 : -1 };
+
+        const documents = await GameEventModel.find()
             .sort(sort)
             .skip(skip)
             .limit(size);
-        const data = result.map(doc => doc.toObject());
-        return { data, total: count };
+
+        const data = documents.map(document => document.toObject());
+
+        return PaginationUtils.toPage(data, count, page, size);
     }
 
     async findByYear(year: number): Promise<Array<GameEvent>> {
@@ -59,15 +70,15 @@ export class GameEventService {
         if (!id) {
             throw 'Event ID is missing or invalid.';
         }
-        const result = await GameEventModel.findOneAndUpdate(
+        const document = await GameEventModel.findOneAndUpdate(
             { _id: id },
             { $set: event },
             { runValidators: true, new: true }
         );
-        if (!result) {
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
 }

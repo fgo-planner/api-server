@@ -1,7 +1,8 @@
 import { GameItem, GameItemModel, GameItemUsage } from '@fgo-planner/data-mongo';
-import { Pagination } from 'dto';
+import { Page, Pagination } from 'dto';
 import { SortOrder } from 'mongoose';
 import { Service } from 'typedi';
+import { PaginationUtils } from 'utils';
 
 @Service()
 export class GameItemService {
@@ -18,57 +19,68 @@ export class GameItemService {
 
     async create(item: GameItem): Promise<GameItem> {
         // TODO Validation
-        const result = await GameItemModel.create(item);
-        return result.toObject();
+        const document = await GameItemModel.create(item);
+        return document.toObject();
     }
 
     async existsById(id: number): Promise<boolean> {
-        const result = await GameItemModel.exists({ _id: id });
-        return !!result;
+        const document = await GameItemModel.exists({ _id: id });
+        return !!document;
     }
 
     async findById(id: number): Promise<GameItem | null> {
-        const result = await GameItemModel.findById(id, this._basicProjection);
-        if (!result) {
+        const document = await GameItemModel.findById(id, this._basicProjection);
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
     async findAll(): Promise<Array<GameItem>> {
-        const result = await GameItemModel.find({}, this._basicProjection);
-        return result.map(doc => doc.toObject());
+        const documents = await GameItemModel.find({}, this._basicProjection);
+        return documents.map(document => document.toObject());
     }
 
     async findByIds(ids: Array<number>): Promise<Array<GameItem>> {
         if (!ids || !ids.length) {
             return [];
         }
-        const result = await GameItemModel.find({ _id: { $in: ids } }, this._basicProjection);
-        return result.map(doc => doc.toObject());
+        const documents = await GameItemModel.find({ _id: { $in: ids } }, this._basicProjection);
+        return documents.map(document => document.toObject());
     }
 
     async findAllIds(): Promise<Array<number>> {
         return GameItemModel.distinct('_id');
     }
 
-    async findPage(page: Pagination): Promise<{ data: Array<GameItem>; total: number }> {
-        const size = page.size;
-        const skip = size * (page.page - 1);
-        const sort = { [page.sort]: page.direction === 'ASC' ? 1 : -1 } as Record<string, SortOrder>;
+    async findPage(pagination: Pagination): Promise<Page<GameItem>> {
+
         const count = await GameItemModel.find()
             .countDocuments();
-        const result = await GameItemModel.find({}, this._basicProjection)
+
+        const {
+            size,
+            page,
+            sort: sortBy,
+            direction
+        } = pagination;
+
+        const skip = size * (page - 1);
+        const sort: Record<string, SortOrder> = { [sortBy]: direction === 'ASC' ? 1 : -1 };
+
+        const documents = await GameItemModel.find()
             .sort(sort)
             .skip(skip)
             .limit(size);
-        const data = result.map(doc => doc.toObject());
-        return { data, total: count };
+
+        const data = documents.map(document => document.toObject());
+
+        return PaginationUtils.toPage(data, count, page, size);
     }
 
     async findByUsage(usage: GameItemUsage | GameItemUsage[]): Promise<Array<GameItem>> {
-        const result = await GameItemModel.findByUsage(usage);
-        return result.map(doc => doc.toObject());
+        const documents = await GameItemModel.findByUsage(usage);
+        return documents.map(document => document.toObject());
     }
 
     async update(item: GameItem): Promise<GameItem | null> {
@@ -76,15 +88,15 @@ export class GameItemService {
         if (!id && id !== 0) {
             throw 'Item ID is missing or invalid.';
         }
-        const result = await GameItemModel.findOneAndUpdate(
+        const document = await GameItemModel.findOneAndUpdate(
             { _id: id },
             { $set: item },
             { runValidators: true, new: true }
         );
-        if (!result) {
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
 }

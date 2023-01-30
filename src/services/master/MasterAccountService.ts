@@ -7,16 +7,16 @@ export class MasterAccountService {
 
     async addAccount(userId: ObjectId, account: Omit<MasterAccount, 'userId' | '_id'>): Promise<MasterAccount> {
         (account as MasterAccount).userId = userId;
-        const result = await MasterAccountModel.create(account);
-        return result.toObject();
+        const document = await MasterAccountModel.create(account);
+        return document.toObject();
     }
 
     async findById(id: ObjectId): Promise<MasterAccount | null> {
         if (!id) {
             throw 'Account ID is missing or invalid.';
         }
-        const result = await MasterAccountModel.findById(id);
-        if (!result) {
+        const document = await MasterAccountModel.findById(id);
+        if (!document) {
             return null;
         }
 
@@ -25,27 +25,27 @@ export class MasterAccountService {
          * 
          * TODO Remove this.
          */
-        if (result.lastServantInstanceId == null) {
-            result.lastServantInstanceId = MasterServantUtils.getLastInstanceId(result.servants);
+        if (document.lastServantInstanceId == null) {
+            document.lastServantInstanceId = MasterServantUtils.getLastInstanceId(document.servants);
         }
 
-        return result.toObject();
+        return document.toObject();
     }
 
     async findByUserId(userId: ObjectId): Promise<Array<BasicMasterAccount>> {
-        const result = await MasterAccountModel.findByUserId(userId);
-        return result.map(doc => doc.toObject());
+        const documents = await MasterAccountModel.findByUserId(userId);
+        return documents.map(doc => doc.toObject());
     }
 
     async update(account: MasterAccountUpdate): Promise<MasterAccount | null> {
         if (!account._id) {
             throw 'Account ID is missing or invalid.';
         }
-        const result = await MasterAccountModel.partialUpdate(account);
-        if (!result) {
+        const document = await MasterAccountModel.partialUpdate(account);
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
     async delete(id: ObjectId): Promise<boolean> {

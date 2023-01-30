@@ -6,24 +6,24 @@ import { Service } from 'typedi';
 export class PlanService {
 
     async addPlan(plan: Partial<Plan>): Promise<Plan> {
-        const result = await PlanModel.create(plan);
-        return result.toObject();
+        const document = await PlanModel.create(plan);
+        return document.toObject();
     }
 
     async findById(id: ObjectId): Promise<Plan | null> {
         if (!id) {
             throw 'Plan ID is missing or invalid.';
         }
-        const result = await PlanModel.findById(id);
-        if (!result) {
+        const document = await PlanModel.findById(id);
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
     async findByAccountId(accountId: ObjectId): Promise<Array<BasicPlan>> {
-        const result = await PlanModel.findByAccountId(accountId);
-        return result.map(doc => doc.toObject());
+        const documents = await PlanModel.findByAccountId(accountId);
+        return documents.map(document => document.toObject());
     }
 
     async update(plan: Partial<Plan>): Promise<Plan | null> {
@@ -32,15 +32,15 @@ export class PlanService {
         }
         // Do not allow accountId to be updated.
         delete plan.accountId;
-        const result = await PlanModel.findOneAndUpdate(
+        const document = await PlanModel.findOneAndUpdate(
             { _id: plan._id },
             { $set: plan },
             { runValidators: true, new: true }
         );
-        if (!result) {
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
     async delete(id: ObjectId): Promise<boolean> {

@@ -1,59 +1,71 @@
 import { GameSoundtrack, GameSoundtrackModel } from '@fgo-planner/data-mongo';
-import { Pagination } from 'dto';
+import { Page, Pagination } from 'dto';
 import { SortOrder } from 'mongoose';
 import { Service } from 'typedi';
+import { PaginationUtils } from 'utils';
 
 @Service()
 export class GameSoundtrackService {
 
     async create(soundtrack: GameSoundtrack): Promise<GameSoundtrack> {
         // TODO Validation
-        const result = await GameSoundtrackModel.create(soundtrack);
-        return result.toObject();
+        const document = await GameSoundtrackModel.create(soundtrack);
+        return document.toObject();
     }
 
     async existsById(id: number): Promise<boolean> {
-        const result = await GameSoundtrackModel.exists({ _id: id });
-        return !!result;
+        const document = await GameSoundtrackModel.exists({ _id: id });
+        return !!document;
     }
 
     async findById(id: number): Promise<GameSoundtrack | null> {
-        const result = await GameSoundtrackModel.findById(id);
-        if (!result) {
+        const document = await GameSoundtrackModel.findById(id);
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
     async findAll(): Promise<Array<GameSoundtrack>> {
-        const result = await GameSoundtrackModel.find({});
-        return result.map(doc => doc.toObject());
+        const documents = await GameSoundtrackModel.find({});
+        return documents.map(document => document.toObject());
     }
     
     async findByIds(ids: Array<number>): Promise<Array<GameSoundtrack>> {
         if (!ids || !ids.length) {
             return [];
         }
-        const result = await GameSoundtrackModel.find({ _id: { $in: ids } });
-        return result.map(doc => doc.toObject());
+        const documents = await GameSoundtrackModel.find({ _id: { $in: ids } });
+        return documents.map(document => document.toObject());
     }
 
     async findAllIds(): Promise<Array<number>> {
         return GameSoundtrackModel.distinct('_id');
     }
 
-    async findPage(page: Pagination): Promise<{data: Array<GameSoundtrack>; total: number}> {
-        const size = page.size;
-        const skip = size * (page.page - 1);
-        const sort = { [page.sort]: page.direction === 'ASC' ? 1 : -1 } as Record<string, SortOrder>;
+    async findPage(pagination: Pagination): Promise<Page<GameSoundtrack>> {
+
         const count = await GameSoundtrackModel.find()
             .countDocuments();
-        const result = await GameSoundtrackModel.find({})
+
+        const {
+            size,
+            page,
+            sort: sortBy,
+            direction
+        } = pagination;
+
+        const skip = size * (page - 1);
+        const sort: Record<string, SortOrder> = { [sortBy]: direction === 'ASC' ? 1 : -1 };
+
+        const documents = await GameSoundtrackModel.find()
             .sort(sort)
             .skip(skip)
             .limit(size);
-        const data = result.map(doc => doc.toObject());
-        return { data, total: count };
+
+        const data = documents.map(document => document.toObject());
+
+        return PaginationUtils.toPage(data, count, page, size);
     }
 
     async update(soundtrack: GameSoundtrack): Promise<GameSoundtrack | null> {
@@ -61,15 +73,15 @@ export class GameSoundtrackService {
         if (!id && id !== 0) {
             throw 'Soundtrack ID is missing or invalid.';
         }
-        const result = await GameSoundtrackModel.findOneAndUpdate(
+        const document = await GameSoundtrackModel.findOneAndUpdate(
             { _id: id },
             { $set: soundtrack },
             { runValidators: true, new: true }
         );
-        if (!result) {
+        if (!document) {
             return null;
         }
-        return result.toObject();
+        return document.toObject();
     }
 
 }

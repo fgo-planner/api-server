@@ -1,6 +1,6 @@
-import { CacheKey } from '../../types/cache-key.type';
-import { InvalidateCachedResponseMetadata } from '../../types/invalidate-cached-response-metadata.type';
-import { MetadataKey } from '../metadata-key.constants';
+import { CacheKey } from '../../types/CacheKey.type';
+import { InvalidateCachedResponseMetadata } from '../../types/InvalidateCachedResponseMetadata.type';
+import { MetadataKey } from '../MetadataKeyConstants';
 
 type Decorator = (target: any, propertyKey: string) => void;
 

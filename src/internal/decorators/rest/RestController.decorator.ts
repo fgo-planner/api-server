@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
-import { UserAccessLevel } from '../../enum/user-access-level.enum';
-import { MetadataKey } from '../metadata-key.constants';
+import { UserAccessLevel } from '../../enum/UserAccessLevel.enum';
+import { MetadataKey } from '../MetadataKeyConstants';
 
 type Decorator = (target: any) => void;
 

@@ -4,10 +4,10 @@ import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResu
 import { ResponseCacheKey, ResponseCacheManager } from 'internal';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { Inject, Service } from 'typedi';
-import { GameItemService } from '../../game-item.service';
-import { GameServantService } from '../../game-servant.service';
-import { GameSoundtrackService } from '../../game-soundtrack.service';
-import { AtlasAcademyDataImportService } from './atlas-academy/atlas-academy-data-import.service';
+import { GameItemService } from '../../GameItemService';
+import { GameServantService } from '../../GameServantService';
+import { GameSoundtrackService } from '../../GameSoundtrackService';
+import { AtlasAcademyDataImportService } from './atlas-academy/AtlasAcademyDataImportService';
 
 type GameServantBulkWriteQuery = AnyBulkWriteOperation<GameServantWithMetadata>;
 type GameItemBulkWriteQuery = AnyBulkWriteOperation<GameItem>;

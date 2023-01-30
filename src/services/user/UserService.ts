@@ -3,7 +3,7 @@ import { BasicUser, MasterAccountValidators, User, UserModel, UserPreferences } 
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'bson';
 import { Inject, Service } from 'typedi';
-import { MasterAccountService } from '../master/master-account.service';
+import { MasterAccountService } from '../master/MasterAccountService';
 
 /** 
  * Handles retrieving and updating users (excluding administrative operations).

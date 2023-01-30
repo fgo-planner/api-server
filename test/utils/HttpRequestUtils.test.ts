@@ -1,4 +1,4 @@
-import { HttpRequestUtils } from '../../src/utils/http-request.utils';
+import { HttpRequestUtils } from '../../src/utils';
 
 describe('HttpRequestUtils.parseIntegerList', () => {
 

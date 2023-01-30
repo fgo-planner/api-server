@@ -1,4 +1,4 @@
-import { GameDataImportResult } from './game-data-import-result.type';
+import { GameDataImportResult } from './GameDataImportResult.type';
 
 export type GameDataImportResultSet = {
     items?: GameDataImportResult;

@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { Dictionary, RequestHandler } from 'express-serve-static-core';
 import { Service } from 'typedi';
-import { CacheKey } from '../types/cache-key.type';
-import { CachedResponseMetadata } from '../types/cached-response-metadata.type';
-import { InvalidateCachedResponseMetadata } from '../types/invalidate-cached-response-metadata.type';
-import { ResponseCacheEntry } from './response-cache-entry.class';
+import { CacheKey } from '../types/CacheKey.type';
+import { CachedResponseMetadata } from '../types/CachedResponseMetadata.type';
+import { InvalidateCachedResponseMetadata } from '../types/InvalidateCachedResponseMetadata.type';
+import { ResponseCacheEntry } from './ResponseCacheEntry';
 
 type CacheMap = Map<CacheKey, Map<CacheKey | undefined, ResponseCacheEntry>>;
 

@@ -1,4 +1,4 @@
-import { GameDataImportExistingAction } from './game-data-import-existing-action.enum';
+import { GameDataImportExistingAction } from './GameDataImportExistingAction.enum';
 
 type GameDataImportOption = {
     import?: boolean;

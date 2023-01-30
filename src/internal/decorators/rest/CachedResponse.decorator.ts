@@ -1,6 +1,6 @@
-import { CacheKey } from '../../types/cache-key.type';
-import { CachedResponseMetadata } from '../../types/cached-response-metadata.type';
-import { MetadataKey } from '../metadata-key.constants';
+import { CacheKey } from '../../types/CacheKey.type';
+import { CachedResponseMetadata } from '../../types/CachedResponseMetadata.type';
+import { MetadataKey } from '../MetadataKeyConstants';
 import { Request } from 'express';
 
 type Decorator = (target: any, propertyKey: string) => void;

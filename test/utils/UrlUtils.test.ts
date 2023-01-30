@@ -1,4 +1,4 @@
-import { UrlUtils } from '../../src/utils/url.utils';
+import { UrlUtils } from '../../src/utils';
 
 describe('UrlUtils.isSegmentValid', () => {
 

@@ -1,8 +1,8 @@
 
-import { RequestMethod } from '../../enum/request-method.enum';
-import { UserAccessLevel } from '../../enum/user-access-level.enum';
-import { RouteMetadata } from '../../types/route-metadata.type';
-import { MetadataKey } from '../metadata-key.constants';
+import { RequestMethod } from '../../enum/RequestMethod.enum';
+import { UserAccessLevel } from '../../enum/UserAccessLevel.enum';
+import { RouteMetadata } from '../../types/RouteMetadata.type';
+import { MetadataKey } from '../MetadataKeyConstants';
 
 type Decorator = (target: any, propertyKey: string) => void;
 

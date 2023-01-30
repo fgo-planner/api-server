@@ -1,7 +1,7 @@
 import { Nullable } from '@fgo-planner/common-core';
 import { ObjectId } from 'bson';
 import { ParamsDictionary } from 'express-serve-static-core';
-import { ObjectIdUtils } from './object-id.utils';
+import { ObjectIdUtils } from './ObjectIdUtils';
 
 interface ParsedQs { [key: string]: undefined | Query }
 

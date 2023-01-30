@@ -1,4 +1,4 @@
-import { UnicodeUtils } from '../../src/utils/unicode.utils';
+import { UnicodeUtils } from '../../src/utils';
 
 describe('UnicodeUtils.convertUnicodeToAscii', () => {
 

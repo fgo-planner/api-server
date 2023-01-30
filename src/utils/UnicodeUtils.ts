@@ -1,3 +1,6 @@
+/**
+ * @deprecated No longer used.
+ */
 export class UnicodeUtils {
 
     private static readonly _FullwidthCharCodeOffset = 65248;

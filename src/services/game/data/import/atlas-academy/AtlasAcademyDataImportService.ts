@@ -2,7 +2,7 @@ import { GameItem, GameServantWithMetadata, GameSoundtrack } from '@fgo-planner/
 import { AtlasAcademyDataImport, NiceBgmEntity, NiceItem, NiceServant, TransformLogger } from '@fgo-planner/transform-core';
 import axios from 'axios';
 import { Service } from 'typedi';
-import { AtlasAcademyDataImportConstants as Constants } from './atlas-academy-data-import.constants';
+import { AtlasAcademyDataImportConstants as Constants } from './AtlasAcademyDataImportConstants';
 
 @Service()
 export class AtlasAcademyDataImportService {

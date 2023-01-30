@@ -1,6 +1,6 @@
 import { Nullable } from '@fgo-planner/common-core';
-import { RequestMethod } from '../enum/request-method.enum';
-import { UserAccessLevel } from '../enum/user-access-level.enum';
+import { RequestMethod } from '../enum/RequestMethod.enum';
+import { UserAccessLevel } from '../enum/UserAccessLevel.enum';
 
 /**
  * Maps a route to an endpoint method in a controller.

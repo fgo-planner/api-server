@@ -1,4 +1,4 @@
-import { CacheEntry } from './cache-entry.class';
+import { CacheEntry } from './CacheEntry';
 
 export class ResponseCacheEntry<T = any> extends CacheEntry<T> {
 

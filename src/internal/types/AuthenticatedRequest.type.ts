@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { AccessTokenPayload } from './token-payload.type';
+import { AccessTokenPayload } from './TokenPayload.type';
 
 export type AuthenticatedRequest = {
     token: AccessTokenPayload;

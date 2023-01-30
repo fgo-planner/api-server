@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { CacheKey } from './cache-key.type';
+import { CacheKey } from './CacheKey.type';
 
 /**
  * Contains metadata for an endpoint's cached response handling.

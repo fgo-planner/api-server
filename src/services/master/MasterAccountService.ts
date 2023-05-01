@@ -1,4 +1,4 @@
-import { BasicMasterAccount, MasterAccount, MasterAccountModel, MasterAccountUpdate, MasterServantUtils } from '@fgo-planner/data-mongo';
+import { BasicMasterAccount, MasterAccount, MasterAccountModel, MasterAccountUpdate } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Service } from 'typedi';
 
@@ -19,16 +19,6 @@ export class MasterAccountService {
         if (!document) {
             return null;
         }
-
-        /**
-         * Temporary, for backwards compatibility with old data.
-         * 
-         * TODO Remove this.
-         */
-        if (document.lastServantInstanceId == null) {
-            document.lastServantInstanceId = MasterServantUtils.getLastInstanceId(document.servants);
-        }
-
         return document.toObject();
     }
 

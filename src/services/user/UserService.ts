@@ -76,11 +76,18 @@ export class UserService {
                     embers: {},
                     qp: 0
                 },
-                servants: [],
-                lastServantInstanceId: 0,
-                costumes: [],
-                bondLevels: {},
-                soundtracks: []
+                servants: {
+                    servants: [],
+                    lastServantInstanceId: 0,
+                    bondLevels: {}
+                },
+                costumes: {
+                    unlocked: [],
+                    noCostUnlock: []
+                },
+                soundtracks: {
+                    unlocked: []
+                }
             });
         }
     }

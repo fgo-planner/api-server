@@ -1,12 +1,9 @@
 import { BasicPlanGroup, MasterAccountModel, PlanGroup, PlanGroupModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
-import { PlanService } from 'services';
-import Container, { Service } from 'typedi';
+import { Service } from 'typedi';
 
 @Service()
 export class PlanGroupService {
-
-    private _planService = Container.get(PlanService);
 
     async addPlanGroup(planGroup: Partial<PlanGroup>): Promise<PlanGroup> {
         const document = await PlanGroupModel.create(planGroup);
@@ -54,7 +51,6 @@ export class PlanGroupService {
         if (!result.deletedCount) {
             return false;
         }
-        await this._planService.removeFromGroup(id);
         return true;
     }
 

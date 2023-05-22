@@ -1,6 +1,7 @@
 import { BasicPlan, MasterAccountModel, Plan, PlanModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Service } from 'typedi';
+import {DeleteResult} from 'mongodb';
 
 @Service()
 export class PlanService {
@@ -43,24 +44,26 @@ export class PlanService {
         return document.toObject();
     }
 
-    async delete(id: ObjectId): Promise<boolean> {
-        if (!id) {
-            throw 'Plan ID is missing or invalid.';
+    async delete(id: ObjectId): Promise<number>;
+    async delete(ids: Array<ObjectId>): Promise<number>;
+    async delete(ids: ObjectId | Array<ObjectId>): Promise<number> {
+        let result: DeleteResult;
+        if (Array.isArray(ids)) {
+            if (!ids.length) {
+                return 0;
+            }
+            result = await PlanModel.deleteMany({ _id: { $in: ids } });
+        } else {
+            if (!ids) {
+                throw 'Plan ID is missing or invalid.';
+            }
+            result = await PlanModel.deleteOne({ _id: ids });
         }
-        const result = await PlanModel.deleteOne({ _id: id });
-        return !!result.deletedCount;
+        return result.deletedCount;
     }
 
     /**
-     * Removes plans from the given plan group ID by removing the `groupId`
-     * references from the associated plans.
-     */
-    async removeFromGroup(groupId: ObjectId): Promise<any> {
-        return await PlanModel.removeFromGroup(groupId);
-    }
-
-    /**
-     * Checks whether the user is the owner of the  plan.
+     * Checks whether the user is the owner of the plan.
      * 
      * @param planId The plan ID. Must not be null.
      * @param userId The user's ID. Must not be null.

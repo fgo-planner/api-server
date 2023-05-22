@@ -2,7 +2,7 @@ import { Plan, PlanGroup } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Response } from 'express';
 import { AccessTokenPayload, AuthenticatedRequest, DeleteMapping, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
-import { MasterAccountService, PlanGroupService, PlanService } from 'services';
+import { MasterAccountService, PlanGroupService, PlanListService, PlanService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, ObjectIdUtils } from 'utils';
 
@@ -14,6 +14,9 @@ export class PlanController {
 
     @Inject()
     private _planGroupService!: PlanGroupService;
+
+    @Inject()
+    private _planListService!: PlanListService;
 
     @Inject()
     private _masterAccountService!: MasterAccountService;
@@ -128,7 +131,29 @@ export class PlanController {
                 return res.status(401).send(); // TODO Add message
             }
             const result = await this._planService.delete(id);
-            res.send(result);
+            res.send(String(result));
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
+    @DeleteMapping('/plan')
+    async deletePlans(req: AuthenticatedRequest, res: Response): Promise<any> {
+        const { planIds } = req.body;
+        try {
+            if (!Array.isArray(planIds)) {
+                throw 'Property \'planIds\' must be an array';
+            }
+            const ids: Array<ObjectId> = [];
+            for (const planId of planIds) {
+                const id = new ObjectId(planId);
+                if (!await this._hasAccess(id, req.token)) {
+                    return res.status(401).send(); // TODO Add message
+                }
+                ids.push(id);
+            }
+            const result = await this._planService.delete(ids);
+            res.send(String(result));
         } catch (err) {
             res.status(400).send(err);
         }
@@ -152,13 +177,8 @@ export class PlanController {
     async getForAccount(req: AuthenticatedRequest, res: Response): Promise<any> {
         try {
             const accountId = HttpRequestUtils.parseObjectIdFromParams(req.params, 'accountId');
-            const userId = this._getRequestorId(req.token);
-            if (userId && !this._masterAccountService.isOwner(userId, accountId)) {
-                return res.status(401).send(); // TODO Add message
-            }
-            const plans = await this._planService.findByAccountId(accountId);
-            const planGroups = await this._planGroupService.findByAccountId(accountId);
-            res.send({ plans, planGroups });
+            const basicPlans = await this._planListService.findOrCreateByAccountId(accountId);
+            res.send(basicPlans);
         } catch (err) {
             res.status(400).send(err);
         }

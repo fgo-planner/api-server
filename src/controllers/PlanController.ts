@@ -123,20 +123,6 @@ export class PlanController {
         }
     }
 
-    @DeleteMapping('/plan/:id')
-    async deletePlan(req: AuthenticatedRequest, res: Response): Promise<any> {
-        try {
-            const id = HttpRequestUtils.parseObjectIdFromParams(req.params, 'id');
-            if (!await this._hasAccess(id, req.token)) {
-                return res.status(401).send(); // TODO Add message
-            }
-            const result = await this._planService.delete(id);
-            res.send(String(result));
-        } catch (err) {
-            res.status(400).send(err);
-        }
-    }
-
     @DeleteMapping('/plan')
     async deletePlans(req: AuthenticatedRequest, res: Response): Promise<any> {
         const { planIds } = req.body;

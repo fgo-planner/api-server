@@ -125,7 +125,7 @@ export class PlanListService {
                 }
                 const updatedChildren: Array<PlanListPlanItem<ObjectId>> = [];
                 for (const child of item.children) {
-                    if (!planIdSet.delete(id)) {
+                    if (!planIdSet.delete(child.refId.toString())) {
                         hasChanges = true;
                         continue;
                     }

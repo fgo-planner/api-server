@@ -1,18 +1,14 @@
 {
     "parser": "@typescript-eslint/parser",
-    "extends": [
-        "plugin:@typescript-eslint/recommended"
-    ],
+    "extends": ["plugin:@typescript-eslint/recommended"],
     "parserOptions": {
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
     "rules": {
-        "indent": [
-            "warn",
-            4,
-            { "SwitchCase": 1 }
-        ],
+        "comma-dangle": ["warn", "never"],
+        "eol-last": ["warn", "always"],
+        "indent": ["warn", 4, { "SwitchCase": 1 }],
         "max-len": [
             "warn",
             {
@@ -21,19 +17,10 @@
                 "ignoreUrls": true
             }
         ],
-        "quotes": [
-            "warn",
-            "single"
-        ],
-        "semi": [
-            "warn",
-            "always"
-        ],
+        "quotes": ["warn", "single"],
+        "semi": ["warn", "always"],
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/semi": [
-            "warn",
-            "always"
-        ]
+        "@typescript-eslint/semi": ["warn", "always"]
     }
 }

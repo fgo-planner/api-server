@@ -1,4 +1,5 @@
-import { GameEvent, GameEventModel } from '@fgo-planner/data-mongo';
+import { GameEvent } from '@fgo-planner/data-core';
+import { GameEventModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Page, Pagination } from 'dto';
 import { SortOrder } from 'mongoose';
@@ -11,7 +12,7 @@ export class GameEventService {
     async create(event: GameEvent): Promise<GameEvent> {
         // TODO Validation
         const document = await GameEventModel.create(event);
-        return document.toObject();
+        return document.toJSON<GameEvent>();
     }
 
     async existsById(id: number): Promise<boolean> {
@@ -24,12 +25,12 @@ export class GameEventService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<GameEvent>();
     }
 
     async findAll(): Promise<Array<GameEvent>> {
         const documents = await GameEventModel.find();
-        return documents.map(document => document.toObject());
+        return documents.map(document => document.toJSON<GameEvent>());
     }
 
     async findAllIds(): Promise<Array<number>> {
@@ -56,13 +57,14 @@ export class GameEventService {
             .skip(skip)
             .limit(size);
 
-        const data = documents.map(document => document.toObject());
+        const data = documents.map(document => document.toJSON<GameEvent>());
 
         return PaginationUtils.toPage(data, count, page, size);
     }
 
     async findByYear(year: number): Promise<Array<GameEvent>> {
-        return GameEventModel.findByYear(year);
+        const documents = await GameEventModel.findByYear(year);
+        return documents.map(document => document.toJSON<GameEvent>());
     }
 
     async update(event: GameEvent): Promise<GameEvent | null> {
@@ -78,7 +80,7 @@ export class GameEventService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<GameEvent>();
     }
 
 }

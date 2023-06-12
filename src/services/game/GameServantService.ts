@@ -1,19 +1,22 @@
 import { CollectionUtils } from '@fgo-planner/common-core';
-import { ExternalLink, GameServant, GameServantModel, GameServantWithMetadata, SearchTagUtils } from '@fgo-planner/data-mongo';
+import { Entity, ExternalLink, GameServant, GameServantMetadata, GameServantWithMetadata, SearchTagUtils } from '@fgo-planner/data-core';
+import { GameServantModel } from '@fgo-planner/data-mongo';
 import { Page, Pagination } from 'dto';
 import { ProjectionType, SortOrder } from 'mongoose';
 import { Service } from 'typedi';
 import { PaginationUtils } from 'utils';
 
+type SearchTagsMetadata = {
+    metadata: Pick<GameServantMetadata, 'searchTags'>;
+};
+
 @Service()
 export class GameServantService {
-
-    private static readonly _ProjectionExcludeMetadata: ProjectionType<GameServantWithMetadata> = { metadata: false } as const;
 
     async create(servant: GameServantWithMetadata): Promise<GameServantWithMetadata> {
         // TODO Validation
         const document = await GameServantModel.create(servant);
-        return document.toObject();
+        return document.toJSON<GameServantWithMetadata>();
     }
 
     async existsById(id: number): Promise<boolean> {
@@ -30,7 +33,7 @@ export class GameServantService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<GameServant | GameServantWithMetadata>();
     }
 
     async findAll(includeMetadata: false): Promise<Array<GameServant>>;
@@ -39,7 +42,7 @@ export class GameServantService {
     async findAll(includeMetadata = true): Promise<Array<GameServant> | Array<GameServantWithMetadata>> {
         const projection = this._getMetadataProjection(includeMetadata);
         const documents = await GameServantModel.find({}, projection);
-        return documents.map(document => document.toObject());
+        return documents.map(document => document.toJSON<GameServantWithMetadata>());
     }
 
     async findByIds(ids: Array<number>, includeMetadata: false): Promise<Array<GameServant>>;
@@ -51,18 +54,17 @@ export class GameServantService {
         }
         const projection = this._getMetadataProjection(includeMetadata);
         const documents = await GameServantModel.find({ _id: { $in: ids } }, projection);
-        return documents.map(document => document.toObject());
+        return documents.map(document => document.toJSON<GameServant | GameServantWithMetadata>());
     }
 
     async findAllIds(): Promise<Array<number>> {
-        const documents = await GameServantModel.distinct('_id');
-        return documents.map(document => document.toObject());
+        return GameServantModel.distinct('_id');
     }
 
     async findPage(pagination: Pagination, includeMetadata: false): Promise<Page<GameServant>>;
     async findPage(pagination: Pagination, includeMetadata?: true): Promise<Page<GameServantWithMetadata>>;
-    async findPage(pagination: Pagination, includeMetadata: boolean): Promise<Page<GameServant> | Array<GameServantWithMetadata>>;
-    async findPage(pagination: Pagination, includeMetadata = true): Promise<Page<GameServant> | Array<GameServantWithMetadata>> {
+    async findPage(pagination: Pagination, includeMetadata: boolean): Promise<Page<GameServant> | Page<GameServantWithMetadata>>;
+    async findPage(pagination: Pagination, includeMetadata = true): Promise<Page<GameServant> | Page<GameServantWithMetadata>> {
 
         const count = await GameServantModel.find()
             .countDocuments();
@@ -83,13 +85,17 @@ export class GameServantService {
             .skip(skip)
             .limit(size);
 
-        const data = documents.map(document => document.toObject());
+        const data = documents.map(document => document.toJSON<GameServant | GameServantWithMetadata>());
 
         return PaginationUtils.toPage(data, count, page, size);
     }
 
     async getExternalLinks(id: number): Promise<Array<ExternalLink> | null> {
-        return await GameServantModel.getExternalLinks(id);
+        const document = await GameServantModel.findExternalLinksById(id);
+        if (!document) {
+            return null;
+        }
+        return document.metadata.links;
     }
 
     async getFgoManagerNamesMap(): Promise<Record<string, number>> {
@@ -106,7 +112,8 @@ export class GameServantService {
     }
 
     async getSearchKeywordsMap(): Promise<Record<number, string>> {
-        const documents = await GameServantModel.find({}, { 'metadata.searchTags': 1 });
+        const documents = await GameServantModel.findSearchTags();
+        documents[0].metadata;
         return CollectionUtils.mapIterableToObject(
             documents,
             this._getIdFunction,
@@ -127,22 +134,22 @@ export class GameServantService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<GameServantWithMetadata>();
     }
 
     private _getMetadataProjection(includeMetadata: boolean): ProjectionType<GameServantWithMetadata> | undefined {
         if (!includeMetadata) {
-            return GameServantService._ProjectionExcludeMetadata;
+            return GameServantModel.ExcludeMetadataProjection;
         }
         return undefined;
     }
 
-    private _getIdFunction(gameServant: GameServant): number {
-        return gameServant._id;
+    private _getIdFunction(entity: Entity<unknown, number>): number {
+        return entity._id;
     }
 
-    private _generateSearchKeywords(gameServant: GameServantWithMetadata): string {
-        const keywordSet = SearchTagUtils.generateSearchKeywords(gameServant.metadata.searchTags);
+    private _generateSearchKeywords({ metadata }: SearchTagsMetadata): string {
+        const keywordSet = SearchTagUtils.generateSearchKeywords(metadata.searchTags);
         return [...keywordSet].join(' ');
     }
 

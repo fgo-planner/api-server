@@ -1,5 +1,6 @@
 import { Nullable } from '@fgo-planner/common-core';
-import { BasicUser, MasterAccountValidators, User, UserModel, UserPreferences } from '@fgo-planner/data-mongo';
+import { BasicUser, User, UserPreferences } from '@fgo-planner/data-core';
+import { MasterAccountValidators, UserDbDocument, UserModel } from '@fgo-planner/data-mongo';
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'bson';
 import { Inject, Service } from 'typedi';
@@ -24,7 +25,7 @@ export class UserService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<User>();
     }
 
     async findBasicById(id: ObjectId): Promise<BasicUser | null> {
@@ -35,7 +36,7 @@ export class UserService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<BasicUser>();
     }
 
     // TODO Create DTO for parameters if it gets too big.
@@ -115,7 +116,11 @@ export class UserService {
     }
 
     async getUserPreferences(userId: ObjectId): Promise<UserPreferences | null> {
-        return UserModel.getUserPreferences(userId);
+        const document = await UserModel.getUserPreferences(userId);
+        if (!document) {
+            return null;
+        }
+        return document.toJSON().userPrefs;
     }
 
     async updateUserPreferences(userId: ObjectId, userPrefs: Partial<UserPreferences>): Promise<UserPreferences | null> {
@@ -123,7 +128,7 @@ export class UserService {
         for (const [key, value] of Object.entries(userPrefs)) {
             updateObject[`userPrefs.${key}`] = value;
         }
-        const document = await UserModel.findOneAndUpdate(
+        const document = await UserModel.findOneAndUpdate<UserDbDocument>(
             { _id: userId },
             { $set: updateObject },
             { runValidators: true, new: true }
@@ -131,7 +136,7 @@ export class UserService {
         if (!document) {
             return null;
         }
-        return document.userPrefs;
+        return document.toJSON().userPrefs;
     }
 
     private _passwordIsValid(password: string): boolean {
@@ -146,7 +151,7 @@ export class UserService {
 
     private _friendIdIsValid(friendId: Nullable<string>): boolean {
         // TODO Implement this.
-        return MasterAccountValidators.isFriendIdFormalValidOrEmpty(friendId);
+        return MasterAccountValidators.isFriendIdFormatValidOrEmpty(friendId);
     }
 
     private _hashPassword(password: string): string {

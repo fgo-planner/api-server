@@ -1,4 +1,5 @@
-import { BasicMasterAccount, MasterAccount, MasterAccountModel, MasterAccountUpdate } from '@fgo-planner/data-mongo';
+import { BasicMasterAccount, MasterAccount, MasterAccountUpdate } from '@fgo-planner/data-core';
+import { MasterAccountModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Service } from 'typedi';
 
@@ -6,9 +7,11 @@ import { Service } from 'typedi';
 export class MasterAccountService {
 
     async addAccount(userId: ObjectId, account: Omit<MasterAccount, 'userId' | '_id'>): Promise<MasterAccount> {
-        (account as MasterAccount).userId = userId;
-        const document = await MasterAccountModel.create(account);
-        return document.toObject();
+        const document = await MasterAccountModel.create({
+            ...account,
+            userId
+        });
+        return document.toJSON<MasterAccount>();
     }
 
     async findById(id: ObjectId): Promise<MasterAccount | null> {
@@ -19,12 +22,12 @@ export class MasterAccountService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<MasterAccount>();
     }
 
     async findByUserId(userId: ObjectId): Promise<Array<BasicMasterAccount>> {
         const documents = await MasterAccountModel.findByUserId(userId);
-        return documents.map(doc => doc.toObject());
+        return documents.map(doc => doc.toJSON<BasicMasterAccount>());
     }
 
     async update(account: MasterAccountUpdate): Promise<MasterAccount | null> {
@@ -35,7 +38,7 @@ export class MasterAccountService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<MasterAccount>();
     }
 
     async delete(id: ObjectId): Promise<boolean> {
@@ -52,9 +55,12 @@ export class MasterAccountService {
      * @param accountId The master account ID. Must not be null.
      * @param userId The user's ID. Must not be null.
      */
-    async isOwner(accountId: ObjectId, userId: ObjectId): Promise<boolean> {
+    async isOwner(accountId: ObjectId, userId: ObjectId | string): Promise<boolean> {
         const account = await MasterAccountModel.findById(accountId, { userId: 1 });
-        return account ? userId.equals(account.userId) : false;
+        if (typeof userId !== 'string') {
+            userId = userId.toString();
+        }
+        return account ? userId === account.userId.toString() : false;
     }
 
 }

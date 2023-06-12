@@ -1,4 +1,5 @@
-import { GameItem, GameItemModel, GameItemUsage } from '@fgo-planner/data-mongo';
+import { GameItem, GameItemUsage } from '@fgo-planner/data-core';
+import { GameItemModel } from '@fgo-planner/data-mongo';
 import { Page, Pagination } from 'dto';
 import { SortOrder } from 'mongoose';
 import { Service } from 'typedi';
@@ -20,7 +21,7 @@ export class GameItemService {
     async create(item: GameItem): Promise<GameItem> {
         // TODO Validation
         const document = await GameItemModel.create(item);
-        return document.toObject();
+        return document.toJSON<GameItem>();
     }
 
     async existsById(id: number): Promise<boolean> {
@@ -33,12 +34,12 @@ export class GameItemService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<GameItem>();
     }
 
     async findAll(): Promise<Array<GameItem>> {
         const documents = await GameItemModel.find({}, this._basicProjection);
-        return documents.map(document => document.toObject());
+        return documents.map(document => document.toJSON());
     }
 
     async findByIds(ids: Array<number>): Promise<Array<GameItem>> {
@@ -46,7 +47,7 @@ export class GameItemService {
             return [];
         }
         const documents = await GameItemModel.find({ _id: { $in: ids } }, this._basicProjection);
-        return documents.map(document => document.toObject());
+        return documents.map(document => document.toJSON<GameItem>());
     }
 
     async findAllIds(): Promise<Array<number>> {
@@ -73,14 +74,14 @@ export class GameItemService {
             .skip(skip)
             .limit(size);
 
-        const data = documents.map(document => document.toObject());
+        const data = documents.map(document => document.toJSON<GameItem>());
 
         return PaginationUtils.toPage(data, count, page, size);
     }
 
     async findByUsage(usage: GameItemUsage | GameItemUsage[]): Promise<Array<GameItem>> {
         const documents = await GameItemModel.findByUsage(usage);
-        return documents.map(document => document.toObject());
+        return documents.map(document => document.toJSON<GameItem>());
     }
 
     async update(item: GameItem): Promise<GameItem | null> {
@@ -96,7 +97,7 @@ export class GameItemService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<GameItem>();
     }
 
 }

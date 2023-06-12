@@ -1,4 +1,4 @@
-import { GameItem, GameServantWithMetadata, GameSoundtrack } from '@fgo-planner/data-mongo';
+import { GameItem, GameServantWithMetadata, GameSoundtrack } from '@fgo-planner/data-core';
 import { AtlasAcademyDataImport, NiceBgmEntity, NiceItem, NiceServant, TransformLogger } from '@fgo-planner/transform-core';
 import axios from 'axios';
 import { Service } from 'typedi';
@@ -19,7 +19,7 @@ export class AtlasAcademyDataImportService {
          */
         /** */
         const niceServants = await this._getNiceServants('JP', logger);
-        
+
         /**
          * Also retrieve 'nice' NA servant data with lore. This is needed because as of
          * 9/3/2022, the JP servant data with English names does not include English

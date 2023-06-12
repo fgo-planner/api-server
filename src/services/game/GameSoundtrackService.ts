@@ -1,4 +1,5 @@
-import { GameSoundtrack, GameSoundtrackModel } from '@fgo-planner/data-mongo';
+import { GameSoundtrack } from '@fgo-planner/data-core';
+import { GameSoundtrackModel } from '@fgo-planner/data-mongo';
 import { Page, Pagination } from 'dto';
 import { SortOrder } from 'mongoose';
 import { Service } from 'typedi';
@@ -10,7 +11,7 @@ export class GameSoundtrackService {
     async create(soundtrack: GameSoundtrack): Promise<GameSoundtrack> {
         // TODO Validation
         const document = await GameSoundtrackModel.create(soundtrack);
-        return document.toObject();
+        return document.toJSON<GameSoundtrack>();
     }
 
     async existsById(id: number): Promise<boolean> {
@@ -23,20 +24,20 @@ export class GameSoundtrackService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<GameSoundtrack>();
     }
 
     async findAll(): Promise<Array<GameSoundtrack>> {
         const documents = await GameSoundtrackModel.find({});
-        return documents.map(document => document.toObject());
+        return documents.map(document => document.toJSON<GameSoundtrack>());
     }
-    
+
     async findByIds(ids: Array<number>): Promise<Array<GameSoundtrack>> {
         if (!ids || !ids.length) {
             return [];
         }
         const documents = await GameSoundtrackModel.find({ _id: { $in: ids } });
-        return documents.map(document => document.toObject());
+        return documents.map(document => document.toJSON<GameSoundtrack>());
     }
 
     async findAllIds(): Promise<Array<number>> {
@@ -63,7 +64,7 @@ export class GameSoundtrackService {
             .skip(skip)
             .limit(size);
 
-        const data = documents.map(document => document.toObject());
+        const data = documents.map(document => document.toJSON<GameSoundtrack>());
 
         return PaginationUtils.toPage(data, count, page, size);
     }
@@ -81,7 +82,7 @@ export class GameSoundtrackService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<GameSoundtrack>();
     }
 
 }

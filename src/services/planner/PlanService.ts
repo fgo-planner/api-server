@@ -1,14 +1,15 @@
-import { BasicPlan, MasterAccountModel, Plan, PlanModel } from '@fgo-planner/data-mongo';
+import { BasicPlan, Plan } from '@fgo-planner/data-core';
+import { MasterAccountModel, PlanModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
+import { DeleteResult } from 'mongodb';
 import { Service } from 'typedi';
-import {DeleteResult} from 'mongodb';
 
 @Service()
 export class PlanService {
 
     async addPlan(plan: Partial<Plan>): Promise<Plan> {
         const document = await PlanModel.create(plan);
-        return document.toObject();
+        return document.toJSON<Plan>();
     }
 
     async findById(id: ObjectId): Promise<Plan | null> {
@@ -19,12 +20,12 @@ export class PlanService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<Plan>();
     }
 
     async findByAccountId(accountId: ObjectId): Promise<Array<BasicPlan>> {
         const documents = await PlanModel.findByAccountId(accountId);
-        return documents.map(document => document.toObject());
+        return documents.map(document => document.toJSON<BasicPlan>());
     }
 
     async update(plan: Partial<Plan>): Promise<Plan | null> {
@@ -41,7 +42,7 @@ export class PlanService {
         if (!document) {
             return null;
         }
-        return document.toObject();
+        return document.toJSON<Plan>();
     }
 
     async delete(id: ObjectId): Promise<number>;
@@ -68,7 +69,7 @@ export class PlanService {
      * @param planId The plan ID. Must not be null.
      * @param userId The user's ID. Must not be null.
      */
-    async isOwner(planId: ObjectId, userId: ObjectId): Promise<boolean> {
+    async isOwner(planId: ObjectId | string, userId: ObjectId): Promise<boolean> {
         // TODO Do this in a single db call
         const plan = await PlanModel.findById(planId, { accountId: 1 });
         if (!plan) {

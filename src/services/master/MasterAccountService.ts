@@ -1,4 +1,4 @@
-import { BasicMasterAccount, MasterAccount, MasterAccountUpdate } from '@fgo-planner/data-core';
+import { BasicMasterAccount, MasterAccount, UpdateMasterAccount } from '@fgo-planner/data-core';
 import { MasterAccountModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Service } from 'typedi';
@@ -6,7 +6,7 @@ import { Service } from 'typedi';
 @Service()
 export class MasterAccountService {
 
-    async addAccount(userId: ObjectId, account: Omit<MasterAccount, 'userId' | '_id'>): Promise<MasterAccount> {
+    async createAccount(userId: ObjectId, account: Omit<MasterAccount, 'userId' | '_id'>): Promise<MasterAccount> {
         const document = await MasterAccountModel.create({
             ...account,
             userId
@@ -30,7 +30,7 @@ export class MasterAccountService {
         return documents.map(doc => doc.toJSON<BasicMasterAccount>());
     }
 
-    async update(account: MasterAccountUpdate): Promise<MasterAccount | null> {
+    async update(account: UpdateMasterAccount): Promise<MasterAccount | null> {
         if (!account._id) {
             throw 'Account ID is missing or invalid.';
         }
@@ -52,15 +52,12 @@ export class MasterAccountService {
     /**
      * Checks whether the user is the owner of the master account.
      * 
-     * @param accountId The master account ID. Must not be null.
      * @param userId The user's ID. Must not be null.
+     * @param accountId The master account ID. Must not be null.
      */
-    async isOwner(accountId: ObjectId, userId: ObjectId | string): Promise<boolean> {
-        const account = await MasterAccountModel.findById(accountId, { userId: 1 });
-        if (typeof userId !== 'string') {
-            userId = userId.toString();
-        }
-        return account ? userId === account.userId.toString() : false;
+    async isOwner(userId: ObjectId | string, accountId: ObjectId | string): Promise<boolean> {
+        const document = await MasterAccountModel.exists({ _id: accountId, userId });
+        return !!document;
     }
 
 }

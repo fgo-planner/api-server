@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { AccessTokenPayload } from './TokenPayload.type';
 
-export type AuthenticatedRequest = {
+export type AuthenticatedRequest<T = any> = {
     token: AccessTokenPayload;
-} & Request;
+} & Request<any, any, T>;

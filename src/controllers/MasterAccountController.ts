@@ -12,11 +12,11 @@ export class MasterAccountController {
     private _masterAccountService!: MasterAccountService;
 
     @PutMapping()
-    async addAccount(req: AuthenticatedRequest, res: Response): Promise<any> {
+    async createAccount(req: AuthenticatedRequest, res: Response): Promise<any> {
         let account = req.body;
         const userId = new ObjectId(req.token.id);
         try {
-            account = await this._masterAccountService.addAccount(userId, account);
+            account = await this._masterAccountService.createAccount(userId, account);
             res.send(account);
         } catch (err) {
             res.status(400).send(err);
@@ -91,7 +91,7 @@ export class MasterAccountController {
         if (!userId) {
             return true;
         }
-        return this._masterAccountService.isOwner(accountId, userId);
+        return this._masterAccountService.isOwner(userId, accountId);
     }
 
     /**

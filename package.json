@@ -31,8 +31,9 @@
     "homepage": "https://github.com/fgo-planner/api-server#readme",
     "dependencies": {
         "@fgo-planner/common-core": "^0.1.4",
-        "@fgo-planner/data-mongo": "^0.8.1",
-        "@fgo-planner/transform-core": "^0.8.1",
+        "@fgo-planner/data-mongo": "0.9.0",
+        "@fgo-planner/data-core": "^0.9.0",
+        "@fgo-planner/transform-core": "^0.9.0",
         "axios": "^0.25.0",
         "bcryptjs": "^2.4.3",
         "bson": "^4.6.0",

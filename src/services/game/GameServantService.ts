@@ -1,5 +1,5 @@
 import { CollectionUtils } from '@fgo-planner/common-core';
-import { Entity, ExternalLink, GameServant, GameServantMetadata, GameServantWithMetadata, SearchTagUtils } from '@fgo-planner/data-core';
+import { EntityUtils, ExternalLink, GameServant, GameServantMetadata, GameServantWithMetadata, SearchTagUtils } from '@fgo-planner/data-core';
 import { GameServantModel } from '@fgo-planner/data-mongo';
 import { Page, Pagination } from 'dto';
 import { ProjectionType, SortOrder } from 'mongoose';
@@ -116,7 +116,7 @@ export class GameServantService {
         documents[0].metadata;
         return CollectionUtils.mapIterableToObject(
             documents,
-            this._getIdFunction,
+            EntityUtils.getId,
             this._generateSearchKeywords
         );
     }
@@ -142,10 +142,6 @@ export class GameServantService {
             return GameServantModel.ExcludeMetadataProjection;
         }
         return undefined;
-    }
-
-    private _getIdFunction(entity: Entity<unknown, number>): number {
-        return entity._id;
     }
 
     private _generateSearchKeywords({ metadata }: SearchTagsMetadata): string {

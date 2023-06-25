@@ -70,7 +70,7 @@ export class UserService {
         });
 
         if (friendId) {
-            await this._masterAccountService.addAccount(user._id, {
+            await this._masterAccountService.createAccount(user._id, {
                 friendId,
                 resources: {
                     items: [],
@@ -88,6 +88,10 @@ export class UserService {
                 },
                 soundtracks: {
                     unlocked: []
+                },
+                planGrouping: {
+                    ungrouped: [],
+                    groups: []
                 }
             });
         }

@@ -9,8 +9,6 @@ type Query = Nullable<string | Array<string> | ParsedQs | Array<ParsedQs>>;
 
 export class HttpRequestUtils {
 
-    private static readonly _MissingIdErrorMessage = 'Param \'id\' is missing.';
-
     /**
      * Parses a string of comma delimited integers from request params.
      * 
@@ -49,7 +47,7 @@ export class HttpRequestUtils {
     static parseNumericalIdFromParams(params: ParamsDictionary, key: string): number {
         const value = params[key];
         if (!value) {
-            throw Error(this._MissingIdErrorMessage);
+            throw this._getMissingParamError(key);
         }
         const result = Number(value);
         if (isNaN(result)) {
@@ -61,9 +59,13 @@ export class HttpRequestUtils {
     static parseObjectIdFromParams(params: ParamsDictionary, key: string): ObjectId {
         const value = params[key];
         if (!value) {
-            throw Error(this._MissingIdErrorMessage);
+            throw this._getMissingParamError(key);
         }
         return ObjectIdUtils.instantiate(value);
+    }
+
+    private static _getMissingParamError(key: string): Error {
+        return new Error(`Param '${key}' is missing`);
     }
 
 }

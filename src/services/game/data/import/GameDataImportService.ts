@@ -1,5 +1,5 @@
 import { GameItem, GameServantMetadata, GameServantWithMetadata, GameSoundtrack } from '@fgo-planner/data-core';
-import { GameItemDocument, GameItemModel, GameServantDbDocument, GameServantModel, GameServantWithMetadataDocument, GameSoundtrackDocument, GameSoundtrackModel } from '@fgo-planner/data-mongo';
+import { GameItemDocument, GameItemModel, GameServantMongooseDocument, GameServantModel, GameServantWithMetadataDocument, GameSoundtrackDocument, GameSoundtrackModel } from '@fgo-planner/data-mongo';
 import { TransformLogger } from '@fgo-planner/transform-core';
 import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
 import { ResponseCacheKey, ResponseCacheManager } from 'internal';
@@ -160,7 +160,7 @@ export class GameDataImportService {
         logger: TransformLogger
     ): Promise<GameServantBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
-        const existing = await GameServantModel.findById<GameServantDbDocument>(servant._id);
+        const existing = await GameServantModel.findById<GameServantMongooseDocument>(servant._id);
         if (!existing) {
             logger.info(servant._id, 'Servant does not exist yet, will be inserted into the database.');
             return {

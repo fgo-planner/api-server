@@ -44,13 +44,25 @@ export class HttpRequestUtils {
         return result;
     }
 
-    static parseNumericalIdFromParams(params: ParamsDictionary, key: string): number {
+    static parseNumericalValueFromParams(params: ParamsDictionary, key: string): number {
         const value = params[key];
         if (!value) {
             throw this._getMissingParamError(key);
         }
         const result = Number(value);
         if (isNaN(result)) {
+            throw Error(`'${value}' is not a valid number.`);
+        }
+        return result;
+    }
+
+    static parseNumericalIdFromParams(params: ParamsDictionary, key: string): number {
+        const value = params[key];
+        if (!value) {
+            throw this._getMissingParamError(key);
+        }
+        const result = Number(value);
+        if (!(result > 0)) {
             throw Error(`'${value}' is not a valid ID.`);
         }
         return result;

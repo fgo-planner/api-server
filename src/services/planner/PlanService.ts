@@ -1,4 +1,4 @@
-import { BasicPlan, CreatePlan, Plan, PlanGroup, PlanGrouping, UpdatePlan } from '@fgo-planner/data-core';
+import { BasicPlan, CreatePlan, CreatePlanGroup, Plan, PlanGroup, PlanGrouping, UpdatePlan, UpdatePlanGrouping } from '@fgo-planner/data-core';
 import { MasterAccountModel, ObjectIdOrString, PlanModel } from '@fgo-planner/data-mongo';
 import { Service } from 'typedi';
 
@@ -7,9 +7,9 @@ export class PlanService {
 
     //#region Plan
 
-    async createPlan(plan: CreatePlan): Promise<Plan | null> {
-        const { groupId, ...createDoc } = plan;
-        const document = await PlanModel.create(createDoc);
+    async createPlan(createPlan: CreatePlan): Promise<Plan | null> {
+        const { groupId, ...plan } = createPlan;
+        const document = await PlanModel.create(plan);
         const accountId = document.accountId;
         const planGrouping = await this.findPlanGroupingByAccountId(accountId);
         if (!planGrouping) {
@@ -30,7 +30,7 @@ export class PlanService {
             // Push plan as ungrouped if the groupId was not provided or not found.
             planGrouping.ungrouped.push(planId);
         }
-        await this.syncPlanGrouping(accountId, planGrouping);
+        await this._syncPlanGrouping(accountId, planGrouping);
         return document.toJSON<Plan>();
     }
 
@@ -50,15 +50,15 @@ export class PlanService {
         return documents.map(document => document.toJSON<BasicPlan>());
     }
 
-    async updatePlan(plan: UpdatePlan): Promise<Plan | null> {
+    async updatePlan(updatePlan: UpdatePlan): Promise<Plan | null> {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { _id, accountId, ...update } = plan;
+        const { _id, accountId, ...plan } = updatePlan;
         if (!_id) {
             throw 'Plan ID is missing or invalid.';
         }
         const document = await PlanModel.findOneAndUpdate(
             { _id, accountId },
-            { $set: update },
+            { $set: plan },
             { runValidators: true, new: true }
         );
         if (!document) {
@@ -94,10 +94,24 @@ export class PlanService {
         return document.toJSON().planGrouping;
     }
 
-    async updatePlanGrouping(accountId: ObjectIdOrString, planGrouping: PlanGrouping): Promise<PlanGrouping | null> {
+    async updatePlanGrouping(updatePlanGrouping: UpdatePlanGrouping): Promise<PlanGrouping | null> {
+        const { accountId, ...planGrouping } = updatePlanGrouping;
         const document = await MasterAccountModel.findOneAndUpdate(
             { accountId },
             { $set: { planGrouping } },
+            { runValidators: true, new: true, projection: MasterAccountModel.PlanGroupingProjection }
+        );
+        if (!document) {
+            return null;
+        }
+        return document.toJSON().planGrouping;
+    }
+
+    async createPlanGroup(createPlanGroup: CreatePlanGroup): Promise<PlanGrouping | null> {
+        const { accountId, ...planGroup } = createPlanGroup;
+        const document = await MasterAccountModel.findOneAndUpdate(
+            { accountId },
+            { $push: { 'planGrouping.groups': planGroup } },
             { runValidators: true, new: true, projection: MasterAccountModel.PlanGroupingProjection }
         );
         if (!document) {
@@ -134,7 +148,7 @@ export class PlanService {
             }
         }
         planGrouping.groups = updatedGroups;
-        await this.syncPlanGrouping(accountId, planGrouping);
+        await this._syncPlanGrouping(accountId, planGrouping);
         return count;
     }
 
@@ -143,11 +157,11 @@ export class PlanService {
         if (!planGrouping) {
             return null;
         }
-        return await this.syncPlanGrouping(accountId, planGrouping);
+        return await this._syncPlanGrouping(accountId, planGrouping);
     }
 
-    async syncPlanGrouping(accountId: ObjectIdOrString, planGrouping: PlanGrouping): Promise<PlanGrouping | null> {
-        const planIds = await PlanModel.findPlanIdsByAccountId(accountId);
+    async syncPlanGrouping(planGrouping: UpdatePlanGrouping): Promise<PlanGrouping | null> {
+        const planIds = await PlanModel.findPlanIdsByAccountId(planGrouping.accountId);
         const planIdSet = new Set(planIds.map(id => id.toHexString()));
         const updatedGroups: Array<PlanGroup> = [];
         let hasChanges = false;
@@ -171,11 +185,20 @@ export class PlanService {
             updatedUngrouped.push(...planIdSet);
         }
         if (!hasChanges) {
-            return planGrouping;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { accountId, ...result } = planGrouping;
+            return result;
         }
         planGrouping.ungrouped = updatedUngrouped;
         planGrouping.groups = updatedGroups;
-        return await this.updatePlanGrouping(accountId, planGrouping);
+        return await this.updatePlanGrouping(planGrouping);
+    }
+
+    private _syncPlanGrouping(accountId: ObjectIdOrString, planGrouping: PlanGrouping): Promise<PlanGrouping | null> {
+        return this.syncPlanGrouping({
+            accountId: accountId.toString(),
+            ...planGrouping
+        });
     }
 
     private _syncGroup(planGroup: PlanGroup, planIdSet: Set<string>): boolean {

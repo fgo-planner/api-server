@@ -6,6 +6,7 @@ import { Service } from 'typedi';
 @Service()
 export class MasterAccountService {
 
+    // TODO Create DTO type for the account payload
     async createAccount(userId: ObjectId, account: Omit<MasterAccount, 'userId' | '_id'>): Promise<MasterAccount> {
         const document = await MasterAccountModel.create({
             ...account,

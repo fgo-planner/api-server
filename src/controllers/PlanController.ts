@@ -1,10 +1,22 @@
-import { CreatePlan, PlanGrouping, UpdatePlan, UpdatePlanGrouping } from '@fgo-planner/data-core';
+import { CreatePlan, CreatePlanGroup, PlanGrouping, UpdatePlan, UpdatePlanGrouping } from '@fgo-planner/data-core';
 import { ObjectId } from 'bson';
 import { Response } from 'express';
 import { AuthenticatedRequest, DeleteMapping, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
+import { ParsedQs } from 'qs';
 import { MasterAccountService, PlanService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, ObjectIdUtils } from 'utils';
+
+const getResyncParam = (query: ParsedQs): boolean => {
+    const resyncParam = query['resync'];
+    if (typeof resyncParam !== 'string') {
+        /**
+         * Always resync by default.
+         */
+        return true;
+    }
+    return resyncParam.toLowerCase() === 'true';
+};
 
 @RestController('/user/planner', UserAccessLevel.Authenticated)
 export class PlanController {
@@ -111,6 +123,9 @@ export class PlanController {
                 return res.status(401).send(); // TODO Add message
             }
             const planGrouping = await this._planService.findPlanGroupingByAccountId(accountId);
+            if (!planGrouping) {
+                return null;
+            }
             res.send(planGrouping);
         } catch (err) {
             res.status(400).send(err);
@@ -119,17 +134,17 @@ export class PlanController {
 
     @PostMapping('/plan-grouping')
     async updatePlanGrouping(req: AuthenticatedRequest<UpdatePlanGrouping>, res: Response): Promise<any> {
-        const { accountId, ...planGrouping } = req.body;
-        const resync = true;  // TODO Make this configurable as part of query param or request body.
+        const updatePlanGrouping = req.body;
+        const resync = getResyncParam(req.query);
         try {
-            if (!await this._hasAccess(req, accountId)) {
+            if (!await this._hasAccess(req, updatePlanGrouping.accountId)) {
                 return res.status(401).send(); // TODO Add message
             }
             let updated: PlanGrouping | null;
             if (resync) {
-                updated = await this._planService.syncPlanGrouping(accountId, planGrouping);
+                updated = await this._planService.syncPlanGrouping(updatePlanGrouping);
             } else {
-                updated = await this._planService.updatePlanGrouping(accountId, planGrouping);
+                updated = await this._planService.updatePlanGrouping(updatePlanGrouping);
             }
             if (!updated) {
                 return res.status(404).send(); // TODO Add message
@@ -140,8 +155,26 @@ export class PlanController {
         }
     }
 
+    @PutMapping('/plan-grouping')
+    async createPlanGroup(req: AuthenticatedRequest<CreatePlanGroup>, res: Response): Promise<any> {
+        const createPlanGroup = req.body;
+        try {
+            if (!await this._hasAccess(req, createPlanGroup.accountId)) {
+                return res.status(401).send(); // TODO Add message
+            }
+            const planGrouping = await this._planService.createPlanGroup(createPlanGroup);
+            if (!planGrouping) {
+                return null;
+            }
+            res.send(planGrouping);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
     @DeleteMapping('/plan-grouping')
     async deletePlanGroups(req: AuthenticatedRequest, res: Response): Promise<any> {
+        // TODO Create DTO type for this
         const { accountId, planGroupIds, deletePlans } = req.body;
         try {
             if (!Array.isArray(planGroupIds)) {

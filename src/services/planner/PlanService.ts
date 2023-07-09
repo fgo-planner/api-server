@@ -7,30 +7,29 @@ export class PlanService {
 
     //#region Plan
 
-    async createPlan(createPlan: CreatePlan): Promise<Plan | null> {
+    async createPlan(createPlan: CreatePlan): Promise<Plan> {
         const { groupId, ...plan } = createPlan;
         const document = await PlanModel.create(plan);
         const accountId = document.accountId;
         const planGrouping = await this.findPlanGroupingByAccountId(accountId);
-        if (!planGrouping) {
-            return null;
-        }
-        const planId = document._id.toHexString();
-        let planGroupFound = false;
-        if (groupId) {
-            for (const planGroup of planGrouping.groups) {
-                if (planGroup._id === groupId) {
-                    planGroup.plans.push(planId);
-                    planGroupFound = true;
-                    break;
+        if (planGrouping) {
+            const planId = document._id.toHexString();
+            let planGroupFound = false;
+            if (groupId) {
+                for (const planGroup of planGrouping.groups) {
+                    if (planGroup._id === groupId) {
+                        planGroup.plans.push(planId);
+                        planGroupFound = true;
+                        break;
+                    }
                 }
             }
+            if (!planGroupFound) {
+                // Push plan as ungrouped if the groupId was not provided or not found.
+                planGrouping.ungrouped.push(planId);
+            }
+            await this._syncPlanGrouping(accountId, planGrouping);
         }
-        if (!planGroupFound) {
-            // Push plan as ungrouped if the groupId was not provided or not found.
-            planGrouping.ungrouped.push(planId);
-        }
-        await this._syncPlanGrouping(accountId, planGrouping);
         return document.toJSON<Plan>();
     }
 
@@ -160,38 +159,28 @@ export class PlanService {
         return await this._syncPlanGrouping(accountId, planGrouping);
     }
 
-    async syncPlanGrouping(planGrouping: UpdatePlanGrouping): Promise<PlanGrouping | null> {
+    async syncPlanGrouping(planGrouping: UpdatePlanGrouping<ObjectIdOrString>): Promise<PlanGrouping | null> {
         const planIds = await PlanModel.findPlanIdsByAccountId(planGrouping.accountId);
-        const planIdSet = new Set(planIds.map(id => id.toHexString()));
-        const updatedGroups: Array<PlanGroup> = [];
-        let hasChanges = false;
+        const planIdSet = new Set(planIds.map(id => id.toString()));
+        const updatedGroups: Array<PlanGroup<ObjectIdOrString>> = [];
         for (const planGroup of planGrouping.groups) {
-            if (this._syncGroup(planGroup, planIdSet)) {
-                hasChanges = true;
-            }
+            this._syncGroup(planGroup, planIdSet);
             updatedGroups.push(planGroup);
         }
         const updatedUngrouped: Array<string> = [];
         for (const planId of planGrouping.ungrouped) {
-            if (!planIdSet.delete(planId)) {
-                hasChanges = true;
-            } else {
-                updatedUngrouped.push(planId);
+            const planIdString = planId.toString();
+            if (planIdSet.delete(planIdString)) {
+                updatedUngrouped.push(planIdString);
             }
         }
         if (planIdSet.size) {
             // Push remaining plans
-            hasChanges = true;
             updatedUngrouped.push(...planIdSet);
-        }
-        if (!hasChanges) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { accountId, ...result } = planGrouping;
-            return result;
         }
         planGrouping.ungrouped = updatedUngrouped;
         planGrouping.groups = updatedGroups;
-        return await this.updatePlanGrouping(planGrouping);
+        return await this.updatePlanGrouping(planGrouping as UpdatePlanGrouping);
     }
 
     private _syncPlanGrouping(accountId: ObjectIdOrString, planGrouping: PlanGrouping): Promise<PlanGrouping | null> {
@@ -201,20 +190,15 @@ export class PlanService {
         });
     }
 
-    private _syncGroup(planGroup: PlanGroup, planIdSet: Set<string>): boolean {
-        let hasChanges = false;
+    private _syncGroup(planGroup: PlanGroup<ObjectIdOrString>, planIdSet: Set<string>): void {
         const updatedPlans: Array<string> = [];
         for (const planId of planGroup.plans) {
-            if (!planIdSet.delete(planId)) {
-                hasChanges = true;
-            } else {
-                updatedPlans.push(planId);
+            const planIdString = planId.toString();
+            if (planIdSet.delete(planIdString)) {
+                updatedPlans.push(planIdString);
             }
         }
-        if (hasChanges) {
-            planGroup.plans = updatedPlans;
-        }
-        return hasChanges;
+        planGroup.plans = updatedPlans;
     }
 
     //#endregion

@@ -17,4 +17,8 @@ export class ObjectIdUtils {
         return new ObjectId(id);
     }
 
+    static toString(id: ObjectId): string {
+        return id.toString();
+    }
+
 }

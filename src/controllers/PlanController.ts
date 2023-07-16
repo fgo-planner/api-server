@@ -1,4 +1,5 @@
-import { CreatePlan, CreatePlanGroup, PlanGrouping, UpdatePlan, UpdatePlanGrouping } from '@fgo-planner/data-core';
+import { CreatePlan, CreatePlanGroup, UpdatePlan, UpdatePlanGrouping } from '@fgo-planner/data-core';
+import { PlanGroupingDocument } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Response } from 'express';
 import { AuthenticatedRequest, DeleteMapping, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
@@ -140,7 +141,7 @@ export class PlanController {
             if (!await this._hasAccess(req, updatePlanGrouping.accountId)) {
                 return res.status(401).send(); // TODO Add message
             }
-            let updated: PlanGrouping | null;
+            let updated: PlanGroupingDocument | null;
             if (resync) {
                 updated = await this._planService.syncPlanGrouping(updatePlanGrouping);
             } else {
@@ -164,7 +165,7 @@ export class PlanController {
             }
             const planGrouping = await this._planService.createPlanGroup(createPlanGroup);
             if (!planGrouping) {
-                return null;
+                return res.status(404).send(); // TODO Add message
             }
             res.send(planGrouping);
         } catch (err) {

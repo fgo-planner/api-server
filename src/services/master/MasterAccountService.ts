@@ -1,5 +1,5 @@
-import { BasicMasterAccount, MasterAccount, UpdateMasterAccount } from '@fgo-planner/data-core';
-import { MasterAccountModel } from '@fgo-planner/data-mongo';
+import { MasterAccount, UpdateMasterAccount } from '@fgo-planner/data-core';
+import { MasterAccountBasicDocument, MasterAccountDocument, MasterAccountModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Service } from 'typedi';
 
@@ -7,39 +7,30 @@ import { Service } from 'typedi';
 export class MasterAccountService {
 
     // TODO Create DTO type for the account payload
-    async createAccount(userId: ObjectId, account: Omit<MasterAccount, 'userId' | '_id'>): Promise<MasterAccount> {
+    async createAccount(userId: ObjectId, account: Omit<MasterAccount, 'userId' | '_id'>): Promise<MasterAccountDocument> {
         const document = await MasterAccountModel.create({
             ...account,
             userId
         });
-        return document.toJSON<MasterAccount>();
+        return document.toObject<MasterAccountDocument>();
     }
 
-    async findById(id: ObjectId): Promise<MasterAccount | null> {
+    async findById(id: ObjectId): Promise<MasterAccountDocument | null> {
         if (!id) {
             throw 'Account ID is missing or invalid.';
         }
-        const document = await MasterAccountModel.findById(id);
-        if (!document) {
-            return null;
-        }
-        return document.toJSON<MasterAccount>();
+        return await MasterAccountModel.findById(id).lean();
     }
 
-    async findByUserId(userId: ObjectId): Promise<Array<BasicMasterAccount>> {
-        const documents = await MasterAccountModel.findByUserId(userId);
-        return documents.map(doc => doc.toJSON<BasicMasterAccount>());
+    async findByUserId(userId: ObjectId): Promise<Array<MasterAccountBasicDocument>> {
+        return await MasterAccountModel.findByUserId(userId).lean();
     }
 
-    async update(account: UpdateMasterAccount): Promise<MasterAccount | null> {
+    async update(account: UpdateMasterAccount): Promise<MasterAccountDocument | null> {
         if (!account._id) {
             throw 'Account ID is missing or invalid.';
         }
-        const document = await MasterAccountModel.partialUpdate(account);
-        if (!document) {
-            return null;
-        }
-        return document.toJSON<MasterAccount>();
+        return await MasterAccountModel.partialUpdate(account);
     }
 
     async delete(id: ObjectId): Promise<boolean> {
@@ -57,7 +48,7 @@ export class MasterAccountService {
      * @param accountId The master account ID. Must not be null.
      */
     async isOwner(userId: ObjectId | string, accountId: ObjectId | string): Promise<boolean> {
-        const document = await MasterAccountModel.exists({ _id: accountId, userId });
+        const document = await MasterAccountModel.exists({ _id: accountId, userId }).lean();
         return !!document;
     }
 

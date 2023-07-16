@@ -1,6 +1,6 @@
 import { Nullable } from '@fgo-planner/common-core';
-import { BasicUser, User, UserPreferences } from '@fgo-planner/data-core';
-import { MasterAccountValidators, UserDbDocument, UserModel } from '@fgo-planner/data-mongo';
+import { UserPreferences } from '@fgo-planner/data-core';
+import { MasterAccountValidators, UserBasicDocument, UserDocument, UserModel } from '@fgo-planner/data-mongo';
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'bson';
 import { Inject, Service } from 'typedi';
@@ -17,26 +17,18 @@ export class UserService {
     @Inject()
     private _masterAccountService!: MasterAccountService;
 
-    async findById(id: ObjectId): Promise<User | null> {
+    async findById(id: ObjectId): Promise<UserDocument | null> {
         if (!id) {
             throw 'User ID is missing or invalid.';
         }
-        const document = await UserModel.findById(id);
-        if (!document) {
-            return null;
-        }
-        return document.toJSON<User>();
+        return await UserModel.findById(id).lean();
     }
 
-    async findBasicById(id: ObjectId): Promise<BasicUser | null> {
+    async findBasicById(id: ObjectId): Promise<UserBasicDocument | null> {
         if (!id) {
             throw 'User ID is missing or invalid.';
         }
-        const document = await UserModel.findBasicById(id);
-        if (!document) {
-            return null;
-        }
-        return document.toJSON<BasicUser>();
+        return await UserModel.findBasicById(id).lean();
     }
 
     // TODO Create DTO for parameters if it gets too big.
@@ -104,7 +96,7 @@ export class UserService {
         if (!username) {
             return false;
         }
-        const document = await UserModel.exists({ username });
+        const document = await UserModel.exists({ username }).lean();
         return !!document;
     }
 
@@ -115,16 +107,16 @@ export class UserService {
         if (!email) {
             return false;
         }
-        const document = await UserModel.exists({ email });
+        const document = await UserModel.exists({ email }).lean();
         return !!document;
     }
 
     async getUserPreferences(userId: ObjectId): Promise<UserPreferences | null> {
-        const document = await UserModel.getUserPreferences(userId);
+        const document = await UserModel.getUserPreferences(userId).lean();
         if (!document) {
             return null;
         }
-        return document.toJSON().userPrefs;
+        return document.userPrefs;
     }
 
     async updateUserPreferences(userId: ObjectId, userPrefs: Partial<UserPreferences>): Promise<UserPreferences | null> {
@@ -132,15 +124,15 @@ export class UserService {
         for (const [key, value] of Object.entries(userPrefs)) {
             updateObject[`userPrefs.${key}`] = value;
         }
-        const document = await UserModel.findOneAndUpdate<UserDbDocument>(
+        const document = await UserModel.findOneAndUpdate(
             { _id: userId },
             { $set: updateObject },
             { runValidators: true, new: true }
-        );
+        ).lean();
         if (!document) {
             return null;
         }
-        return document.toJSON().userPrefs;
+        return document.userPrefs;
     }
 
     private _passwordIsValid(password: string): boolean {
@@ -148,6 +140,7 @@ export class UserService {
         return !!password;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private _emailIsValid(email?: string): boolean {
         // TODO Implement this.
         return true;

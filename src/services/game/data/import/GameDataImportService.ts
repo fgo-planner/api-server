@@ -1,4 +1,5 @@
-import { GameItem, GameItemModel, GameServantMetadata, GameServantModel, GameServantWithMetadata, GameSoundtrack, GameSoundtrackModel } from '@fgo-planner/data-mongo';
+import { GameItem, GameServantMetadata, GameServantWithMetadata, GameSoundtrack } from '@fgo-planner/data-core';
+import { GameItemDocument, GameItemModel, GameServantMongooseDocument, GameServantModel, GameServantWithMetadataDocument, GameSoundtrackDocument, GameSoundtrackModel } from '@fgo-planner/data-mongo';
 import { TransformLogger } from '@fgo-planner/transform-core';
 import { GameDataImportExistingAction, GameDataImportOptions, GameDataImportResult, GameDataImportResultSet } from 'dto';
 import { ResponseCacheKey, ResponseCacheManager } from 'internal';
@@ -9,9 +10,9 @@ import { GameServantService } from '../../GameServantService';
 import { GameSoundtrackService } from '../../GameSoundtrackService';
 import { AtlasAcademyDataImportService } from './atlas-academy/AtlasAcademyDataImportService';
 
-type GameServantBulkWriteQuery = AnyBulkWriteOperation<GameServantWithMetadata>;
-type GameItemBulkWriteQuery = AnyBulkWriteOperation<GameItem>;
-type GameSoundtrackBulkWriteQuery = AnyBulkWriteOperation<GameSoundtrack>;
+type GameServantBulkWriteQuery = AnyBulkWriteOperation<GameServantWithMetadataDocument>;
+type GameItemBulkWriteQuery = AnyBulkWriteOperation<GameItemDocument>;
+type GameSoundtrackBulkWriteQuery = AnyBulkWriteOperation<GameSoundtrackDocument>;
 
 @Service()
 export class GameDataImportService {
@@ -142,7 +143,7 @@ export class GameDataImportService {
         if (!exists) {
             logger.info(servant._id, 'Servant does not exist yet, will be inserted into the database.');
             return {
-                insertOne: { document: servant }
+                insertOne: { document: GameServantModel.castObject(servant) }
             };
         }
         logger.info(servant._id, 'Servant already exists, write operation will be skipped.');
@@ -159,11 +160,11 @@ export class GameDataImportService {
         logger: TransformLogger
     ): Promise<GameServantBulkWriteQuery> {
         // TODO We should change the database method to return a lean document.
-        const existing = await this._gameServantService.findById(servant._id);
+        const existing = await GameServantModel.findById<GameServantMongooseDocument>(servant._id);
         if (!existing) {
             logger.info(servant._id, 'Servant does not exist yet, will be inserted into the database.');
             return {
-                insertOne: { document: servant }
+                insertOne: { document: GameServantModel.castObject(servant) }
             };
         }
         for (const [key, value] of Object.entries(servant)) {
@@ -179,7 +180,7 @@ export class GameDataImportService {
         return {
             updateOne: {
                 filter: { _id: servant._id },
-                update: { $set: existing }
+                update: { $set: GameServantModel.castObject(existing) }
             }
         };
     }
@@ -211,7 +212,7 @@ export class GameDataImportService {
         if (!existing) {
             logger.info(servant._id, 'Servant does not exist yet, will be inserted into the database.');
             return {
-                insertOne: { document: servant }
+                insertOne: { document: GameServantModel.castObject(servant) }
             };
         }
         for (const [key, value] of Object.entries(servant)) {
@@ -228,12 +229,12 @@ export class GameDataImportService {
          */
         existing.costumes = servant.costumes;
         existing.np = servant.np;
-        
+
         logger.info(servant._id, 'Servant already exists, existing data will be updated.');
         return {
             updateOne: {
                 filter: { _id: servant._id },
-                update: { $set: existing }
+                update: { $set: GameServantModel.castObject(existing) }
             }
         };
     }
@@ -338,7 +339,7 @@ export class GameDataImportService {
         if (!exists) {
             logger.info(item._id, 'Item does not exist yet, will be inserted into the database.');
             return {
-                insertOne: { document: item }
+                insertOne: { document: GameItemModel.castObject(item) }
             };
         }
         logger.info(item._id, 'Item already exists, write operation will be skipped.');
@@ -359,7 +360,7 @@ export class GameDataImportService {
         if (!existing) {
             logger.info(item._id, 'Item does not exist yet, will be inserted into the database.');
             return {
-                insertOne: { document: item }
+                insertOne: { document: GameItemModel.castObject(item) }
             };
         }
         for (const [key, value] of Object.entries(item)) {
@@ -372,7 +373,7 @@ export class GameDataImportService {
         return {
             updateOne: {
                 filter: { _id: item._id },
-                update: { $set: existing }
+                update: { $set: GameItemModel.castObject(existing) }
             }
         };
     }
@@ -391,7 +392,7 @@ export class GameDataImportService {
         if (!existing) {
             logger.info(item._id, 'Item does not exist yet, will be inserted into the database.');
             return {
-                insertOne: { document: item }
+                insertOne: { document: GameItemModel.castObject(item) }
             };
         }
         for (const [key, value] of Object.entries(item)) {
@@ -404,7 +405,7 @@ export class GameDataImportService {
         return {
             updateOne: {
                 filter: { _id: item._id },
-                update: { $set: existing }
+                update: { $set: GameItemModel.castObject(existing) }
             }
         };
     }
@@ -485,7 +486,7 @@ export class GameDataImportService {
         if (!exists) {
             logger.info(soundtrack._id, 'Soundtrack does not exist yet, will be inserted into the database.');
             return {
-                insertOne: { document: soundtrack }
+                insertOne: { document: GameSoundtrackModel.castObject(soundtrack) }
             };
         }
         logger.info(soundtrack._id, 'Soundtrack already exists, write operation will be skipped.');
@@ -506,7 +507,7 @@ export class GameDataImportService {
         if (!existing) {
             logger.info(soundtrack._id, 'Soundtrack does not exist yet, will be inserted into the database.');
             return {
-                insertOne: { document: soundtrack }
+                insertOne: { document: GameSoundtrackModel.castObject(soundtrack) }
             };
         }
         for (const [key, value] of Object.entries(soundtrack)) {
@@ -519,7 +520,7 @@ export class GameDataImportService {
         return {
             updateOne: {
                 filter: { _id: soundtrack._id },
-                update: { $set: existing }
+                update: { $set: GameSoundtrackModel.castObject(existing) }
             }
         };
     }
@@ -539,7 +540,7 @@ export class GameDataImportService {
         if (!existing) {
             logger.info(soundtrack._id, 'Soundtrack does not exist yet, will be inserted into the database.');
             return {
-                insertOne: { document: soundtrack }
+                insertOne: { document: GameSoundtrackModel.castObject(soundtrack) }
             };
         }
         for (const [key, value] of Object.entries(soundtrack)) {
@@ -552,7 +553,7 @@ export class GameDataImportService {
         return {
             updateOne: {
                 filter: { _id: soundtrack._id },
-                update: { $set: existing }
+                update: { $set: GameSoundtrackModel.castObject(existing) }
             }
         };
     }

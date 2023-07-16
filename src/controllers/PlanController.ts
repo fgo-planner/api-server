@@ -1,10 +1,23 @@
-import { Plan, PlanGroup } from '@fgo-planner/data-mongo';
+import { CreatePlan, CreatePlanGroup, UpdatePlan, UpdatePlanGrouping } from '@fgo-planner/data-core';
+import { PlanGroupingDocument } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Response } from 'express';
-import { AccessTokenPayload, AuthenticatedRequest, DeleteMapping, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
-import { MasterAccountService, PlanGroupService, PlanListService, PlanService } from 'services';
+import { AuthenticatedRequest, DeleteMapping, GetMapping, PostMapping, PutMapping, RestController, UserAccessLevel } from 'internal';
+import { ParsedQs } from 'qs';
+import { MasterAccountService, PlanService } from 'services';
 import { Inject } from 'typedi';
 import { HttpRequestUtils, ObjectIdUtils } from 'utils';
+
+const getResyncParam = (query: ParsedQs): boolean => {
+    const resyncParam = query['resync'];
+    if (typeof resyncParam !== 'string') {
+        /**
+         * Always resync by default.
+         */
+        return true;
+    }
+    return resyncParam.toLowerCase() === 'true';
+};
 
 @RestController('/user/planner', UserAccessLevel.Authenticated)
 export class PlanController {
@@ -13,47 +26,23 @@ export class PlanController {
     private _planService!: PlanService;
 
     @Inject()
-    private _planGroupService!: PlanGroupService;
-
-    @Inject()
-    private _planListService!: PlanListService;
-
-    @Inject()
     private _masterAccountService!: MasterAccountService;
 
-    @PutMapping('/plan')
-    async addPlan(req: AuthenticatedRequest, res: Response): Promise<any> {
-        let plan = req.body as Partial<Plan>;
-        try {
-            const accountId = plan.accountId;
-            if (!accountId) {
-                throw 'Property \'accountId\' is required';
-            }
-            const userId = this._getRequestorId(req.token);
-            if (userId && !this._masterAccountService.isOwner(userId, accountId)) {
-                return res.status(401).send(); // TODO Add message
-            }
-            plan = await this._planService.addPlan(plan);
-            res.send(plan);
-        } catch (err) {
-            res.status(400).send(err);
-        }
-    }
 
-    @PutMapping('/group')
-    async addPlanGroup(req: AuthenticatedRequest, res: Response): Promise<any> {
-        let planGroup = req.body as Partial<PlanGroup>;
+    //#region Plan
+
+    @PutMapping('/plan')
+    async createPlan(req: AuthenticatedRequest<CreatePlan>, res: Response): Promise<any> {
+        const plan = req.body;
         try {
-            const accountId = planGroup.accountId;
-            if (!accountId) {
+            if (!plan.accountId) {
                 throw 'Property \'accountId\' is required';
             }
-            const userId = this._getRequestorId(req.token);
-            if (userId && !this._masterAccountService.isOwner(userId, accountId)) {
+            if (!await this._hasAccess(req, plan.accountId)) {
                 return res.status(401).send(); // TODO Add message
             }
-            planGroup = await this._planGroupService.addPlanGroup(planGroup);
-            res.send(planGroup);
+            const created = await this._planService.createPlan(plan);
+            res.send(created);
         } catch (err) {
             res.status(400).send(err);
         }
@@ -62,76 +51,44 @@ export class PlanController {
     @GetMapping('/plan/:id')
     async getPlan(req: AuthenticatedRequest, res: Response): Promise<any> {
         try {
-            const id = HttpRequestUtils.parseObjectIdFromParams(req.params, 'id');
-            if (!await this._hasAccess(id, req.token)) {
-                return res.status(401).send(); // TODO Add message
+            const planId = HttpRequestUtils.parseObjectIdFromParams(req.params, 'id');
+            const plan = await this._planService.findPlanById(planId);
+            if (!plan || !await this._hasAccess(req, plan.accountId)) {
+                return res.status(404).send(); // TODO Add message
             }
-            const plan = await this._planService.findById(id);
             res.send(plan);
         } catch (err) {
             res.status(400).send(err);
         }
     }
 
-    @GetMapping('/group/:id')
-    async getPlanGroup(req: AuthenticatedRequest, res: Response): Promise<any> {
+    @GetMapping('/plans/:accountId')
+    async getPlansForAccount(req: AuthenticatedRequest, res: Response): Promise<any> {
         try {
-            const id = HttpRequestUtils.parseObjectIdFromParams(req.params, 'id');
-            if (!await this._hasAccess(id, req.token)) {
+            const accountId = HttpRequestUtils.parseObjectIdFromParams(req.params, 'accountId');
+            if (!await this._hasAccess(req, accountId)) {
                 return res.status(401).send(); // TODO Add message
             }
-            const planGroup = await this._planGroupService.findById(id);
-            res.send(planGroup);
+            const plans = await this._planService.findPlansByAccountId(accountId);
+            res.send(plans);
         } catch (err) {
             res.status(400).send(err);
         }
     }
 
     @PostMapping('/plan')
-    async updatePlan(req: AuthenticatedRequest, res: Response): Promise<any> {
-        const plan = req.body as Partial<Plan>;
+    async updatePlan(req: AuthenticatedRequest<UpdatePlan>, res: Response): Promise<any> {
+        const plan = req.body;
         try {
-            const id = plan._id = ObjectIdUtils.instantiate(plan._id);
-            if (!await this._hasAccess(id, req.token)) {
+            const planId = plan._id;
+            if (!await this._hasAccess(req, plan.accountId)) {
                 return res.status(401).send(); // TODO Add message
             }
-            const updated = await this._planService.update(plan);
+            const updated = await this._planService.updatePlan(plan);
             if (!updated) {
-                return res.status(404).send(`Plan ID ${id} does not exist.`);
+                return res.status(404).send(`Plan id=${planId} could not be found`);
             }
             res.send(updated);
-        } catch (err) {
-            res.status(400).send(err);
-        }
-    }
-
-    @PostMapping('/group')
-    async updatePlanGroup(req: AuthenticatedRequest, res: Response): Promise<any> {
-        const planGroup = req.body as Partial<PlanGroup>;
-        try {
-            const id = planGroup._id = ObjectIdUtils.instantiate(planGroup._id);
-            if (!await this._hasAccess(id, req.token)) {
-                return res.status(401).send(); // TODO Add message
-            }
-            const updated = await this._planGroupService.update(planGroup);
-            if (!updated) {
-                return res.status(404).send(`Plan group ID ${id} does not exist.`);
-            }
-            res.send(updated);
-        } catch (err) {
-            res.status(400).send(err);
-        }
-    }
-
-    @DeleteMapping('/plan/:id')
-    async deletePlan(req: AuthenticatedRequest, res: Response): Promise<any> {
-        try {
-            const id = HttpRequestUtils.parseObjectIdFromParams(req.params, 'id');
-            if (!await this._hasAccess(id, req.token)) {
-                return res.status(401).send(); // TODO Add message
-            }
-            const result = await this._planService.delete(id);
-            res.send(String(result));
         } catch (err) {
             res.status(400).send(err);
         }
@@ -139,74 +96,120 @@ export class PlanController {
 
     @DeleteMapping('/plan')
     async deletePlans(req: AuthenticatedRequest, res: Response): Promise<any> {
-        const { planIds } = req.body;
+        const { accountId, planIds } = req.body;
         try {
             if (!Array.isArray(planIds)) {
                 throw 'Property \'planIds\' must be an array';
             }
-            const ids: Array<ObjectId> = [];
-            for (const planId of planIds) {
-                const id = new ObjectId(planId);
-                if (!await this._hasAccess(id, req.token)) {
-                    return res.status(401).send(); // TODO Add message
-                }
-                ids.push(id);
+            if (!await this._hasAccess(req, accountId)) {
+                return res.status(401).send(); // TODO Add message
             }
-            const result = await this._planService.delete(ids);
+            const result = await this._planService.deletePlans(accountId, planIds);
             res.send(String(result));
         } catch (err) {
             res.status(400).send(err);
         }
     }
 
-    @DeleteMapping('/group/:id')
-    async deletePlanGroup(req: AuthenticatedRequest, res: Response): Promise<any> {
-        try {
-            const id = HttpRequestUtils.parseObjectIdFromParams(req.params, 'id');
-            if (!await this._hasAccess(id, req.token)) {
-                return res.status(401).send(); // TODO Add message
-            }
-            const result = await this._planGroupService.delete(id);
-            res.send(result);
-        } catch (err) {
-            res.status(400).send(err);
-        }
-    }
+    //#endregion
 
-    @GetMapping('/account/:accountId')
-    async getForAccount(req: AuthenticatedRequest, res: Response): Promise<any> {
+
+    //#region Plan grouping
+
+    @GetMapping('/plan-grouping/:accountId')
+    async getPlanGroupingForAccount(req: AuthenticatedRequest, res: Response): Promise<any> {
         try {
             const accountId = HttpRequestUtils.parseObjectIdFromParams(req.params, 'accountId');
-            const basicPlans = await this._planListService.findOrCreateByAccountId(accountId);
-            res.send(basicPlans);
+            if (!await this._hasAccess(req, accountId)) {
+                return res.status(401).send(); // TODO Add message
+            }
+            const planGrouping = await this._planService.findPlanGroupingByAccountId(accountId);
+            if (!planGrouping) {
+                return null;
+            }
+            res.send(planGrouping);
         } catch (err) {
             res.status(400).send(err);
         }
     }
 
-    /**
-     * Verifies that the user has access to the master plan in question.
-     * 
-     * @param planId The master plan ID.
-     * @param token The requesting user's access token payload.
-     */
-    private async _hasAccess(planId: ObjectId, token: AccessTokenPayload): Promise<boolean> {
-        const userId = this._getRequestorId(token);
-        if (!userId) {
-            return true;
+    @PostMapping('/plan-grouping')
+    async updatePlanGrouping(req: AuthenticatedRequest<UpdatePlanGrouping>, res: Response): Promise<any> {
+        const updatePlanGrouping = req.body;
+        const resync = getResyncParam(req.query);
+        try {
+            if (!await this._hasAccess(req, updatePlanGrouping.accountId)) {
+                return res.status(401).send(); // TODO Add message
+            }
+            let updated: PlanGroupingDocument | null;
+            if (resync) {
+                updated = await this._planService.syncPlanGrouping(updatePlanGrouping);
+            } else {
+                updated = await this._planService.updatePlanGrouping(updatePlanGrouping);
+            }
+            if (!updated) {
+                return res.status(404).send(); // TODO Add message
+            }
+            res.send(updated);
+        } catch (err) {
+            res.status(400).send(err);
         }
-        return this._planService.isOwner(planId, userId);
     }
 
-    /**
-     * Extracts the ID of the user making the request for verification purposes. If
-     * the user is an admin, then null is returned. 
-     */
-    private _getRequestorId(token: AccessTokenPayload): ObjectId | null {
-        if (token.admin) {
-            return null;
+    @PutMapping('/plan-grouping')
+    async createPlanGroup(req: AuthenticatedRequest<CreatePlanGroup>, res: Response): Promise<any> {
+        const createPlanGroup = req.body;
+        try {
+            if (!await this._hasAccess(req, createPlanGroup.accountId)) {
+                return res.status(401).send(); // TODO Add message
+            }
+            const planGrouping = await this._planService.createPlanGroup(createPlanGroup);
+            if (!planGrouping) {
+                return res.status(404).send(); // TODO Add message
+            }
+            res.send(planGrouping);
+        } catch (err) {
+            res.status(400).send(err);
         }
-        return ObjectIdUtils.instantiate(token.id);
     }
+
+    @DeleteMapping('/plan-grouping')
+    async deletePlanGroups(req: AuthenticatedRequest, res: Response): Promise<any> {
+        // TODO Create DTO type for this
+        const { accountId, planGroupIds, deletePlans } = req.body;
+        try {
+            if (!Array.isArray(planGroupIds)) {
+                throw 'Property \'planGroupIds\' must be an array';
+            }
+            if (!await this._hasAccess(req, accountId)) {
+                return res.status(401).send(); // TODO Add message
+            }
+            const result = await this._planService.deletePlanGroups(accountId, planGroupIds, deletePlans);
+            res.send(String(result));
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    }
+
+    //#endregion
+
+
+    //#region Internal helper functions
+
+    /**
+     * Verifies that the requesting user has access to the account.
+     * 
+     * @param req The authenticated HTTP request.
+     * @param accountId The master account ID that owns the plan.
+     */
+    private async _hasAccess(req: AuthenticatedRequest, accountId: ObjectId | string): Promise<boolean> {
+        if (req.token.admin) {
+            return true;
+        }
+        const userId = ObjectIdUtils.instantiate(req.token.id);
+        return await this._masterAccountService.isOwner(userId, accountId);
+    }
+
+    //#endregion
 
 }

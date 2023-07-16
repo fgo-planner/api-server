@@ -1,4 +1,5 @@
-import { GameEvent, GameEventModel } from '@fgo-planner/data-mongo';
+import { GameEvent } from '@fgo-planner/data-core';
+import { GameEventDocument, GameEventModel } from '@fgo-planner/data-mongo';
 import { ObjectId } from 'bson';
 import { Page, Pagination } from 'dto';
 import { SortOrder } from 'mongoose';
@@ -8,35 +9,30 @@ import { ObjectIdUtils, PaginationUtils } from 'utils';
 @Service()
 export class GameEventService {
 
-    async create(event: GameEvent): Promise<GameEvent> {
+    async create(event: GameEvent): Promise<GameEventDocument> {
         // TODO Validation
         const document = await GameEventModel.create(event);
-        return document.toObject();
+        return document.toObject<GameEventDocument>();
     }
 
     async existsById(id: number): Promise<boolean> {
-        const document = await GameEventModel.exists({ _id: id });
+        const document = await GameEventModel.exists({ _id: id }).lean();
         return !!document;
     }
 
-    async findById(id: ObjectId): Promise<GameEvent | null> {
-        const document = await GameEventModel.findById(id);
-        if (!document) {
-            return null;
-        }
-        return document.toObject();
+    async findById(id: ObjectId): Promise<GameEventDocument | null> {
+        return await GameEventModel.findById(id).lean();
     }
 
-    async findAll(): Promise<Array<GameEvent>> {
-        const documents = await GameEventModel.find();
-        return documents.map(document => document.toObject());
+    async findAll(): Promise<Array<GameEventDocument>> {
+        return await GameEventModel.find().lean();
     }
 
     async findAllIds(): Promise<Array<number>> {
         return GameEventModel.distinct('_id');
     }
 
-    async findPage(pagination: Pagination): Promise<Page<GameEvent>> {
+    async findPage(pagination: Pagination): Promise<Page<GameEventDocument>> {
 
         const count = await GameEventModel.find()
             .countDocuments();
@@ -54,31 +50,26 @@ export class GameEventService {
         const documents = await GameEventModel.find()
             .sort(sort)
             .skip(skip)
-            .limit(size);
+            .limit(size)
+            .lean();
 
-        const data = documents.map(document => document.toObject());
-
-        return PaginationUtils.toPage(data, count, page, size);
+        return PaginationUtils.toPage(documents, count, page, size);
     }
 
-    async findByYear(year: number): Promise<Array<GameEvent>> {
-        return GameEventModel.findByYear(year);
+    async findByYear(year: number): Promise<Array<GameEventDocument>> {
+        return GameEventModel.findByYear(year).lean();
     }
 
-    async update(event: GameEvent): Promise<GameEvent | null> {
+    async update(event: GameEvent): Promise<GameEventDocument | null> {
         const id = ObjectIdUtils.instantiate(event._id);
         if (!id) {
             throw 'Event ID is missing or invalid.';
         }
-        const document = await GameEventModel.findOneAndUpdate(
+        return await GameEventModel.findOneAndUpdate(
             { _id: id },
             { $set: event },
             { runValidators: true, new: true }
-        );
-        if (!document) {
-            return null;
-        }
-        return document.toObject();
+        ).lean();
     }
 
 }

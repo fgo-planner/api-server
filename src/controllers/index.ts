@@ -1,5 +1,6 @@
 export * from './AppInfoController';
 export * from './AuthenticationController';
+export * from './EntityController';
 export * from './GameDataImportController';
 export * from './GameEventController';
 export * from './GameItemController';

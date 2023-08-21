@@ -1,5 +1,5 @@
 import { GameItem, GameServantWithMetadata, GameSoundtrack } from '@fgo-planner/data-core';
-import { AtlasAcademyDataImport, NiceBgmEntity, NiceItem, NiceServant, TransformLogger } from '@fgo-planner/transform-core';
+import { AtlasAcademyDataImport, AtlasAcademyServantTransformOptions, NiceBgmEntity, NiceItem, NiceServant, TransformLogger } from '@fgo-planner/transform-core';
 import axios from 'axios';
 import { Service } from 'typedi';
 import { AtlasAcademyDataImportConstants as Constants } from './AtlasAcademyDataImportConstants';
@@ -13,7 +13,7 @@ export class AtlasAcademyDataImportService {
      * Retrieves servant data from the Atlas Academy API and converts it into a
      * list of `GameServant` objects.
      */
-    async getServants(logger?: TransformLogger): Promise<Array<GameServantWithMetadata>> {
+    async getServants(logger: TransformLogger, options: AtlasAcademyServantTransformOptions): Promise<Array<GameServantWithMetadata>> {
         /**
          * Retrieve 'nice' JP servant data with lore and English names.
          */
@@ -32,7 +32,7 @@ export class AtlasAcademyDataImportService {
          * Convert the servant data into `GameServant` objects.
          */
         try {
-            return AtlasAcademyDataImport.transformNiceServantsToGameServants(niceServants, niceServantsNa, logger);
+            return AtlasAcademyDataImport.transformNiceServantsToGameServants(niceServants, niceServantsNa, options, logger);
         } catch (e) {
             console.error(e);
         }

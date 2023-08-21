@@ -39,7 +39,7 @@ export class GameDataImportService {
             const logger: TransformLogger = new TransformLogger();
             logger.setStart();
             const existingAction = options.servants.onExisting || GameDataImportExistingAction.Skip;
-            const servants = await this._atlasAcademyDataImportService.getServants(logger);
+            const servants = await this._atlasAcademyDataImportService.getServants(logger, options.servants);
             const result = await this._writeServants(servants, existingAction, logger);
             logger.setEnd();
             result.logs = logger;
@@ -307,6 +307,7 @@ export class GameDataImportService {
         if (updated || created) {
             this._responseCacheManager.invalidateCache(ResponseCacheKey.GameItem);
         }
+        // FIXME the error count does not include errors from the transformation process.
         return { updated, created, errors };
     }
 

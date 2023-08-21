@@ -5,8 +5,13 @@ type GameDataImportOption = {
     onExisting?: GameDataImportExistingAction;
 };
 
+type GameServantImportOption = GameDataImportOption & {
+    minCollectionNo?: number;
+    maxCollectionNo?: number;
+};
+
 export type GameDataImportOptions = {
     items?: GameDataImportOption;
-    servants?: GameDataImportOption;
+    servants?: GameServantImportOption;
     soundtracks?: GameDataImportOption;
 };
